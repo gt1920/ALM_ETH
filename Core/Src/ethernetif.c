@@ -13,7 +13,6 @@
 
 #include "lwip/opt.h"
 #include "lwip/pbuf.h"
-#include "dcache.h"
 #include "lwip/timeouts.h"
 #include "netif/etharp.h"
 #include "lwip/ethip6.h"
@@ -69,9 +68,6 @@ void HAL_ETH_RxLinkCallback(void **pStart, void **pEnd,
   struct pbuf **ppStart = (struct pbuf **)pStart;
   struct pbuf **ppEnd   = (struct pbuf **)pEnd;
   struct pbuf *p;
-
-  /* Invalidate DCache so CPU reads DMA-written data from physical memory */
-  HAL_DCACHE_InvalidateByAddr(&hdcache1, (uint32_t *)(uint32_t)buff, ETH_RX_BUFFER_SIZE);
 
   /* Allocate a PBUF_RAM and copy the data from the DMA buffer.
      This frees the static DMA RX buffer immediately for reuse. */
@@ -156,11 +152,6 @@ static err_t low_level_output(struct netif *netif, struct pbuf *p)
     {
       return ERR_IF;
     }
-
-    /* Clean DCache so DMA reads the CPU-written payload from physical memory */
-    uint32_t ca = (uint32_t)q->payload & ~0x1FU;
-    uint32_t cl = (((uint32_t)q->payload & 0x1FU) + q->len + 31U) & ~31U;
-    HAL_DCACHE_CleanByAddr(&hdcache1, (uint32_t *)ca, cl);
 
     Txbuffer[i].buffer = q->payload;
     Txbuffer[i].len    = q->len;
