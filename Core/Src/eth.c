@@ -48,12 +48,14 @@ void MX_ETH_Init(void)
 
   /* USER CODE END ETH_Init 1 */
   heth.Instance = ETH;
+  /* OUI: ST Microelectronics */
   MACAddr[0] = 0x00;
   MACAddr[1] = 0x80;
   MACAddr[2] = 0xE1;
-  MACAddr[3] = 0x00;
-  MACAddr[4] = 0x00;
-  MACAddr[5] = 0x00;
+  /* Suffix: derived from 96-bit CPU Unique ID */
+  MACAddr[3] = (uint8_t)((HAL_GetUIDw0() ^ HAL_GetUIDw2()) >> 16);
+  MACAddr[4] = (uint8_t)((HAL_GetUIDw0() ^ HAL_GetUIDw2()) >>  8);
+  MACAddr[5] = (uint8_t)((HAL_GetUIDw0() ^ HAL_GetUIDw2())      );
   heth.Init.MACAddr = &MACAddr[0];
   heth.Init.MediaInterface = HAL_ETH_RMII_MODE;
   heth.Init.TxDesc = DMATxDscrTab;

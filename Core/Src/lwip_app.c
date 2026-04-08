@@ -17,6 +17,7 @@
 #include "lwip/autoip.h"
 #include "lwip/ip4_addr.h"
 #include "netif/ethernet.h"
+#include "netif/etharp.h"
 
 /* ---- Global IP info (watch in Keil) ---- */
 LWIP_IPInfo_t g_lwip_ipinfo;
@@ -84,6 +85,9 @@ void LWIP_APP_Init(void)
   g_lwip_ipinfo.dhcp_state = 1;   /* started */
 }
 
+/* Gratuitous ARP interval: 30 seconds (in ms) */
+#define GARP_INTERVAL_MS   30000U
+
 /* ---- poll (call from main loop) ---- */
 void LWIP_APP_Poll(void)
 {
@@ -93,7 +97,19 @@ void LWIP_APP_Poll(void)
   /* 2. Handle LwIP timers (ARP, DHCP, TCP, ...) */
   sys_check_timeouts();
 
-  /* 3. Update global IP info struct from current netif state */
+  /* 3. Periodic Gratuitous ARP so other devices keep our MAC in their cache */
+  static uint32_t garp_timer = 0;
+  uint32_t now = HAL_GetTick();
+  if ((now - garp_timer) >= GARP_INTERVAL_MS)
+  {
+    garp_timer = now;
+    if (!ip4_addr_isany(netif_ip4_addr(&gnetif)))
+    {
+      etharp_gratuitous(&gnetif);
+    }
+  }
+
+  /* 4. Update global IP info struct from current netif state */
   ip4_to_array(netif_ip4_addr(&gnetif),    g_lwip_ipinfo.ip);
   ip4_to_array(netif_ip4_netmask(&gnetif), g_lwip_ipinfo.netmask);
   ip4_to_array(netif_ip4_gw(&gnetif),      g_lwip_ipinfo.gateway);
