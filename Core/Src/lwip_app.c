@@ -9,6 +9,7 @@
   */
 #include "lwip_app.h"
 #include "ethernetif.h"
+#include "main.h"
 
 #include "lwip/init.h"
 #include "lwip/netif.h"
