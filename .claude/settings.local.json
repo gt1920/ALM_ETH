@@ -1,0 +1,20 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(grep -v \"^$\")",
+      "Bash(gh auth:*)",
+      "Read(//c/Users/Administrator/.config/gh/**)",
+      "Read(//c/Users/Administrator/AppData/Roaming/GitHub CLI/**)",
+      "Bash(where gh:*)",
+      "Bash(gh --version)",
+      "Bash(cmd /c \"gh auth status\")",
+      "Bash(cmd /c \"gh auth status 2>&1\")",
+      "Bash(powershell -Command \"gh auth status\")",
+      "Bash(powershell -Command \"gh auth login --with-token\")",
+      "Bash(powershell -Command 'ls $env:APPDATA\\\\GitHub*')",
+      "Bash(powershell -Command 'ls $env:APPDATA')",
+      "Bash(powershell -Command 'ls $env:LOCALAPPDATA\\\\gh 2>/dev/null; ls $env:APPDATA\\\\gh 2>/dev/null; ls $env:USERPROFILE\\\\.config\\\\gh 2>/dev/null')",
+      "Bash(powershell -Command 'Test-Path $env:LOCALAPPDATA\\\\gh; Test-Path $env:APPDATA\\\\gh; Test-Path $env:USERPROFILE\\\\.config\\\\gh')"
+    ]
+  }
+}
