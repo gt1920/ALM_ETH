@@ -16,7 +16,7 @@
 #define MEMP_NUM_TCP_PCB                10
 #define MEMP_NUM_TCP_PCB_LISTEN         6
 #define MEMP_NUM_TCP_SEG                12
-#define MEMP_NUM_SYS_TIMEOUT            10
+#define MEMP_NUM_SYS_TIMEOUT            12  /* +2 for AutoIP timers */
 
 #define PBUF_POOL_SIZE                  16
 #define PBUF_POOL_BUFSIZE               1536
@@ -30,6 +30,11 @@
 
 /* --------------- DHCP --------------- */
 #define LWIP_DHCP                       1
+
+/* --------------- AutoIP (169.254.x.x fallback) --------------- */
+#define LWIP_AUTOIP                     1
+#define LWIP_DHCP_AUTOIP_COOP           1   /* DHCP失败后自动切换AutoIP */
+#define LWIP_DHCP_AUTOIP_COOP_TRIES     5   /* DHCP重试5次后启动AutoIP */
 
 /* --------------- UDP --------------- */
 #define LWIP_UDP                        1

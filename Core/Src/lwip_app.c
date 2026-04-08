@@ -14,6 +14,7 @@
 #include "lwip/netif.h"
 #include "lwip/timeouts.h"
 #include "lwip/dhcp.h"
+#include "lwip/autoip.h"
 #include "lwip/ip4_addr.h"
 #include "netif/ethernet.h"
 
@@ -55,6 +56,7 @@ void LWIP_APP_Init(void)
   g_lwip_ipinfo.netmask[0] = g_lwip_ipinfo.netmask[1] = g_lwip_ipinfo.netmask[2] = g_lwip_ipinfo.netmask[3] = 0;
   g_lwip_ipinfo.gateway[0] = g_lwip_ipinfo.gateway[1] = g_lwip_ipinfo.gateway[2] = g_lwip_ipinfo.gateway[3] = 0;
   g_lwip_ipinfo.dhcp_state = 0;
+  g_lwip_ipinfo.ip_source  = 0;
   g_lwip_ipinfo.link_up = 0;
 
   /* Initialize LwIP stack */
@@ -98,15 +100,23 @@ void LWIP_APP_Poll(void)
 
   if (dhcp_supplied_address(&gnetif))
   {
+    /* DHCP成功 */
     g_lwip_ipinfo.dhcp_state = 2;
+    g_lwip_ipinfo.ip_source  = 1;
+  }
+  else if (autoip_supplied_address(&gnetif))
+  {
+    /* 无路由器，AutoIP分配了169.254.x.x */
+    g_lwip_ipinfo.dhcp_state = 4;
+    g_lwip_ipinfo.ip_source  = 2;
   }
   else if (g_lwip_ipinfo.dhcp_state == 1)
   {
-    /* still waiting */
+    /* DHCP等待中，检查是否已触发AutoIP */
     struct dhcp *d = netif_dhcp_data(&gnetif);
-    if (d != NULL && d->tries > 10)
+    if (d != NULL && d->tries >= LWIP_DHCP_AUTOIP_COOP_TRIES)
     {
-      g_lwip_ipinfo.dhcp_state = 3;  /* timeout */
+      g_lwip_ipinfo.dhcp_state = 3;  /* DHCP超时，AutoIP已启动 */
     }
   }
 }

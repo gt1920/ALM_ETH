@@ -13,7 +13,8 @@ typedef struct
   uint8_t  ip[4];
   uint8_t  netmask[4];
   uint8_t  gateway[4];
-  uint8_t  dhcp_state;     /* 0=off, 1=started, 2=addr_assigned, 3=timeout */
+  uint8_t  dhcp_state;     /* 0=off, 1=started, 2=assigned, 3=timeout/AutoIP started, 4=AutoIP assigned */
+  uint8_t  ip_source;      /* 0=none, 1=DHCP, 2=AutoIP(169.254.x.x) */
   uint8_t  link_up;        /* 1=link up */
 } LWIP_IPInfo_t;
 
