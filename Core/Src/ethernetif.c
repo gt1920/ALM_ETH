@@ -32,7 +32,7 @@
   __attribute__((section(".EthSection")))
   static ETH_DMADescTypeDef DMATxDscrTab_lwip[ETH_TX_DESC_CNT];
 
-  __attribute__((section(".EthSection")))
+  __attribute__((section(".EthSection"), aligned(32)))
   static uint8_t Rx_Buff[ETH_RX_BUFFER_CNT][ETH_RX_BUFFER_SIZE];
 #elif defined(__GNUC__)
   static ETH_DMADescTypeDef DMARxDscrTab_lwip[ETH_RX_DESC_CNT]
@@ -40,7 +40,7 @@
   static ETH_DMADescTypeDef DMATxDscrTab_lwip[ETH_TX_DESC_CNT]
     __attribute__((section(".EthSection")));
   static uint8_t Rx_Buff[ETH_RX_BUFFER_CNT][ETH_RX_BUFFER_SIZE]
-    __attribute__((section(".EthSection")));
+    __attribute__((section(".EthSection"), aligned(32)));
 #endif
 
 /* HAL helpers */
@@ -68,6 +68,9 @@ void HAL_ETH_RxLinkCallback(void **pStart, void **pEnd,
   struct pbuf **ppStart = (struct pbuf **)pStart;
   struct pbuf **ppEnd   = (struct pbuf **)pEnd;
   struct pbuf *p;
+
+  /* Invalidate DCache for this RX buffer before CPU reads DMA-written data */
+  SCB_InvalidateDCache_by_Addr((uint32_t *)(uint32_t)buff, (int32_t)ETH_RX_BUFFER_SIZE);
 
   /* Allocate a PBUF_RAM and copy the data from the DMA buffer.
      This frees the static DMA RX buffer immediately for reuse. */
@@ -153,6 +156,11 @@ static err_t low_level_output(struct netif *netif, struct pbuf *p)
       return ERR_IF;
     }
 
+    /* Clean DCache so DMA reads the CPU-written payload from physical memory */
+    uint32_t ca = (uint32_t)q->payload & ~0x1FU;
+    int32_t  cl = (int32_t)(((uint32_t)q->payload & 0x1FU) + q->len + 31U) & ~31;
+    SCB_CleanDCache_by_Addr((uint32_t *)ca, cl);
+
     Txbuffer[i].buffer = q->payload;
     Txbuffer[i].len    = q->len;
     framelen          += q->len;
@@ -185,7 +193,8 @@ void ethernetif_input(struct netif *netif)
 {
   struct pbuf *p = NULL;
 
-  if (HAL_ETH_ReadData(&heth, (void **)&p) == HAL_OK)
+  /* Drain all pending frames from the DMA ring */
+  while (HAL_ETH_ReadData(&heth, (void **)&p) == HAL_OK)
   {
     if (p != NULL)
     {
@@ -193,6 +202,7 @@ void ethernetif_input(struct netif *netif)
       {
         pbuf_free(p);
       }
+      p = NULL;
     }
   }
 }
