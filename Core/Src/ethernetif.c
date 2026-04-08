@@ -172,8 +172,10 @@ static err_t low_level_output(struct netif *netif, struct pbuf *p)
   TxConfig.TxBuffer = Txbuffer;
   TxConfig.pData    = p;
 
-  /* DCache clean for TX payload is handled by HAL if needed */
-  HAL_ETH_Transmit_IT(&heth, &TxConfig);
+  if (HAL_ETH_Transmit(&heth, &TxConfig, 20) != HAL_OK)
+  {
+    return ERR_IF;
+  }
 
   return ERR_OK;
 }
@@ -205,7 +207,7 @@ void ethernetif_input(struct netif *netif)
 err_t ethernetif_init(struct netif *netif)
 {
 #if LWIP_NETIF_HOSTNAME
-  netif->hostname = "STM32H563";
+  netif->hostname = "DT-CIC";
 #endif
 
   netif->name[0] = IFNAME0;
