@@ -1304,7 +1304,11 @@ namespace DT_Controller
                     sb.AppendLine($"SN: {mi.SN}");
                     sb.AppendLine($"FW: {mi.FW}");
                     sb.AppendLine($"Date: {mi.Date}");
-                    Module_Info_richTextBox.Text = sb.ToString();
+                    var newText = sb.ToString();
+                    if (string.Equals(Module_Info_richTextBox.Text.Replace("\r", ""),
+                                      newText.Replace("\r", "")))
+                        return;
+                    Module_Info_richTextBox.Text = newText;
                 }
                 catch
                 {
@@ -1536,6 +1540,9 @@ namespace DT_Controller
 
                         if (sb.Length > 0)
                         {
+                            // Only auto-scroll if user isn't selecting/reading
+                            bool userHasFocus = richTextBox1.Focused;
+
                             richTextBox1.AppendText(sb.ToString());
 
                             // Trim log if too long
@@ -1546,8 +1553,11 @@ namespace DT_Controller
                                 richTextBox1.SelectedText = "";
                             }
 
-                            richTextBox1.SelectionStart = richTextBox1.TextLength;
-                            richTextBox1.ScrollToCaret();
+                            if (!userHasFocus)
+                            {
+                                richTextBox1.SelectionStart = richTextBox1.TextLength;
+                                richTextBox1.ScrollToCaret();
+                            }
                         }
                     }
                     catch { }
