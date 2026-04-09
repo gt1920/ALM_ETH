@@ -1,5 +1,5 @@
-alm_eth/main.o: ..\Core\Src\main.c ..\Core\Inc\main.h \
-  ..\Drivers\STM32H5xx_HAL_Driver\Inc\stm32h5xx_hal.h \
+alm_eth/can_comm.o: ..\BSP\CAN_comm.c ..\BSP\CAN_comm.h \
+  ..\Core\Inc\main.h ..\Drivers\STM32H5xx_HAL_Driver\Inc\stm32h5xx_hal.h \
   ..\Core\Inc\stm32h5xx_hal_conf.h \
   ..\Drivers\STM32H5xx_HAL_Driver\Inc\stm32h5xx_hal_rcc.h \
   ..\Drivers\STM32H5xx_HAL_Driver\Inc\stm32h5xx_hal_def.h \
@@ -36,9 +36,6 @@ alm_eth/main.o: ..\Core\Src\main.c ..\Core\Inc\main.h \
   ..\Drivers\STM32H5xx_HAL_Driver\Inc\stm32h5xx_hal_eth.h \
   ..\Drivers\STM32H5xx_HAL_Driver\Inc\stm32h5xx_hal_eth_ex.h \
   ..\Drivers\STM32H5xx_HAL_Driver\Inc\stm32h5xx_hal_fdcan.h \
-  ..\Core\Inc\dcache.h ..\Core\Inc\eth.h ..\Core\Inc\fdcan.h \
-  ..\Core\Inc\icache.h ..\Core\Inc\octospi.h ..\Core\Inc\usb.h \
-  ..\Core\Inc\gpio.h ..\Core\Inc\bsp_lan8742.h ..\Core\Inc\lwip_app.h \
-  ..\BSP\tcp_server.h \
-  D:\Keil_v5\ARM\ARMCC_V6.22\bin\..\include\stdbool.h ..\BSP\CAN_comm.h \
-  ..\BSP\systick_task.h
+  ..\Core\Inc\fdcan.h ..\BSP\comm_protocol.h ..\BSP\eth_send_queue.h \
+  D:\Keil_v5\ARM\ARMCC_V6.22\bin\..\include\stdbool.h \
+  D:\Keil_v5\ARM\ARMCC_V6.22\bin\..\include\string.h

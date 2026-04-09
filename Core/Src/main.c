@@ -30,6 +30,9 @@
 /* USER CODE BEGIN Includes */
 #include "bsp_lan8742.h"
 #include "lwip_app.h"
+#include "tcp_server.h"
+#include "CAN_comm.h"
+#include "systick_task.h"
 
 /* USER CODE END Includes */
 
@@ -169,6 +172,23 @@ int main(void)
 
   /* Initialize LwIP + DHCP (this re-inits ETH with non-cacheable DMA buffers) */
   LWIP_APP_Init();
+
+  /* ---- FDCAN1: accept all standard IDs, start with RX interrupt ---- */
+  {
+    FDCAN_FilterTypeDef filter = {0};
+    filter.IdType       = FDCAN_STANDARD_ID;
+    filter.FilterIndex  = 0;
+    filter.FilterType   = FDCAN_FILTER_RANGE;
+    filter.FilterConfig = FDCAN_FILTER_TO_RXFIFO0;
+    filter.FilterID1    = 0x000;
+    filter.FilterID2    = 0x7FF;
+    HAL_FDCAN_ConfigFilter(&hfdcan1, &filter);
+    HAL_FDCAN_Start(&hfdcan1);
+    HAL_FDCAN_ActivateNotification(&hfdcan1, FDCAN_IT_RX_FIFO0_NEW_MESSAGE, 0);
+  }
+
+  /* ---- TCP server on port 40000 ---- */
+  TCP_Server_Init();
 
   /* USER CODE END 2 */
 

@@ -340,7 +340,7 @@
               <MiscControls></MiscControls>
               <Define>USE_HAL_DRIVER,STM32H563xx</Define>
               <Undefine></Undefine>
-              <IncludePath>../Core/Inc;../Drivers/STM32H5xx_HAL_Driver/Inc;../Drivers/STM32H5xx_HAL_Driver/Inc/Legacy;../Drivers/CMSIS/Device/ST/STM32H5xx/Include;../Drivers/CMSIS/Include;../Middlewares/Third_Party/LwIP/src/include;../Middlewares/Third_Party/LwIP/src/include/lwip;../Middlewares/Third_Party/LwIP/src/include/netif</IncludePath>
+              <IncludePath>../Core/Inc;../BSP;../Drivers/STM32H5xx_HAL_Driver/Inc;../Drivers/STM32H5xx_HAL_Driver/Inc/Legacy;../Drivers/CMSIS/Device/ST/STM32H5xx/Include;../Drivers/CMSIS/Include;../Middlewares/Third_Party/LwIP/src/include;../Middlewares/Third_Party/LwIP/src/include/lwip;../Middlewares/Third_Party/LwIP/src/include/netif</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -763,6 +763,36 @@
               <FileName>ethernet.c</FileName>
               <FileType>1</FileType>
               <FilePath>../Middlewares/Third_Party/LwIP/src/netif/ethernet.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>BSP</GroupName>
+          <Files>
+            <File>
+              <FileName>tcp_server.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>../BSP/tcp_server.c</FilePath>
+            </File>
+            <File>
+              <FileName>CAN_comm.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>../BSP/CAN_comm.c</FilePath>
+            </File>
+            <File>
+              <FileName>comm_protocol.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>../BSP/comm_protocol.c</FilePath>
+            </File>
+            <File>
+              <FileName>eth_send_queue.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>../BSP/eth_send_queue.c</FilePath>
+            </File>
+            <File>
+              <FileName>systick_task.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>../BSP/systick_task.c</FilePath>
             </File>
           </Files>
         </Group>

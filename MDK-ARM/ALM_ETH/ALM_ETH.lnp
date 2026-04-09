@@ -68,6 +68,11 @@
 "alm_eth\ip4_frag.o"
 "alm_eth\err.o"
 "alm_eth\ethernet.o"
+"alm_eth\tcp_server.o"
+"alm_eth\can_comm.o"
+"alm_eth\comm_protocol.o"
+"alm_eth\eth_send_queue.o"
+"alm_eth\systick_task.o"
 --strict --scatter "ALM_ETH\ALM_ETH.sct"
 --summary_stderr --info summarysizes --map --load_addr_map_info --xref --callgraph --symbols
 --info sizes --info totals --info unused --info veneers

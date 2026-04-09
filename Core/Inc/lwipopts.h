@@ -45,6 +45,7 @@
 #define TCP_WND                         (4 * TCP_MSS)
 #define TCP_SND_BUF                     (4 * TCP_MSS)
 #define TCP_SND_QUEUELEN                (2 * TCP_SND_BUF / TCP_MSS)
+#define LWIP_TCP_KEEPALIVE              1
 
 /* --------------- ARP --------------- */
 #define LWIP_ARP                        1
