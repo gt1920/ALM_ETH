@@ -34,6 +34,7 @@
 #include "CAN_comm.h"
 #include "systick_task.h"
 #include "udp_discovery.h"
+#include <string.h>
 
 /* USER CODE END Includes */
 
@@ -58,6 +59,9 @@
 __IO uint32_t TSB;
 
 uint32_t now;
+
+/* Device SN: 32-bit from UID XOR, same as Motor module's Build_NodeID_From_UID */
+uint32_t g_device_sn = 0;
 
 uint32_t ETH_Start_IT_Stat;
 BSP_LAN8742_HandleTypeDef hphy;
@@ -136,6 +140,14 @@ int main(void)
   HAL_Init();
 
   /* USER CODE BEGIN Init */
+  /* Build device SN from UID (same as Motor module's Build_NodeID_From_UID) */
+  {
+      const uint32_t *uid = (const uint32_t *)UID_BASE;
+      g_device_sn = uid[0] ^ uid[1] ^ uid[2];
+      if (g_device_sn == 0)
+          g_device_sn = uid[0] | 0x01000000UL;
+  }
+
   MPU_Config();
   /* USER CODE END Init */
 

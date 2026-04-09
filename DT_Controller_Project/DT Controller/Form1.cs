@@ -995,11 +995,18 @@ namespace DT_Controller
 
                             var dateStr = $"{day:D2}.{monthName}.{year}";
 
+                            // SN: bytes [14..17] as 8-char hex (same as Module SN format)
+                            string deviceSn = string.Empty;
+                            if (data.Length > 17)
+                            {
+                                deviceSn = $"{data[14]:X2}{data[15]:X2}{data[16]:X2}{data[17]:X2}";
+                            }
+
                             // �� UI �̸߳��� Device_Info��ʹ�õ�ǰѡ���豸��Ϊ�����ģ�
                             InvokeIfRequired(() =>
                             {
                                 var sel = MainDevice.SelectedItem as HidDeviceItem;
-                                UpdateDeviceInfo(sel, fw, dateStr);
+                                UpdateDeviceInfo(sel, fw, dateStr, deviceSn);
                             });
 
                             // Auto-query Module List (SubCmd = 0x02)
@@ -2022,19 +2029,19 @@ namespace DT_Controller
         }
 
         // �� Form1 �������ӣ����� Device_Info richtextbox ���ݣ���ʾ SN / FW / Date��
-        private void UpdateDeviceInfo(HidDeviceItem item, string fw = null, string date = null)
+        private void UpdateDeviceInfo(HidDeviceItem item, string fw = null, string date = null, string sn = null)
         {
             InvokeIfRequired(() =>
             {
                 try
                 {
-                    var sn = item?.Serial ?? string.Empty;
+                    var snVal = sn ?? item?.Serial ?? string.Empty;
 
                     var fwVal = fw ?? string.Empty;
                     var dateVal = date ?? string.Empty;
 
                     var sb = new StringBuilder();
-                    sb.AppendLine($"SN: {sn}");
+                    sb.AppendLine($"SN: {snVal}");
                     if (!string.IsNullOrEmpty(_pendingEthIp))
                         sb.AppendLine($"IP: {_pendingEthIp}");
                     sb.AppendLine($"FW: {fwVal}");
@@ -2539,7 +2546,7 @@ namespace DT_Controller
                     for (int i = 10; i < 26 && data[i] != 0; i++) hostLen++;
                     string hostname = System.Text.Encoding.ASCII.GetString(data, 10, hostLen);
 
-                    string fw = $"{data[26]}.{data[27]}.{data[28]}.{data[29]}";
+                    string fw = $"{data[26]:D3}.{data[27]:D2}.{data[28]:D2}.{data[29]:D2}";
                     int tcpPort = data[30] | (data[31] << 8);
                     string ip = ep.Address.ToString();
 

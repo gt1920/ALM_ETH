@@ -26,11 +26,18 @@
 #define RESP_LEN    32
 #define ANNOUNCE_INTERVAL_MS  3000U
 
-/* FW version (keep in sync with comm_protocol.c) */
-#define FW_VER_0  1
-#define FW_VER_1  0
-#define FW_VER_2  0
-#define FW_VER_3  1
+/* FW version: hw_ver.DD.MM.YY from compile date */
+#define FW_HW_VER  1
+#define BUILD_DAY   ((__DATE__[4] == ' ' ? 0 : ((__DATE__[4] - '0') * 10)) + (__DATE__[5] - '0'))
+#define BUILD_MONTH ( \
+    __DATE__[0] == 'J' ? (__DATE__[1] == 'a' ? 1 : (__DATE__[2] == 'n' ? 6 : 7)) : \
+    __DATE__[0] == 'F' ? 2 : \
+    __DATE__[0] == 'M' ? (__DATE__[2] == 'r' ? 3 : 5) : \
+    __DATE__[0] == 'A' ? (__DATE__[1] == 'p' ? 4 : 8) : \
+    __DATE__[0] == 'S' ? 9 : \
+    __DATE__[0] == 'O' ? 10 : \
+    __DATE__[0] == 'N' ? 11 : 12)
+#define BUILD_YEAR  (((__DATE__[9] - '0') * 10) + (__DATE__[10] - '0'))
 
 static struct udp_pcb *disc_pcb = NULL;
 
@@ -85,10 +92,10 @@ void UDP_Discovery_Poll(void)
         strncpy((char *)(buf + 10), nif->hostname, 15);
 
     /* FW version */
-    buf[26] = FW_VER_0;
-    buf[27] = FW_VER_1;
-    buf[28] = FW_VER_2;
-    buf[29] = FW_VER_3;
+    buf[26] = FW_HW_VER;
+    buf[27] = BUILD_DAY;
+    buf[28] = BUILD_MONTH;
+    buf[29] = BUILD_YEAR;
 
     /* TCP port (LE) */
     buf[30] = (uint8_t)(TCP_SERVER_PORT & 0xFF);
