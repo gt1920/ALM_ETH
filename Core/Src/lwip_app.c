@@ -87,7 +87,7 @@ void LWIP_APP_Init(void)
 }
 
 /* Gratuitous ARP interval: 30 seconds (in ms) */
-#define GARP_INTERVAL_MS   30000U
+#define GARP_INTERVAL_MS   20000U
 
 /* ---- poll (call from main loop) ---- */
 void LWIP_APP_Poll(void)
