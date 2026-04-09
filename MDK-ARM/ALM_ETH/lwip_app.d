@@ -24,6 +24,41 @@ alm_eth/lwip_app.o: ..\Core\Src\lwip_app.c ..\Core\Inc\lwip_app.h \
   ..\Middlewares\Third_Party\LwIP\src\include\lwip\priv\memp_std.h \
   ..\Middlewares\Third_Party\LwIP\src\include\lwip\priv\memp_priv.h \
   ..\Middlewares\Third_Party\LwIP\src\include\lwip\priv\mem_priv.h \
+  ..\Core\Inc\main.h ..\Drivers\STM32H5xx_HAL_Driver\Inc\stm32h5xx_hal.h \
+  ..\Core\Inc\stm32h5xx_hal_conf.h \
+  ..\Drivers\STM32H5xx_HAL_Driver\Inc\stm32h5xx_hal_rcc.h \
+  ..\Drivers\STM32H5xx_HAL_Driver\Inc\stm32h5xx_hal_def.h \
+  ..\Drivers\CMSIS\Device\ST\STM32H5xx\Include\stm32h5xx.h \
+  D:\Keil_v5\ARM\ARMCC_V6.22\bin\..\include\math.h \
+  ..\Drivers\CMSIS\Device\ST\STM32H5xx\Include\stm32h563xx.h \
+  ..\Drivers\CMSIS\Include\core_cm33.h \
+  ..\Drivers\CMSIS\Include\cmsis_version.h \
+  ..\Drivers\CMSIS\Include\cmsis_compiler.h \
+  ..\Drivers\CMSIS\Include\cmsis_armclang.h \
+  ..\Drivers\CMSIS\Include\mpu_armv8.h \
+  ..\Drivers\CMSIS\Device\ST\STM32H5xx\Include\system_stm32h5xx.h \
+  ..\Drivers\STM32H5xx_HAL_Driver\Inc\Legacy\stm32_hal_legacy.h \
+  ..\Drivers\STM32H5xx_HAL_Driver\Inc\stm32h5xx_hal_rcc_ex.h \
+  ..\Drivers\STM32H5xx_HAL_Driver\Inc\stm32h5xx_hal_gpio.h \
+  ..\Drivers\STM32H5xx_HAL_Driver\Inc\stm32h5xx_hal_gpio_ex.h \
+  ..\Drivers\STM32H5xx_HAL_Driver\Inc\stm32h5xx_hal_icache.h \
+  ..\Drivers\STM32H5xx_HAL_Driver\Inc\stm32h5xx_hal_dcache.h \
+  ..\Drivers\STM32H5xx_HAL_Driver\Inc\stm32h5xx_hal_dma.h \
+  ..\Drivers\STM32H5xx_HAL_Driver\Inc\stm32h5xx_hal_dma_ex.h \
+  ..\Drivers\STM32H5xx_HAL_Driver\Inc\stm32h5xx_hal_cortex.h \
+  ..\Drivers\STM32H5xx_HAL_Driver\Inc\stm32h5xx_hal_flash.h \
+  ..\Drivers\STM32H5xx_HAL_Driver\Inc\stm32h5xx_hal_flash_ex.h \
+  ..\Drivers\STM32H5xx_HAL_Driver\Inc\stm32h5xx_hal_pwr.h \
+  ..\Drivers\STM32H5xx_HAL_Driver\Inc\stm32h5xx_hal_pwr_ex.h \
+  ..\Drivers\STM32H5xx_HAL_Driver\Inc\stm32h5xx_hal_xspi.h \
+  ..\Drivers\STM32H5xx_HAL_Driver\Inc\stm32h5xx_ll_dlyb.h \
+  ..\Drivers\STM32H5xx_HAL_Driver\Inc\stm32h5xx_hal_pcd.h \
+  ..\Drivers\STM32H5xx_HAL_Driver\Inc\stm32h5xx_ll_usb.h \
+  ..\Drivers\STM32H5xx_HAL_Driver\Inc\stm32h5xx_hal_pcd_ex.h \
+  ..\Drivers\STM32H5xx_HAL_Driver\Inc\stm32h5xx_hal_exti.h \
+  ..\Drivers\STM32H5xx_HAL_Driver\Inc\stm32h5xx_hal_eth.h \
+  ..\Drivers\STM32H5xx_HAL_Driver\Inc\stm32h5xx_hal_eth_ex.h \
+  ..\Drivers\STM32H5xx_HAL_Driver\Inc\stm32h5xx_hal_fdcan.h \
   ..\Middlewares\Third_Party\LwIP\src\include\lwip\init.h \
   ..\Middlewares\Third_Party\LwIP\src\include\lwip\timeouts.h \
   ..\Middlewares\Third_Party\LwIP\src\include\lwip\dhcp.h \
@@ -34,6 +69,10 @@ alm_eth/lwip_app.o: ..\Core\Src\lwip_app.c ..\Core\Inc\lwip_app.h \
   ..\Middlewares\Third_Party\LwIP\src\include\lwip\ip6.h \
   ..\Middlewares\Third_Party\LwIP\src\include\lwip\prot\ip.h \
   ..\Middlewares\Third_Party\LwIP\src\include\lwip\prot\udp.h \
-  ..\Middlewares\Third_Party\LwIP\src\include\netif\ethernet.h \
+  ..\Middlewares\Third_Party\LwIP\src\include\lwip\autoip.h \
+  ..\Middlewares\Third_Party\LwIP\src\include\lwip\etharp.h \
   ..\Middlewares\Third_Party\LwIP\src\include\lwip\prot\ethernet.h \
-  ..\Middlewares\Third_Party\LwIP\src\include\lwip\prot\ieee.h
+  ..\Middlewares\Third_Party\LwIP\src\include\lwip\prot\ieee.h \
+  ..\Middlewares\Third_Party\LwIP\src\include\lwip\prot\etharp.h \
+  ..\Middlewares\Third_Party\LwIP\src\include\netif\ethernet.h \
+  ..\Middlewares\Third_Party\LwIP\src\include\netif\etharp.h

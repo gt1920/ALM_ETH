@@ -1,0 +1,70 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "X:\\GT_IAP_Done\\DT_Controller\\DT_Controller_V1.0\\DT_Controller_260303_1226_PC\u5BF9\u8C03XY - v6\\DT Controller\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{405166B1-B209-46B9-9AFA-B3B4E184CD50}|DT Controller.csproj|x:\\gt_iap_done\\dt_controller\\dt_controller_v1.0\\dt_controller_260303_1226_pc\u5BF9\u8C03xy - v6\\dt controller\\form1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
+      "RelativeMoniker": "D:0:0:{405166B1-B209-46B9-9AFA-B3B4E184CD50}|DT Controller.csproj|solutionrelative:form1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{405166B1-B209-46B9-9AFA-B3B4E184CD50}|DT Controller.csproj|X:\\GT_IAP_Done\\DT_Controller\\DT_Controller_V1.0\\DT_Controller_260303_1226_PC\u5BF9\u8C03XY - v6\\DT Controller\\form1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{405166B1-B209-46B9-9AFA-B3B4E184CD50}|DT Controller.csproj|solutionrelative:form1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{405166B1-B209-46B9-9AFA-B3B4E184CD50}|DT Controller.csproj|X:\\GT_IAP_Done\\DT_Controller\\DT_Controller_V1.0\\DT_Controller_260303_1226_PC\u5BF9\u8C03XY - v6\\DT Controller\\form1.designer.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{405166B1-B209-46B9-9AFA-B3B4E184CD50}|DT Controller.csproj|solutionrelative:form1.designer.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 0,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "Form1.cs [\u8BBE\u8BA1]",
+              "DocumentMoniker": "X:\\GT_IAP_Done\\DT_Controller\\DT_Controller_V1.0\\DT_Controller_260303_1226_PC\u5BF9\u8C03XY - v6\\DT Controller\\Form1.cs",
+              "RelativeDocumentMoniker": "Form1.cs",
+              "ToolTip": "X:\\GT_IAP_Done\\DT_Controller\\DT_Controller_V1.0\\DT_Controller_260303_1226_PC\u5BF9\u8C03XY - v6\\DT Controller\\Form1.cs [\u8BBE\u8BA1]",
+              "RelativeToolTip": "Form1.cs [\u8BBE\u8BA1]",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-02T03:39:14.718Z",
+              "EditorCaption": " [\u8BBE\u8BA1]"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "Form1.Designer.cs",
+              "DocumentMoniker": "X:\\GT_IAP_Done\\DT_Controller\\DT_Controller_V1.0\\DT_Controller_260303_1226_PC\u5BF9\u8C03XY - v6\\DT Controller\\Form1.Designer.cs",
+              "RelativeDocumentMoniker": "Form1.Designer.cs",
+              "ToolTip": "X:\\GT_IAP_Done\\DT_Controller\\DT_Controller_V1.0\\DT_Controller_260303_1226_PC\u5BF9\u8C03XY - v6\\DT Controller\\Form1.Designer.cs",
+              "RelativeToolTip": "Form1.Designer.cs",
+              "ViewState": "AgIAABUAAAAAAAAAAABAwAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-30T06:24:59.657Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "Form1.cs",
+              "DocumentMoniker": "X:\\GT_IAP_Done\\DT_Controller\\DT_Controller_V1.0\\DT_Controller_260303_1226_PC\u5BF9\u8C03XY - v6\\DT Controller\\Form1.cs",
+              "RelativeDocumentMoniker": "Form1.cs",
+              "ToolTip": "X:\\GT_IAP_Done\\DT_Controller\\DT_Controller_V1.0\\DT_Controller_260303_1226_PC\u5BF9\u8C03XY - v6\\DT Controller\\Form1.cs",
+              "RelativeToolTip": "Form1.cs",
+              "ViewState": "AgIAAI0EAAAAAAAAAABIwF0JAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-02T04:49:57.551Z",
+              "EditorCaption": ""
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

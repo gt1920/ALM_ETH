@@ -1,0 +1,11 @@
+PC → Device PARAM_SET 协议逐项一致：
+
+项目	约定	实际
+Head	0xA5	0xA5
+CMD	CMD_PARAM_SET (0x20)	0x20
+Direction	PC→Device	0x02
+seq	LE	正确
+payload_length	7	7
+NodeID	[6..9]	正确
+param_id	[10]	正确
+value	[11..12]	正确

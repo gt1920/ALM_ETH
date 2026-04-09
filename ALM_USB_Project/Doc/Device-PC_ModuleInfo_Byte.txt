@@ -1,0 +1,96 @@
+
+Device → PC
+
+Module Info / Heartbeat 数据包（HID Payload，64 Bytes）
+
+[00] 0xA5        // 协议头 Header
+[01] CMD         // 命令 = 0x01 (Info)
+[02] Direction   // 方向 = 0x01 (MCU → PC)
+[03] SEQ_L       // 序列号低字节
+[04] SEQ_H       // 序列号高字节
+[05] LENGTH      // 有效数据长度（>= 22）
+[06] SubCmd      // 子命令 = Module Info
+[07] ModuleIndex // 模块索引号（0-based）
+
+[08] ModuleType  // 模块类型
+                 // 0x12 = MODULE_ADJUSTER
+
+[09] Name[0]     // 模块名称 ASCII
+[10] Name[1]
+[11] Name[2]
+[12] Name[3]
+[13] Name[4]
+[14] Name[5]
+[15] Name[6]
+[16] Name[7]
+
+[17] NodeID[0]   // NodeID LSB
+[18] NodeID[1]
+[19] NodeID[2]
+[20] NodeID[3]   // NodeID MSB
+
+[21] Flag0       // 轴数量 / 能力标志（已存在，语义保持）
+[22] Flag1       // 状态标志 1（已存在）
+[23] Flag2       // 状态标志 2（已存在）
+[24] Flag3       // 状态标志 3（已存在）
+
+[25] ErrorCode   // 错误码
+[26] Reserved0   // 保留
+[27] Reserved1   // 保留
+
+V2 扩展参数区（新增，不影响旧协议）
+
+[28] X_Current_L // X 轴电机电流 LSB
+[29] X_Current_H // X 轴电机电流 MSB
+                 // uint16，单位 0.1A（放大 10×）
+                 // 例：20 = 2.0A → UI 显示 200mA
+
+[30] Y_Current_L // Y 轴电机电流 LSB
+[31] Y_Current_H // Y 轴电机电流 MSB
+                 // uint16，单位 0.1A
+
+[32] HoldCurrent // 电机保持电流
+                 // uint8，0–100 (%，相对于设定电流)
+
+[33] Reserved2   // 保留（对齐 / 未来使用）
+
+[34] Speed_L     // 运行速度 LSB
+[35] Speed_H     // 运行速度 MSB
+                 // uint16，单位 step/s
+
+[36] X_Pos_0     // X 轴当前位置 byte0 (LSB)
+[37] X_Pos_1
+[38] X_Pos_2
+[39] X_Pos_3     // X 轴当前位置 byte3 (MSB)
+                 // int32，单位 step
+
+[40] Y_Pos_0     // Y 轴当前位置 byte0 (LSB)
+[41] Y_Pos_1
+[42] Y_Pos_2
+[43] Y_Pos_3     // Y 轴当前位置 byte3 (MSB)
+                 // int32，单位 step
+
+未来保留区（不使用，全部填 0）
+
+[44] Reserved
+[45] Reserved
+[46] Reserved
+[47] Reserved
+[48] Reserved
+[49] Reserved
+[50] Reserved
+[51] Reserved
+[52] Reserved
+[53] Reserved
+[54] Reserved
+[55] Reserved
+[56] Reserved
+[57] Reserved
+[58] Reserved
+[59] Reserved
+[60] Reserved
+[61] Reserved
+[62] Reserved
+[63] Reserved
+
+

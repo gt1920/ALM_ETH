@@ -9,4 +9,26 @@ alm_eth/autoip.o: ..\Middlewares\Third_Party\LwIP\src\core\ipv4\autoip.c \
   D:\Keil_v5\ARM\ARMCC_V6.22\bin\..\include\stdint.h \
   D:\Keil_v5\ARM\ARMCC_V6.22\bin\..\include\inttypes.h \
   D:\Keil_v5\ARM\ARMCC_V6.22\bin\..\include\limits.h \
-  D:\Keil_v5\ARM\ARMCC_V6.22\bin\..\include\ctype.h
+  D:\Keil_v5\ARM\ARMCC_V6.22\bin\..\include\ctype.h \
+  ..\Middlewares\Third_Party\LwIP\src\include\lwip\mem.h \
+  ..\Middlewares\Third_Party\LwIP\src\include\lwip\ip_addr.h \
+  ..\Middlewares\Third_Party\LwIP\src\include\lwip\def.h \
+  ..\Middlewares\Third_Party\LwIP\src\include\lwip\ip4_addr.h \
+  ..\Middlewares\Third_Party\LwIP\src\include\lwip\ip6_addr.h \
+  ..\Middlewares\Third_Party\LwIP\src\include\lwip\netif.h \
+  ..\Middlewares\Third_Party\LwIP\src\include\lwip\err.h \
+  ..\Middlewares\Third_Party\LwIP\src\include\lwip\pbuf.h \
+  ..\Middlewares\Third_Party\LwIP\src\include\lwip\stats.h \
+  ..\Middlewares\Third_Party\LwIP\src\include\lwip\memp.h \
+  ..\Middlewares\Third_Party\LwIP\src\include\lwip\priv\memp_std.h \
+  ..\Middlewares\Third_Party\LwIP\src\include\lwip\priv\memp_priv.h \
+  ..\Middlewares\Third_Party\LwIP\src\include\lwip\priv\mem_priv.h \
+  ..\Middlewares\Third_Party\LwIP\src\include\lwip\autoip.h \
+  ..\Middlewares\Third_Party\LwIP\src\include\lwip\etharp.h \
+  ..\Middlewares\Third_Party\LwIP\src\include\lwip\ip4.h \
+  ..\Middlewares\Third_Party\LwIP\src\include\lwip\prot\ip4.h \
+  ..\Middlewares\Third_Party\LwIP\src\include\lwip\prot\ethernet.h \
+  ..\Middlewares\Third_Party\LwIP\src\include\lwip\prot\ieee.h \
+  ..\Middlewares\Third_Party\LwIP\src\include\lwip\prot\etharp.h \
+  ..\Middlewares\Third_Party\LwIP\src\include\lwip\prot\autoip.h \
+  D:\Keil_v5\ARM\ARMCC_V6.22\bin\..\include\string.h

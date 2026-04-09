@@ -118,7 +118,7 @@ I (..\Drivers\STM32H5xx_HAL_Driver\Inc\stm32h5xx_hal_exti.h)(0x69B51B3C)
 I (..\Drivers\STM32H5xx_HAL_Driver\Inc\stm32h5xx_hal_eth.h)(0x69B51B3C)
 I (..\Drivers\STM32H5xx_HAL_Driver\Inc\stm32h5xx_hal_eth_ex.h)(0x69B51B3C)
 I (..\Drivers\STM32H5xx_HAL_Driver\Inc\stm32h5xx_hal_fdcan.h)(0x69B51B3C)
-F (../Core/Src/eth.c)(0x69B52017)(-xc -std=c99 --target=arm-arm-none-eabi -mcpu=cortex-m33+nodsp -mfpu=fpv5-sp-d16 -mfloat-abi=hard -c-fno-rtti -funsigned-char -fshort-enums -fshort-wchar-gdwarf-4 -O3 -ffunction-sections -Wno-packed -Wno-missing-variable-declarations -Wno-missing-prototypes -Wno-missing-noreturn -Wno-sign-conversion -Wno-nonportable-include-path -Wno-reserved-id-macro -Wno-unused-macros -Wno-documentation-unknown-command -Wno-documentation -Wno-license-management -Wno-parentheses-equality -Wno-reserved-identifier -I ../Core/Inc -I ../Drivers/STM32H5xx_HAL_Driver/Inc -I ../Drivers/STM32H5xx_HAL_Driver/Inc/Legacy -I ../Drivers/CMSIS/Device/ST/STM32H5xx/Include -I ../Drivers/CMSIS/Include -I ../Middlewares/Third_Party/LwIP/src/include -I ../Middlewares/Third_Party/LwIP/src/include/lwip -I ../Middlewares/Third_Party/LwIP/src/include/netif-I./RTE/_ALM_ETH-ID:/Keil_v5/ARM/PACK/ARM/CMSIS/6.0.0/CMSIS/Core/Include-D__UVISION_VERSION="539" -D_RTE_ -DSTM32H563xx -D_RTE_ -DUSE_HAL_DRIVER -DSTM32H563xx-o alm_eth/eth.o -MD)
+F (../Core/Src/eth.c)(0x69D62E8E)(-xc -std=c99 --target=arm-arm-none-eabi -mcpu=cortex-m33+nodsp -mfpu=fpv5-sp-d16 -mfloat-abi=hard -c-fno-rtti -funsigned-char -fshort-enums -fshort-wchar-gdwarf-4 -O3 -ffunction-sections -Wno-packed -Wno-missing-variable-declarations -Wno-missing-prototypes -Wno-missing-noreturn -Wno-sign-conversion -Wno-nonportable-include-path -Wno-reserved-id-macro -Wno-unused-macros -Wno-documentation-unknown-command -Wno-documentation -Wno-license-management -Wno-parentheses-equality -Wno-reserved-identifier -I ../Core/Inc -I ../Drivers/STM32H5xx_HAL_Driver/Inc -I ../Drivers/STM32H5xx_HAL_Driver/Inc/Legacy -I ../Drivers/CMSIS/Device/ST/STM32H5xx/Include -I ../Drivers/CMSIS/Include -I ../Middlewares/Third_Party/LwIP/src/include -I ../Middlewares/Third_Party/LwIP/src/include/lwip -I ../Middlewares/Third_Party/LwIP/src/include/netif-I./RTE/_ALM_ETH-ID:/Keil_v5/ARM/PACK/ARM/CMSIS/6.0.0/CMSIS/Core/Include-D__UVISION_VERSION="539" -D_RTE_ -DSTM32H563xx -D_RTE_ -DUSE_HAL_DRIVER -DSTM32H563xx-o alm_eth/eth.o -MD)
 I (..\Drivers\STM32H5xx_HAL_Driver\Inc\stm32h5xx_hal.h)(0x69B51B3C)
 I (..\Core\Inc\stm32h5xx_hal_conf.h)(0x69B52019)
 I (..\Drivers\STM32H5xx_HAL_Driver\Inc\stm32h5xx_hal_rcc.h)(0x69B51B3C)
@@ -196,12 +196,12 @@ I (..\Drivers\STM32H5xx_HAL_Driver\Inc\stm32h5xx_hal_exti.h)(0x69B51B3C)
 I (..\Drivers\STM32H5xx_HAL_Driver\Inc\stm32h5xx_hal_eth.h)(0x69B51B3C)
 I (..\Drivers\STM32H5xx_HAL_Driver\Inc\stm32h5xx_hal_eth_ex.h)(0x69B51B3C)
 I (..\Drivers\STM32H5xx_HAL_Driver\Inc\stm32h5xx_hal_fdcan.h)(0x69B51B3C)
-F (../Core/Src/lwip_app.c)(0x69D61DA0)(-xc -std=c99 --target=arm-arm-none-eabi -mcpu=cortex-m33+nodsp -mfpu=fpv5-sp-d16 -mfloat-abi=hard -c-fno-rtti -funsigned-char -fshort-enums -fshort-wchar-gdwarf-4 -O3 -ffunction-sections -Wno-packed -Wno-missing-variable-declarations -Wno-missing-prototypes -Wno-missing-noreturn -Wno-sign-conversion -Wno-nonportable-include-path -Wno-reserved-id-macro -Wno-unused-macros -Wno-documentation-unknown-command -Wno-documentation -Wno-license-management -Wno-parentheses-equality -Wno-reserved-identifier -I ../Core/Inc -I ../Drivers/STM32H5xx_HAL_Driver/Inc -I ../Drivers/STM32H5xx_HAL_Driver/Inc/Legacy -I ../Drivers/CMSIS/Device/ST/STM32H5xx/Include -I ../Drivers/CMSIS/Include -I ../Middlewares/Third_Party/LwIP/src/include -I ../Middlewares/Third_Party/LwIP/src/include/lwip -I ../Middlewares/Third_Party/LwIP/src/include/netif-I./RTE/_ALM_ETH-ID:/Keil_v5/ARM/PACK/ARM/CMSIS/6.0.0/CMSIS/Core/Include-D__UVISION_VERSION="539" -D_RTE_ -DSTM32H563xx -D_RTE_ -DUSE_HAL_DRIVER -DSTM32H563xx-o alm_eth/lwip_app.o -MD)
+F (../Core/Src/lwip_app.c)(0x69D70CA9)(-xc -std=c99 --target=arm-arm-none-eabi -mcpu=cortex-m33+nodsp -mfpu=fpv5-sp-d16 -mfloat-abi=hard -c-fno-rtti -funsigned-char -fshort-enums -fshort-wchar-gdwarf-4 -O3 -ffunction-sections -Wno-packed -Wno-missing-variable-declarations -Wno-missing-prototypes -Wno-missing-noreturn -Wno-sign-conversion -Wno-nonportable-include-path -Wno-reserved-id-macro -Wno-unused-macros -Wno-documentation-unknown-command -Wno-documentation -Wno-license-management -Wno-parentheses-equality -Wno-reserved-identifier -I ../Core/Inc -I ../Drivers/STM32H5xx_HAL_Driver/Inc -I ../Drivers/STM32H5xx_HAL_Driver/Inc/Legacy -I ../Drivers/CMSIS/Device/ST/STM32H5xx/Include -I ../Drivers/CMSIS/Include -I ../Middlewares/Third_Party/LwIP/src/include -I ../Middlewares/Third_Party/LwIP/src/include/lwip -I ../Middlewares/Third_Party/LwIP/src/include/netif-I./RTE/_ALM_ETH-ID:/Keil_v5/ARM/PACK/ARM/CMSIS/6.0.0/CMSIS/Core/Include-D__UVISION_VERSION="539" -D_RTE_ -DSTM32H563xx -D_RTE_ -DUSE_HAL_DRIVER -DSTM32H563xx-o alm_eth/lwip_app.o -MD)
 I (D:\Keil_v5\ARM\ARMCC_V6.22\include\stdint.h)(0x65F0855A)
 I (..\Core\Inc\ethernetif.h)(0x69D6199E)
 I (..\Middlewares\Third_Party\LwIP\src\include\lwip\err.h)(0x69D6197A)
 I (..\Middlewares\Third_Party\LwIP\src\include\lwip\opt.h)(0x69D6197A)
-I (..\Core\Inc\lwipopts.h)(0x69D61994)
+I (..\Core\Inc\lwipopts.h)(0x69D62925)
 I (..\Middlewares\Third_Party\LwIP\src\include\lwip\debug.h)(0x69D6197A)
 I (..\Middlewares\Third_Party\LwIP\src\include\lwip\arch.h)(0x69D6197A)
 I (..\Core\Inc\arch\cc.h)(0x69D61DE3)
@@ -222,6 +222,41 @@ I (..\Middlewares\Third_Party\LwIP\src\include\lwip\memp.h)(0x69D6197A)
 I (..\Middlewares\Third_Party\LwIP\src\include\lwip\priv\memp_std.h)(0x69D6197A)
 I (..\Middlewares\Third_Party\LwIP\src\include\lwip\priv\memp_priv.h)(0x69D6197A)
 I (..\Middlewares\Third_Party\LwIP\src\include\lwip\priv\mem_priv.h)(0x69D6197A)
+I (..\Core\Inc\main.hr.\Drivers\STM32H5xx_HAL_Driver\Inc\stm32h5xx_hal.h)(0x00000000)
+I (..\Core\Inc\stm32h5xx_hal_conf.h)(0x69B52019)
+I (..\Drivers\STM32H5xx_HAL_Driver\Inc\stm32h5xx_hal_rcc.h)(0x69B51B3C)
+I (..\Drivers\STM32H5xx_HAL_Driver\Inc\stm32h5xx_hal_def.h)(0x69B51B3C)
+I (..\Drivers\CMSIS\Device\ST\STM32H5xx\Include\stm32h5xx.h)(0x69B51B3C)
+I (D:\Keil_v5\ARM\ARMCC_V6.22\include\math.h)(0x65F0855A)
+I (..\Drivers\CMSIS\Device\ST\STM32H5xx\Include\stm32h563xx.h)(0x69B51B3C)
+I (..\Drivers\CMSIS\Include\core_cm33.h)(0x69B51B3B)
+I (..\Drivers\CMSIS\Include\cmsis_version.h)(0x69B51B3B)
+I (..\Drivers\CMSIS\Include\cmsis_compiler.h)(0x69B51B3B)
+I (..\Drivers\CMSIS\Include\cmsis_armclang.h)(0x69B51B3B)
+I (..\Drivers\CMSIS\Include\mpu_armv8.h)(0x69B51B3B)
+I (..\Drivers\CMSIS\Device\ST\STM32H5xx\Include\system_stm32h5xx.h)(0x69B51B3C)
+I (..\Drivers\STM32H5xx_HAL_Driver\Inc\Legacy\stm32_hal_legacy.h)(0x69B51B3C)
+I (..\Drivers\STM32H5xx_HAL_Driver\Inc\stm32h5xx_hal_rcc_ex.h)(0x69B51B3C)
+I (..\Drivers\STM32H5xx_HAL_Driver\Inc\stm32h5xx_hal_gpio.h)(0x69B51B3C)
+I (..\Drivers\STM32H5xx_HAL_Driver\Inc\stm32h5xx_hal_gpio_ex.h)(0x69B51B3C)
+I (..\Drivers\STM32H5xx_HAL_Driver\Inc\stm32h5xx_hal_icache.h)(0x69B51B3C)
+I (..\Drivers\STM32H5xx_HAL_Driver\Inc\stm32h5xx_hal_dcache.h)(0x69B51B3C)
+I (..\Drivers\STM32H5xx_HAL_Driver\Inc\stm32h5xx_hal_dma.h)(0x69B51B3C)
+I (..\Drivers\STM32H5xx_HAL_Driver\Inc\stm32h5xx_hal_dma_ex.h)(0x69B51B3C)
+I (..\Drivers\STM32H5xx_HAL_Driver\Inc\stm32h5xx_hal_cortex.h)(0x69B51B3C)
+I (..\Drivers\STM32H5xx_HAL_Driver\Inc\stm32h5xx_hal_flash.h)(0x69B51B3C)
+I (..\Drivers\STM32H5xx_HAL_Driver\Inc\stm32h5xx_hal_flash_ex.h)(0x69B51B3C)
+I (..\Drivers\STM32H5xx_HAL_Driver\Inc\stm32h5xx_hal_pwr.h)(0x69B51B3C)
+I (..\Drivers\STM32H5xx_HAL_Driver\Inc\stm32h5xx_hal_pwr_ex.h)(0x69B51B3C)
+I (..\Drivers\STM32H5xx_HAL_Driver\Inc\stm32h5xx_hal_xspi.h)(0x69B51B3C)
+I (..\Drivers\STM32H5xx_HAL_Driver\Inc\stm32h5xx_ll_dlyb.h)(0x69B51B3C)
+I (..\Drivers\STM32H5xx_HAL_Driver\Inc\stm32h5xx_hal_pcd.h)(0x69B51B3C)
+I (..\Drivers\STM32H5xx_HAL_Driver\Inc\stm32h5xx_ll_usb.h)(0x69B51B3C)
+I (..\Drivers\STM32H5xx_HAL_Driver\Inc\stm32h5xx_hal_pcd_ex.h)(0x69B51B3C)
+I (..\Drivers\STM32H5xx_HAL_Driver\Inc\stm32h5xx_hal_exti.h)(0x69B51B3C)
+I (..\Drivers\STM32H5xx_HAL_Driver\Inc\stm32h5xx_hal_eth.h)(0x69B51B3C)
+I (..\Drivers\STM32H5xx_HAL_Driver\Inc\stm32h5xx_hal_eth_ex.h)(0x69B51B3C)
+I (..\Drivers\STM32H5xx_HAL_Driver\Inc\stm32h5xx_hal_fdcan.h)(0x69B51B3C)
 I (..\Middlewares\Third_Party\LwIP\src\include\lwip\init.h)(0x69D6197A)
 I (..\Middlewares\Third_Party\LwIP\src\include\lwip\timeouts.h)(0x69D6197A)
 I (..\Middlewares\Third_Party\LwIP\src\include\lwip\dhcp.h)(0x69D6197A)
@@ -232,13 +267,17 @@ I (..\Middlewares\Third_Party\LwIP\src\include\lwip\prot\ip4.h)(0x69D6197A)
 I (..\Middlewares\Third_Party\LwIP\src\include\lwip\ip6.h)(0x69D6197A)
 I (..\Middlewares\Third_Party\LwIP\src\include\lwip\prot\ip.h)(0x69D6197A)
 I (..\Middlewares\Third_Party\LwIP\src\include\lwip\prot\udp.h)(0x69D6197A)
-I (..\Middlewares\Third_Party\LwIP\src\include\netif\ethernet.h)(0x69D6197A)
+I (..\Middlewares\Third_Party\LwIP\src\include\lwip\autoip.h)(0x69D6197A)
+I (..\Middlewares\Third_Party\LwIP\src\include\lwip\etharp.h)(0x69D6197A)
 I (..\Middlewares\Third_Party\LwIP\src\include\lwip\prot\ethernet.h)(0x69D6197A)
 I (..\Middlewares\Third_Party\LwIP\src\include\lwip\prot\ieee.h)(0x69D6197A)
-F (../Core/Src/ethernetif.c)(0x69D61B0A)(-xc -std=c99 --target=arm-arm-none-eabi -mcpu=cortex-m33+nodsp -mfpu=fpv5-sp-d16 -mfloat-abi=hard -c-fno-rtti -funsigned-char -fshort-enums -fshort-wchar-gdwarf-4 -O3 -ffunction-sections -Wno-packed -Wno-missing-variable-declarations -Wno-missing-prototypes -Wno-missing-noreturn -Wno-sign-conversion -Wno-nonportable-include-path -Wno-reserved-id-macro -Wno-unused-macros -Wno-documentation-unknown-command -Wno-documentation -Wno-license-management -Wno-parentheses-equality -Wno-reserved-identifier -I ../Core/Inc -I ../Drivers/STM32H5xx_HAL_Driver/Inc -I ../Drivers/STM32H5xx_HAL_Driver/Inc/Legacy -I ../Drivers/CMSIS/Device/ST/STM32H5xx/Include -I ../Drivers/CMSIS/Include -I ../Middlewares/Third_Party/LwIP/src/include -I ../Middlewares/Third_Party/LwIP/src/include/lwip -I ../Middlewares/Third_Party/LwIP/src/include/netif-I./RTE/_ALM_ETH-ID:/Keil_v5/ARM/PACK/ARM/CMSIS/6.0.0/CMSIS/Core/Include-D__UVISION_VERSION="539" -D_RTE_ -DSTM32H563xx -D_RTE_ -DUSE_HAL_DRIVER -DSTM32H563xx-o alm_eth/ethernetif.o -MD)
+I (..\Middlewares\Third_Party\LwIP\src\include\lwip\prot\etharp.h)(0x69D6197A)
+I (..\Middlewares\Third_Party\LwIP\src\include\netif\ethernet.h)(0x69D6197A)
+I (..\Middlewares\Third_Party\LwIP\src\include\netif\etharp.h)(0x69D6197A)
+F (../Core/Src/ethernetif.c)(0x69D634ED)(-xc -std=c99 --target=arm-arm-none-eabi -mcpu=cortex-m33+nodsp -mfpu=fpv5-sp-d16 -mfloat-abi=hard -c-fno-rtti -funsigned-char -fshort-enums -fshort-wchar-gdwarf-4 -O3 -ffunction-sections -Wno-packed -Wno-missing-variable-declarations -Wno-missing-prototypes -Wno-missing-noreturn -Wno-sign-conversion -Wno-nonportable-include-path -Wno-reserved-id-macro -Wno-unused-macros -Wno-documentation-unknown-command -Wno-documentation -Wno-license-management -Wno-parentheses-equality -Wno-reserved-identifier -I ../Core/Inc -I ../Drivers/STM32H5xx_HAL_Driver/Inc -I ../Drivers/STM32H5xx_HAL_Driver/Inc/Legacy -I ../Drivers/CMSIS/Device/ST/STM32H5xx/Include -I ../Drivers/CMSIS/Include -I ../Middlewares/Third_Party/LwIP/src/include -I ../Middlewares/Third_Party/LwIP/src/include/lwip -I ../Middlewares/Third_Party/LwIP/src/include/netif-I./RTE/_ALM_ETH-ID:/Keil_v5/ARM/PACK/ARM/CMSIS/6.0.0/CMSIS/Core/Include-D__UVISION_VERSION="539" -D_RTE_ -DSTM32H563xx -D_RTE_ -DUSE_HAL_DRIVER -DSTM32H563xx-o alm_eth/ethernetif.o -MD)
 I (..\Middlewares\Third_Party\LwIP\src\include\lwip\err.h)(0x69D6197A)
 I (..\Middlewares\Third_Party\LwIP\src\include\lwip\opt.h)(0x69D6197A)
-I (..\Core\Inc\lwipopts.h)(0x69D61994)
+I (..\Core\Inc\lwipopts.h)(0x69D62925)
 I (..\Middlewares\Third_Party\LwIP\src\include\lwip\debug.h)(0x69D6197A)
 I (..\Middlewares\Third_Party\LwIP\src\include\lwip\arch.h)(0x69D6197A)
 I (..\Core\Inc\arch\cc.h)(0x69D61DE3)
@@ -309,7 +348,7 @@ I (..\Middlewares\Third_Party\LwIP\src\include\netif\ethernet.h)(0x69D6197A)
 I (..\Middlewares\Third_Party\LwIP\src\include\lwip\ethip6.h)(0x69D6197A)
 F (../Core/Src/sys_arch.c)(0x69D61A29)(-xc -std=c99 --target=arm-arm-none-eabi -mcpu=cortex-m33+nodsp -mfpu=fpv5-sp-d16 -mfloat-abi=hard -c-fno-rtti -funsigned-char -fshort-enums -fshort-wchar-gdwarf-4 -O3 -ffunction-sections -Wno-packed -Wno-missing-variable-declarations -Wno-missing-prototypes -Wno-missing-noreturn -Wno-sign-conversion -Wno-nonportable-include-path -Wno-reserved-id-macro -Wno-unused-macros -Wno-documentation-unknown-command -Wno-documentation -Wno-license-management -Wno-parentheses-equality -Wno-reserved-identifier -I ../Core/Inc -I ../Drivers/STM32H5xx_HAL_Driver/Inc -I ../Drivers/STM32H5xx_HAL_Driver/Inc/Legacy -I ../Drivers/CMSIS/Device/ST/STM32H5xx/Include -I ../Drivers/CMSIS/Include -I ../Middlewares/Third_Party/LwIP/src/include -I ../Middlewares/Third_Party/LwIP/src/include/lwip -I ../Middlewares/Third_Party/LwIP/src/include/netif-I./RTE/_ALM_ETH-ID:/Keil_v5/ARM/PACK/ARM/CMSIS/6.0.0/CMSIS/Core/Include-D__UVISION_VERSION="539" -D_RTE_ -DSTM32H563xx -D_RTE_ -DUSE_HAL_DRIVER -DSTM32H563xx-o alm_eth/sys_arch.o -MD)
 I (..\Middlewares\Third_Party\LwIP\src\include\lwip\opt.h)(0x69D6197A)
-I (..\Core\Inc\lwipopts.h)(0x69D61994)
+I (..\Core\Inc\lwipopts.h)(0x69D62925)
 I (..\Middlewares\Third_Party\LwIP\src\include\lwip\debug.h)(0x69D6197A)
 I (..\Middlewares\Third_Party\LwIP\src\include\lwip\arch.h)(0x69D6197A)
 I (..\Core\Inc\arch\cc.h)(0x69D61DE3)
@@ -1499,7 +1538,7 @@ I (..\Drivers\STM32H5xx_HAL_Driver\Inc\stm32h5xx_hal_eth_ex.h)(0x69B51B3C)
 I (..\Drivers\STM32H5xx_HAL_Driver\Inc\stm32h5xx_hal_fdcan.h)(0x69B51B3C)
 F (../Middlewares/Third_Party/LwIP/src/core/init.c)(0x69D6197A)(-xc -std=c99 --target=arm-arm-none-eabi -mcpu=cortex-m33+nodsp -mfpu=fpv5-sp-d16 -mfloat-abi=hard -c-fno-rtti -funsigned-char -fshort-enums -fshort-wchar-gdwarf-4 -O3 -ffunction-sections -Wno-packed -Wno-missing-variable-declarations -Wno-missing-prototypes -Wno-missing-noreturn -Wno-sign-conversion -Wno-nonportable-include-path -Wno-reserved-id-macro -Wno-unused-macros -Wno-documentation-unknown-command -Wno-documentation -Wno-license-management -Wno-parentheses-equality -Wno-reserved-identifier -I ../Core/Inc -I ../Drivers/STM32H5xx_HAL_Driver/Inc -I ../Drivers/STM32H5xx_HAL_Driver/Inc/Legacy -I ../Drivers/CMSIS/Device/ST/STM32H5xx/Include -I ../Drivers/CMSIS/Include -I ../Middlewares/Third_Party/LwIP/src/include -I ../Middlewares/Third_Party/LwIP/src/include/lwip -I ../Middlewares/Third_Party/LwIP/src/include/netif-I./RTE/_ALM_ETH-ID:/Keil_v5/ARM/PACK/ARM/CMSIS/6.0.0/CMSIS/Core/Include-D__UVISION_VERSION="539" -D_RTE_ -DSTM32H563xx -D_RTE_ -DUSE_HAL_DRIVER -DSTM32H563xx-o alm_eth/init.o -MD)
 I (..\Middlewares\Third_Party\LwIP\src\include\lwip\opt.h)(0x69D6197A)
-I (..\Core\Inc\lwipopts.h)(0x69D61994)
+I (..\Core\Inc\lwipopts.h)(0x69D62925)
 I (..\Middlewares\Third_Party\LwIP\src\include\lwip\debug.h)(0x69D6197A)
 I (..\Middlewares\Third_Party\LwIP\src\include\lwip\arch.h)(0x69D6197A)
 I (..\Core\Inc\arch\cc.h)(0x69D61DE3)
@@ -1553,7 +1592,7 @@ I (..\Middlewares\Third_Party\LwIP\src\include\netif\ppp\ppp_opts.h)(0x69D6197A)
 I (..\Middlewares\Third_Party\LwIP\src\include\netif\ppp\ppp_impl.h)(0x69D6197A)
 F (../Middlewares/Third_Party/LwIP/src/core/def.c)(0x69D6197A)(-xc -std=c99 --target=arm-arm-none-eabi -mcpu=cortex-m33+nodsp -mfpu=fpv5-sp-d16 -mfloat-abi=hard -c-fno-rtti -funsigned-char -fshort-enums -fshort-wchar-gdwarf-4 -O3 -ffunction-sections -Wno-packed -Wno-missing-variable-declarations -Wno-missing-prototypes -Wno-missing-noreturn -Wno-sign-conversion -Wno-nonportable-include-path -Wno-reserved-id-macro -Wno-unused-macros -Wno-documentation-unknown-command -Wno-documentation -Wno-license-management -Wno-parentheses-equality -Wno-reserved-identifier -I ../Core/Inc -I ../Drivers/STM32H5xx_HAL_Driver/Inc -I ../Drivers/STM32H5xx_HAL_Driver/Inc/Legacy -I ../Drivers/CMSIS/Device/ST/STM32H5xx/Include -I ../Drivers/CMSIS/Include -I ../Middlewares/Third_Party/LwIP/src/include -I ../Middlewares/Third_Party/LwIP/src/include/lwip -I ../Middlewares/Third_Party/LwIP/src/include/netif-I./RTE/_ALM_ETH-ID:/Keil_v5/ARM/PACK/ARM/CMSIS/6.0.0/CMSIS/Core/Include-D__UVISION_VERSION="539" -D_RTE_ -DSTM32H563xx -D_RTE_ -DUSE_HAL_DRIVER -DSTM32H563xx-o alm_eth/def.o -MD)
 I (..\Middlewares\Third_Party\LwIP\src\include\lwip\opt.h)(0x69D6197A)
-I (..\Core\Inc\lwipopts.h)(0x69D61994)
+I (..\Core\Inc\lwipopts.h)(0x69D62925)
 I (..\Middlewares\Third_Party\LwIP\src\include\lwip\debug.h)(0x69D6197A)
 I (..\Middlewares\Third_Party\LwIP\src\include\lwip\arch.h)(0x69D6197A)
 I (..\Core\Inc\arch\cc.h)(0x69D61DE3)
@@ -1567,7 +1606,7 @@ I (..\Middlewares\Third_Party\LwIP\src\include\lwip\def.h)(0x69D6197A)
 I (D:\Keil_v5\ARM\ARMCC_V6.22\include\string.h)(0x65F0855A)
 F (../Middlewares/Third_Party/LwIP/src/core/dns.c)(0x69D6197A)(-xc -std=c99 --target=arm-arm-none-eabi -mcpu=cortex-m33+nodsp -mfpu=fpv5-sp-d16 -mfloat-abi=hard -c-fno-rtti -funsigned-char -fshort-enums -fshort-wchar-gdwarf-4 -O3 -ffunction-sections -Wno-packed -Wno-missing-variable-declarations -Wno-missing-prototypes -Wno-missing-noreturn -Wno-sign-conversion -Wno-nonportable-include-path -Wno-reserved-id-macro -Wno-unused-macros -Wno-documentation-unknown-command -Wno-documentation -Wno-license-management -Wno-parentheses-equality -Wno-reserved-identifier -I ../Core/Inc -I ../Drivers/STM32H5xx_HAL_Driver/Inc -I ../Drivers/STM32H5xx_HAL_Driver/Inc/Legacy -I ../Drivers/CMSIS/Device/ST/STM32H5xx/Include -I ../Drivers/CMSIS/Include -I ../Middlewares/Third_Party/LwIP/src/include -I ../Middlewares/Third_Party/LwIP/src/include/lwip -I ../Middlewares/Third_Party/LwIP/src/include/netif-I./RTE/_ALM_ETH-ID:/Keil_v5/ARM/PACK/ARM/CMSIS/6.0.0/CMSIS/Core/Include-D__UVISION_VERSION="539" -D_RTE_ -DSTM32H563xx -D_RTE_ -DUSE_HAL_DRIVER -DSTM32H563xx-o alm_eth/dns.o -MD)
 I (..\Middlewares\Third_Party\LwIP\src\include\lwip\opt.h)(0x69D6197A)
-I (..\Core\Inc\lwipopts.h)(0x69D61994)
+I (..\Core\Inc\lwipopts.h)(0x69D62925)
 I (..\Middlewares\Third_Party\LwIP\src\include\lwip\debug.h)(0x69D6197A)
 I (..\Middlewares\Third_Party\LwIP\src\include\lwip\arch.h)(0x69D6197A)
 I (..\Core\Inc\arch\cc.h)(0x69D61DE3)
@@ -1579,7 +1618,7 @@ I (D:\Keil_v5\ARM\ARMCC_V6.22\include\limits.h)(0x65F0855A)
 I (D:\Keil_v5\ARM\ARMCC_V6.22\include\ctype.h)(0x65F0855A)
 F (../Middlewares/Third_Party/LwIP/src/core/inet_chksum.c)(0x69D6197A)(-xc -std=c99 --target=arm-arm-none-eabi -mcpu=cortex-m33+nodsp -mfpu=fpv5-sp-d16 -mfloat-abi=hard -c-fno-rtti -funsigned-char -fshort-enums -fshort-wchar-gdwarf-4 -O3 -ffunction-sections -Wno-packed -Wno-missing-variable-declarations -Wno-missing-prototypes -Wno-missing-noreturn -Wno-sign-conversion -Wno-nonportable-include-path -Wno-reserved-id-macro -Wno-unused-macros -Wno-documentation-unknown-command -Wno-documentation -Wno-license-management -Wno-parentheses-equality -Wno-reserved-identifier -I ../Core/Inc -I ../Drivers/STM32H5xx_HAL_Driver/Inc -I ../Drivers/STM32H5xx_HAL_Driver/Inc/Legacy -I ../Drivers/CMSIS/Device/ST/STM32H5xx/Include -I ../Drivers/CMSIS/Include -I ../Middlewares/Third_Party/LwIP/src/include -I ../Middlewares/Third_Party/LwIP/src/include/lwip -I ../Middlewares/Third_Party/LwIP/src/include/netif-I./RTE/_ALM_ETH-ID:/Keil_v5/ARM/PACK/ARM/CMSIS/6.0.0/CMSIS/Core/Include-D__UVISION_VERSION="539" -D_RTE_ -DSTM32H563xx -D_RTE_ -DUSE_HAL_DRIVER -DSTM32H563xx-o alm_eth/inet_chksum.o -MD)
 I (..\Middlewares\Third_Party\LwIP\src\include\lwip\opt.h)(0x69D6197A)
-I (..\Core\Inc\lwipopts.h)(0x69D61994)
+I (..\Core\Inc\lwipopts.h)(0x69D62925)
 I (..\Middlewares\Third_Party\LwIP\src\include\lwip\debug.h)(0x69D6197A)
 I (..\Middlewares\Third_Party\LwIP\src\include\lwip\arch.h)(0x69D6197A)
 I (..\Core\Inc\arch\cc.h)(0x69D61DE3)
@@ -1599,7 +1638,7 @@ I (..\Middlewares\Third_Party\LwIP\src\include\lwip\ip6_addr.h)(0x69D6197A)
 I (D:\Keil_v5\ARM\ARMCC_V6.22\include\string.h)(0x65F0855A)
 F (../Middlewares/Third_Party/LwIP/src/core/ip.c)(0x69D6197A)(-xc -std=c99 --target=arm-arm-none-eabi -mcpu=cortex-m33+nodsp -mfpu=fpv5-sp-d16 -mfloat-abi=hard -c-fno-rtti -funsigned-char -fshort-enums -fshort-wchar-gdwarf-4 -O3 -ffunction-sections -Wno-packed -Wno-missing-variable-declarations -Wno-missing-prototypes -Wno-missing-noreturn -Wno-sign-conversion -Wno-nonportable-include-path -Wno-reserved-id-macro -Wno-unused-macros -Wno-documentation-unknown-command -Wno-documentation -Wno-license-management -Wno-parentheses-equality -Wno-reserved-identifier -I ../Core/Inc -I ../Drivers/STM32H5xx_HAL_Driver/Inc -I ../Drivers/STM32H5xx_HAL_Driver/Inc/Legacy -I ../Drivers/CMSIS/Device/ST/STM32H5xx/Include -I ../Drivers/CMSIS/Include -I ../Middlewares/Third_Party/LwIP/src/include -I ../Middlewares/Third_Party/LwIP/src/include/lwip -I ../Middlewares/Third_Party/LwIP/src/include/netif-I./RTE/_ALM_ETH-ID:/Keil_v5/ARM/PACK/ARM/CMSIS/6.0.0/CMSIS/Core/Include-D__UVISION_VERSION="539" -D_RTE_ -DSTM32H563xx -D_RTE_ -DUSE_HAL_DRIVER -DSTM32H563xx-o alm_eth/ip.o -MD)
 I (..\Middlewares\Third_Party\LwIP\src\include\lwip\opt.h)(0x69D6197A)
-I (..\Core\Inc\lwipopts.h)(0x69D61994)
+I (..\Core\Inc\lwipopts.h)(0x69D62925)
 I (..\Middlewares\Third_Party\LwIP\src\include\lwip\debug.h)(0x69D6197A)
 I (..\Middlewares\Third_Party\LwIP\src\include\lwip\arch.h)(0x69D6197A)
 I (..\Core\Inc\arch\cc.h)(0x69D61DE3)
@@ -1629,7 +1668,7 @@ I (..\Middlewares\Third_Party\LwIP\src\include\lwip\ip6.h)(0x69D6197A)
 I (..\Middlewares\Third_Party\LwIP\src\include\lwip\prot\ip.h)(0x69D6197A)
 F (../Middlewares/Third_Party/LwIP/src/core/mem.c)(0x69D6197A)(-xc -std=c99 --target=arm-arm-none-eabi -mcpu=cortex-m33+nodsp -mfpu=fpv5-sp-d16 -mfloat-abi=hard -c-fno-rtti -funsigned-char -fshort-enums -fshort-wchar-gdwarf-4 -O3 -ffunction-sections -Wno-packed -Wno-missing-variable-declarations -Wno-missing-prototypes -Wno-missing-noreturn -Wno-sign-conversion -Wno-nonportable-include-path -Wno-reserved-id-macro -Wno-unused-macros -Wno-documentation-unknown-command -Wno-documentation -Wno-license-management -Wno-parentheses-equality -Wno-reserved-identifier -I ../Core/Inc -I ../Drivers/STM32H5xx_HAL_Driver/Inc -I ../Drivers/STM32H5xx_HAL_Driver/Inc/Legacy -I ../Drivers/CMSIS/Device/ST/STM32H5xx/Include -I ../Drivers/CMSIS/Include -I ../Middlewares/Third_Party/LwIP/src/include -I ../Middlewares/Third_Party/LwIP/src/include/lwip -I ../Middlewares/Third_Party/LwIP/src/include/netif-I./RTE/_ALM_ETH-ID:/Keil_v5/ARM/PACK/ARM/CMSIS/6.0.0/CMSIS/Core/Include-D__UVISION_VERSION="539" -D_RTE_ -DSTM32H563xx -D_RTE_ -DUSE_HAL_DRIVER -DSTM32H563xx-o alm_eth/mem.o -MD)
 I (..\Middlewares\Third_Party\LwIP\src\include\lwip\opt.h)(0x69D6197A)
-I (..\Core\Inc\lwipopts.h)(0x69D61994)
+I (..\Core\Inc\lwipopts.h)(0x69D62925)
 I (..\Middlewares\Third_Party\LwIP\src\include\lwip\debug.h)(0x69D6197A)
 I (..\Middlewares\Third_Party\LwIP\src\include\lwip\arch.h)(0x69D6197A)
 I (..\Core\Inc\arch\cc.h)(0x69D61DE3)
@@ -1651,7 +1690,7 @@ I (..\Middlewares\Third_Party\LwIP\src\include\lwip\err.h)(0x69D6197A)
 I (D:\Keil_v5\ARM\ARMCC_V6.22\include\string.h)(0x65F0855A)
 F (../Middlewares/Third_Party/LwIP/src/core/memp.c)(0x69D6197A)(-xc -std=c99 --target=arm-arm-none-eabi -mcpu=cortex-m33+nodsp -mfpu=fpv5-sp-d16 -mfloat-abi=hard -c-fno-rtti -funsigned-char -fshort-enums -fshort-wchar-gdwarf-4 -O3 -ffunction-sections -Wno-packed -Wno-missing-variable-declarations -Wno-missing-prototypes -Wno-missing-noreturn -Wno-sign-conversion -Wno-nonportable-include-path -Wno-reserved-id-macro -Wno-unused-macros -Wno-documentation-unknown-command -Wno-documentation -Wno-license-management -Wno-parentheses-equality -Wno-reserved-identifier -I ../Core/Inc -I ../Drivers/STM32H5xx_HAL_Driver/Inc -I ../Drivers/STM32H5xx_HAL_Driver/Inc/Legacy -I ../Drivers/CMSIS/Device/ST/STM32H5xx/Include -I ../Drivers/CMSIS/Include -I ../Middlewares/Third_Party/LwIP/src/include -I ../Middlewares/Third_Party/LwIP/src/include/lwip -I ../Middlewares/Third_Party/LwIP/src/include/netif-I./RTE/_ALM_ETH-ID:/Keil_v5/ARM/PACK/ARM/CMSIS/6.0.0/CMSIS/Core/Include-D__UVISION_VERSION="539" -D_RTE_ -DSTM32H563xx -D_RTE_ -DUSE_HAL_DRIVER -DSTM32H563xx-o alm_eth/memp.o -MD)
 I (..\Middlewares\Third_Party\LwIP\src\include\lwip\opt.h)(0x69D6197A)
-I (..\Core\Inc\lwipopts.h)(0x69D61994)
+I (..\Core\Inc\lwipopts.h)(0x69D62925)
 I (..\Middlewares\Third_Party\LwIP\src\include\lwip\debug.h)(0x69D6197A)
 I (..\Middlewares\Third_Party\LwIP\src\include\lwip\arch.h)(0x69D6197A)
 I (..\Core\Inc\arch\cc.h)(0x69D61DE3)
@@ -1711,7 +1750,7 @@ I (..\Middlewares\Third_Party\LwIP\src\include\lwip\ip6_frag.h)(0x69D6197A)
 I (..\Middlewares\Third_Party\LwIP\src\include\lwip\mld6.h)(0x69D6197A)
 F (../Middlewares/Third_Party/LwIP/src/core/netif.c)(0x69D6197A)(-xc -std=c99 --target=arm-arm-none-eabi -mcpu=cortex-m33+nodsp -mfpu=fpv5-sp-d16 -mfloat-abi=hard -c-fno-rtti -funsigned-char -fshort-enums -fshort-wchar-gdwarf-4 -O3 -ffunction-sections -Wno-packed -Wno-missing-variable-declarations -Wno-missing-prototypes -Wno-missing-noreturn -Wno-sign-conversion -Wno-nonportable-include-path -Wno-reserved-id-macro -Wno-unused-macros -Wno-documentation-unknown-command -Wno-documentation -Wno-license-management -Wno-parentheses-equality -Wno-reserved-identifier -I ../Core/Inc -I ../Drivers/STM32H5xx_HAL_Driver/Inc -I ../Drivers/STM32H5xx_HAL_Driver/Inc/Legacy -I ../Drivers/CMSIS/Device/ST/STM32H5xx/Include -I ../Drivers/CMSIS/Include -I ../Middlewares/Third_Party/LwIP/src/include -I ../Middlewares/Third_Party/LwIP/src/include/lwip -I ../Middlewares/Third_Party/LwIP/src/include/netif-I./RTE/_ALM_ETH-ID:/Keil_v5/ARM/PACK/ARM/CMSIS/6.0.0/CMSIS/Core/Include-D__UVISION_VERSION="539" -D_RTE_ -DSTM32H563xx -D_RTE_ -DUSE_HAL_DRIVER -DSTM32H563xx-o alm_eth/netif.o -MD)
 I (..\Middlewares\Third_Party\LwIP\src\include\lwip\opt.h)(0x69D6197A)
-I (..\Core\Inc\lwipopts.h)(0x69D61994)
+I (..\Core\Inc\lwipopts.h)(0x69D62925)
 I (..\Middlewares\Third_Party\LwIP\src\include\lwip\debug.h)(0x69D6197A)
 I (..\Middlewares\Third_Party\LwIP\src\include\lwip\arch.h)(0x69D6197A)
 I (..\Core\Inc\arch\cc.h)(0x69D61DE3)
@@ -1757,10 +1796,11 @@ I (..\Middlewares\Third_Party\LwIP\src\include\lwip\prot\ieee.h)(0x69D6197A)
 I (..\Middlewares\Third_Party\LwIP\src\include\lwip\prot\etharp.h)(0x69D6197A)
 I (..\Middlewares\Third_Party\LwIP\src\include\lwip\sys.h)(0x69D6197A)
 I (..\Middlewares\Third_Party\LwIP\src\include\netif\ethernet.h)(0x69D6197A)
+I (..\Middlewares\Third_Party\LwIP\src\include\lwip\autoip.h)(0x69D6197A)
 I (..\Middlewares\Third_Party\LwIP\src\include\lwip\dhcp.h)(0x69D6197A)
 F (../Middlewares/Third_Party/LwIP/src/core/pbuf.c)(0x69D6197A)(-xc -std=c99 --target=arm-arm-none-eabi -mcpu=cortex-m33+nodsp -mfpu=fpv5-sp-d16 -mfloat-abi=hard -c-fno-rtti -funsigned-char -fshort-enums -fshort-wchar-gdwarf-4 -O3 -ffunction-sections -Wno-packed -Wno-missing-variable-declarations -Wno-missing-prototypes -Wno-missing-noreturn -Wno-sign-conversion -Wno-nonportable-include-path -Wno-reserved-id-macro -Wno-unused-macros -Wno-documentation-unknown-command -Wno-documentation -Wno-license-management -Wno-parentheses-equality -Wno-reserved-identifier -I ../Core/Inc -I ../Drivers/STM32H5xx_HAL_Driver/Inc -I ../Drivers/STM32H5xx_HAL_Driver/Inc/Legacy -I ../Drivers/CMSIS/Device/ST/STM32H5xx/Include -I ../Drivers/CMSIS/Include -I ../Middlewares/Third_Party/LwIP/src/include -I ../Middlewares/Third_Party/LwIP/src/include/lwip -I ../Middlewares/Third_Party/LwIP/src/include/netif-I./RTE/_ALM_ETH-ID:/Keil_v5/ARM/PACK/ARM/CMSIS/6.0.0/CMSIS/Core/Include-D__UVISION_VERSION="539" -D_RTE_ -DSTM32H563xx -D_RTE_ -DUSE_HAL_DRIVER -DSTM32H563xx-o alm_eth/pbuf.o -MD)
 I (..\Middlewares\Third_Party\LwIP\src\include\lwip\opt.h)(0x69D6197A)
-I (..\Core\Inc\lwipopts.h)(0x69D61994)
+I (..\Core\Inc\lwipopts.h)(0x69D62925)
 I (..\Middlewares\Third_Party\LwIP\src\include\lwip\debug.h)(0x69D6197A)
 I (..\Middlewares\Third_Party\LwIP\src\include\lwip\arch.h)(0x69D6197A)
 I (..\Core\Inc\arch\cc.h)(0x69D61DE3)
@@ -1798,7 +1838,7 @@ I (..\Middlewares\Third_Party\LwIP\src\include\lwip\prot\tcp.h)(0x69D6197A)
 I (D:\Keil_v5\ARM\ARMCC_V6.22\include\string.h)(0x65F0855A)
 F (../Middlewares/Third_Party/LwIP/src/core/raw.c)(0x69D6197A)(-xc -std=c99 --target=arm-arm-none-eabi -mcpu=cortex-m33+nodsp -mfpu=fpv5-sp-d16 -mfloat-abi=hard -c-fno-rtti -funsigned-char -fshort-enums -fshort-wchar-gdwarf-4 -O3 -ffunction-sections -Wno-packed -Wno-missing-variable-declarations -Wno-missing-prototypes -Wno-missing-noreturn -Wno-sign-conversion -Wno-nonportable-include-path -Wno-reserved-id-macro -Wno-unused-macros -Wno-documentation-unknown-command -Wno-documentation -Wno-license-management -Wno-parentheses-equality -Wno-reserved-identifier -I ../Core/Inc -I ../Drivers/STM32H5xx_HAL_Driver/Inc -I ../Drivers/STM32H5xx_HAL_Driver/Inc/Legacy -I ../Drivers/CMSIS/Device/ST/STM32H5xx/Include -I ../Drivers/CMSIS/Include -I ../Middlewares/Third_Party/LwIP/src/include -I ../Middlewares/Third_Party/LwIP/src/include/lwip -I ../Middlewares/Third_Party/LwIP/src/include/netif-I./RTE/_ALM_ETH-ID:/Keil_v5/ARM/PACK/ARM/CMSIS/6.0.0/CMSIS/Core/Include-D__UVISION_VERSION="539" -D_RTE_ -DSTM32H563xx -D_RTE_ -DUSE_HAL_DRIVER -DSTM32H563xx-o alm_eth/raw.o -MD)
 I (..\Middlewares\Third_Party\LwIP\src\include\lwip\opt.h)(0x69D6197A)
-I (..\Core\Inc\lwipopts.h)(0x69D61994)
+I (..\Core\Inc\lwipopts.h)(0x69D62925)
 I (..\Middlewares\Third_Party\LwIP\src\include\lwip\debug.h)(0x69D6197A)
 I (..\Middlewares\Third_Party\LwIP\src\include\lwip\arch.h)(0x69D6197A)
 I (..\Core\Inc\arch\cc.h)(0x69D61DE3)
@@ -1810,7 +1850,7 @@ I (D:\Keil_v5\ARM\ARMCC_V6.22\include\limits.h)(0x65F0855A)
 I (D:\Keil_v5\ARM\ARMCC_V6.22\include\ctype.h)(0x65F0855A)
 F (../Middlewares/Third_Party/LwIP/src/core/stats.c)(0x69D6197A)(-xc -std=c99 --target=arm-arm-none-eabi -mcpu=cortex-m33+nodsp -mfpu=fpv5-sp-d16 -mfloat-abi=hard -c-fno-rtti -funsigned-char -fshort-enums -fshort-wchar-gdwarf-4 -O3 -ffunction-sections -Wno-packed -Wno-missing-variable-declarations -Wno-missing-prototypes -Wno-missing-noreturn -Wno-sign-conversion -Wno-nonportable-include-path -Wno-reserved-id-macro -Wno-unused-macros -Wno-documentation-unknown-command -Wno-documentation -Wno-license-management -Wno-parentheses-equality -Wno-reserved-identifier -I ../Core/Inc -I ../Drivers/STM32H5xx_HAL_Driver/Inc -I ../Drivers/STM32H5xx_HAL_Driver/Inc/Legacy -I ../Drivers/CMSIS/Device/ST/STM32H5xx/Include -I ../Drivers/CMSIS/Include -I ../Middlewares/Third_Party/LwIP/src/include -I ../Middlewares/Third_Party/LwIP/src/include/lwip -I ../Middlewares/Third_Party/LwIP/src/include/netif-I./RTE/_ALM_ETH-ID:/Keil_v5/ARM/PACK/ARM/CMSIS/6.0.0/CMSIS/Core/Include-D__UVISION_VERSION="539" -D_RTE_ -DSTM32H563xx -D_RTE_ -DUSE_HAL_DRIVER -DSTM32H563xx-o alm_eth/stats.o -MD)
 I (..\Middlewares\Third_Party\LwIP\src\include\lwip\opt.h)(0x69D6197A)
-I (..\Core\Inc\lwipopts.h)(0x69D61994)
+I (..\Core\Inc\lwipopts.h)(0x69D62925)
 I (..\Middlewares\Third_Party\LwIP\src\include\lwip\debug.h)(0x69D6197A)
 I (..\Middlewares\Third_Party\LwIP\src\include\lwip\arch.h)(0x69D6197A)
 I (..\Core\Inc\arch\cc.h)(0x69D61DE3)
@@ -1822,7 +1862,7 @@ I (D:\Keil_v5\ARM\ARMCC_V6.22\include\limits.h)(0x65F0855A)
 I (D:\Keil_v5\ARM\ARMCC_V6.22\include\ctype.h)(0x65F0855A)
 F (../Middlewares/Third_Party/LwIP/src/core/sys.c)(0x69D6197A)(-xc -std=c99 --target=arm-arm-none-eabi -mcpu=cortex-m33+nodsp -mfpu=fpv5-sp-d16 -mfloat-abi=hard -c-fno-rtti -funsigned-char -fshort-enums -fshort-wchar-gdwarf-4 -O3 -ffunction-sections -Wno-packed -Wno-missing-variable-declarations -Wno-missing-prototypes -Wno-missing-noreturn -Wno-sign-conversion -Wno-nonportable-include-path -Wno-reserved-id-macro -Wno-unused-macros -Wno-documentation-unknown-command -Wno-documentation -Wno-license-management -Wno-parentheses-equality -Wno-reserved-identifier -I ../Core/Inc -I ../Drivers/STM32H5xx_HAL_Driver/Inc -I ../Drivers/STM32H5xx_HAL_Driver/Inc/Legacy -I ../Drivers/CMSIS/Device/ST/STM32H5xx/Include -I ../Drivers/CMSIS/Include -I ../Middlewares/Third_Party/LwIP/src/include -I ../Middlewares/Third_Party/LwIP/src/include/lwip -I ../Middlewares/Third_Party/LwIP/src/include/netif-I./RTE/_ALM_ETH-ID:/Keil_v5/ARM/PACK/ARM/CMSIS/6.0.0/CMSIS/Core/Include-D__UVISION_VERSION="539" -D_RTE_ -DSTM32H563xx -D_RTE_ -DUSE_HAL_DRIVER -DSTM32H563xx-o alm_eth/sys.o -MD)
 I (..\Middlewares\Third_Party\LwIP\src\include\lwip\opt.h)(0x69D6197A)
-I (..\Core\Inc\lwipopts.h)(0x69D61994)
+I (..\Core\Inc\lwipopts.h)(0x69D62925)
 I (..\Middlewares\Third_Party\LwIP\src\include\lwip\debug.h)(0x69D6197A)
 I (..\Middlewares\Third_Party\LwIP\src\include\lwip\arch.h)(0x69D6197A)
 I (..\Core\Inc\arch\cc.h)(0x69D61DE3)
@@ -1835,7 +1875,7 @@ I (D:\Keil_v5\ARM\ARMCC_V6.22\include\ctype.h)(0x65F0855A)
 I (..\Middlewares\Third_Party\LwIP\src\include\lwip\sys.h)(0x69D6197A)
 F (../Middlewares/Third_Party/LwIP/src/core/tcp.c)(0x69D6197A)(-xc -std=c99 --target=arm-arm-none-eabi -mcpu=cortex-m33+nodsp -mfpu=fpv5-sp-d16 -mfloat-abi=hard -c-fno-rtti -funsigned-char -fshort-enums -fshort-wchar-gdwarf-4 -O3 -ffunction-sections -Wno-packed -Wno-missing-variable-declarations -Wno-missing-prototypes -Wno-missing-noreturn -Wno-sign-conversion -Wno-nonportable-include-path -Wno-reserved-id-macro -Wno-unused-macros -Wno-documentation-unknown-command -Wno-documentation -Wno-license-management -Wno-parentheses-equality -Wno-reserved-identifier -I ../Core/Inc -I ../Drivers/STM32H5xx_HAL_Driver/Inc -I ../Drivers/STM32H5xx_HAL_Driver/Inc/Legacy -I ../Drivers/CMSIS/Device/ST/STM32H5xx/Include -I ../Drivers/CMSIS/Include -I ../Middlewares/Third_Party/LwIP/src/include -I ../Middlewares/Third_Party/LwIP/src/include/lwip -I ../Middlewares/Third_Party/LwIP/src/include/netif-I./RTE/_ALM_ETH-ID:/Keil_v5/ARM/PACK/ARM/CMSIS/6.0.0/CMSIS/Core/Include-D__UVISION_VERSION="539" -D_RTE_ -DSTM32H563xx -D_RTE_ -DUSE_HAL_DRIVER -DSTM32H563xx-o alm_eth/tcp.o -MD)
 I (..\Middlewares\Third_Party\LwIP\src\include\lwip\opt.h)(0x69D6197A)
-I (..\Core\Inc\lwipopts.h)(0x69D61994)
+I (..\Core\Inc\lwipopts.h)(0x69D62925)
 I (..\Middlewares\Third_Party\LwIP\src\include\lwip\debug.h)(0x69D6197A)
 I (..\Middlewares\Third_Party\LwIP\src\include\lwip\arch.h)(0x69D6197A)
 I (..\Core\Inc\arch\cc.h)(0x69D61DE3)
@@ -1873,7 +1913,7 @@ I (..\Middlewares\Third_Party\LwIP\src\include\lwip\nd6.h)(0x69D6197A)
 I (D:\Keil_v5\ARM\ARMCC_V6.22\include\string.h)(0x65F0855A)
 F (../Middlewares/Third_Party/LwIP/src/core/tcp_in.c)(0x69D6197A)(-xc -std=c99 --target=arm-arm-none-eabi -mcpu=cortex-m33+nodsp -mfpu=fpv5-sp-d16 -mfloat-abi=hard -c-fno-rtti -funsigned-char -fshort-enums -fshort-wchar-gdwarf-4 -O3 -ffunction-sections -Wno-packed -Wno-missing-variable-declarations -Wno-missing-prototypes -Wno-missing-noreturn -Wno-sign-conversion -Wno-nonportable-include-path -Wno-reserved-id-macro -Wno-unused-macros -Wno-documentation-unknown-command -Wno-documentation -Wno-license-management -Wno-parentheses-equality -Wno-reserved-identifier -I ../Core/Inc -I ../Drivers/STM32H5xx_HAL_Driver/Inc -I ../Drivers/STM32H5xx_HAL_Driver/Inc/Legacy -I ../Drivers/CMSIS/Device/ST/STM32H5xx/Include -I ../Drivers/CMSIS/Include -I ../Middlewares/Third_Party/LwIP/src/include -I ../Middlewares/Third_Party/LwIP/src/include/lwip -I ../Middlewares/Third_Party/LwIP/src/include/netif-I./RTE/_ALM_ETH-ID:/Keil_v5/ARM/PACK/ARM/CMSIS/6.0.0/CMSIS/Core/Include-D__UVISION_VERSION="539" -D_RTE_ -DSTM32H563xx -D_RTE_ -DUSE_HAL_DRIVER -DSTM32H563xx-o alm_eth/tcp_in.o -MD)
 I (..\Middlewares\Third_Party\LwIP\src\include\lwip\opt.h)(0x69D6197A)
-I (..\Core\Inc\lwipopts.h)(0x69D61994)
+I (..\Core\Inc\lwipopts.h)(0x69D62925)
 I (..\Middlewares\Third_Party\LwIP\src\include\lwip\debug.h)(0x69D6197A)
 I (..\Middlewares\Third_Party\LwIP\src\include\lwip\arch.h)(0x69D6197A)
 I (..\Core\Inc\arch\cc.h)(0x69D61DE3)
@@ -1912,7 +1952,7 @@ I (..\Middlewares\Third_Party\LwIP\src\include\lwip\nd6.h)(0x69D6197A)
 I (D:\Keil_v5\ARM\ARMCC_V6.22\include\string.h)(0x65F0855A)
 F (../Middlewares/Third_Party/LwIP/src/core/tcp_out.c)(0x69D6197A)(-xc -std=c99 --target=arm-arm-none-eabi -mcpu=cortex-m33+nodsp -mfpu=fpv5-sp-d16 -mfloat-abi=hard -c-fno-rtti -funsigned-char -fshort-enums -fshort-wchar-gdwarf-4 -O3 -ffunction-sections -Wno-packed -Wno-missing-variable-declarations -Wno-missing-prototypes -Wno-missing-noreturn -Wno-sign-conversion -Wno-nonportable-include-path -Wno-reserved-id-macro -Wno-unused-macros -Wno-documentation-unknown-command -Wno-documentation -Wno-license-management -Wno-parentheses-equality -Wno-reserved-identifier -I ../Core/Inc -I ../Drivers/STM32H5xx_HAL_Driver/Inc -I ../Drivers/STM32H5xx_HAL_Driver/Inc/Legacy -I ../Drivers/CMSIS/Device/ST/STM32H5xx/Include -I ../Drivers/CMSIS/Include -I ../Middlewares/Third_Party/LwIP/src/include -I ../Middlewares/Third_Party/LwIP/src/include/lwip -I ../Middlewares/Third_Party/LwIP/src/include/netif-I./RTE/_ALM_ETH-ID:/Keil_v5/ARM/PACK/ARM/CMSIS/6.0.0/CMSIS/Core/Include-D__UVISION_VERSION="539" -D_RTE_ -DSTM32H563xx -D_RTE_ -DUSE_HAL_DRIVER -DSTM32H563xx-o alm_eth/tcp_out.o -MD)
 I (..\Middlewares\Third_Party\LwIP\src\include\lwip\opt.h)(0x69D6197A)
-I (..\Core\Inc\lwipopts.h)(0x69D61994)
+I (..\Core\Inc\lwipopts.h)(0x69D62925)
 I (..\Middlewares\Third_Party\LwIP\src\include\lwip\debug.h)(0x69D6197A)
 I (..\Middlewares\Third_Party\LwIP\src\include\lwip\arch.h)(0x69D6197A)
 I (..\Core\Inc\arch\cc.h)(0x69D61DE3)
@@ -1950,7 +1990,7 @@ I (..\Middlewares\Third_Party\LwIP\src\include\lwip\inet_chksum.h)(0x69D6197A)
 I (D:\Keil_v5\ARM\ARMCC_V6.22\include\string.h)(0x65F0855A)
 F (../Middlewares/Third_Party/LwIP/src/core/timeouts.c)(0x69D6197A)(-xc -std=c99 --target=arm-arm-none-eabi -mcpu=cortex-m33+nodsp -mfpu=fpv5-sp-d16 -mfloat-abi=hard -c-fno-rtti -funsigned-char -fshort-enums -fshort-wchar-gdwarf-4 -O3 -ffunction-sections -Wno-packed -Wno-missing-variable-declarations -Wno-missing-prototypes -Wno-missing-noreturn -Wno-sign-conversion -Wno-nonportable-include-path -Wno-reserved-id-macro -Wno-unused-macros -Wno-documentation-unknown-command -Wno-documentation -Wno-license-management -Wno-parentheses-equality -Wno-reserved-identifier -I ../Core/Inc -I ../Drivers/STM32H5xx_HAL_Driver/Inc -I ../Drivers/STM32H5xx_HAL_Driver/Inc/Legacy -I ../Drivers/CMSIS/Device/ST/STM32H5xx/Include -I ../Drivers/CMSIS/Include -I ../Middlewares/Third_Party/LwIP/src/include -I ../Middlewares/Third_Party/LwIP/src/include/lwip -I ../Middlewares/Third_Party/LwIP/src/include/netif-I./RTE/_ALM_ETH-ID:/Keil_v5/ARM/PACK/ARM/CMSIS/6.0.0/CMSIS/Core/Include-D__UVISION_VERSION="539" -D_RTE_ -DSTM32H563xx -D_RTE_ -DUSE_HAL_DRIVER -DSTM32H563xx-o alm_eth/timeouts.o -MD)
 I (..\Middlewares\Third_Party\LwIP\src\include\lwip\opt.h)(0x69D6197A)
-I (..\Core\Inc\lwipopts.h)(0x69D61994)
+I (..\Core\Inc\lwipopts.h)(0x69D62925)
 I (..\Middlewares\Third_Party\LwIP\src\include\lwip\debug.h)(0x69D6197A)
 I (..\Middlewares\Third_Party\LwIP\src\include\lwip\arch.h)(0x69D6197A)
 I (..\Core\Inc\arch\cc.h)(0x69D61DE3)
@@ -2004,7 +2044,7 @@ I (..\Middlewares\Third_Party\LwIP\src\include\lwip\dhcp6.h)(0x69D6197A)
 I (..\Middlewares\Third_Party\LwIP\src\include\lwip\sys.h)(0x69D6197A)
 F (../Middlewares/Third_Party/LwIP/src/core/udp.c)(0x69D6197A)(-xc -std=c99 --target=arm-arm-none-eabi -mcpu=cortex-m33+nodsp -mfpu=fpv5-sp-d16 -mfloat-abi=hard -c-fno-rtti -funsigned-char -fshort-enums -fshort-wchar-gdwarf-4 -O3 -ffunction-sections -Wno-packed -Wno-missing-variable-declarations -Wno-missing-prototypes -Wno-missing-noreturn -Wno-sign-conversion -Wno-nonportable-include-path -Wno-reserved-id-macro -Wno-unused-macros -Wno-documentation-unknown-command -Wno-documentation -Wno-license-management -Wno-parentheses-equality -Wno-reserved-identifier -I ../Core/Inc -I ../Drivers/STM32H5xx_HAL_Driver/Inc -I ../Drivers/STM32H5xx_HAL_Driver/Inc/Legacy -I ../Drivers/CMSIS/Device/ST/STM32H5xx/Include -I ../Drivers/CMSIS/Include -I ../Middlewares/Third_Party/LwIP/src/include -I ../Middlewares/Third_Party/LwIP/src/include/lwip -I ../Middlewares/Third_Party/LwIP/src/include/netif-I./RTE/_ALM_ETH-ID:/Keil_v5/ARM/PACK/ARM/CMSIS/6.0.0/CMSIS/Core/Include-D__UVISION_VERSION="539" -D_RTE_ -DSTM32H563xx -D_RTE_ -DUSE_HAL_DRIVER -DSTM32H563xx-o alm_eth/udp.o -MD)
 I (..\Middlewares\Third_Party\LwIP\src\include\lwip\opt.h)(0x69D6197A)
-I (..\Core\Inc\lwipopts.h)(0x69D61994)
+I (..\Core\Inc\lwipopts.h)(0x69D62925)
 I (..\Middlewares\Third_Party\LwIP\src\include\lwip\debug.h)(0x69D6197A)
 I (..\Middlewares\Third_Party\LwIP\src\include\lwip\arch.h)(0x69D6197A)
 I (..\Core\Inc\arch\cc.h)(0x69D61DE3)
@@ -2044,7 +2084,7 @@ I (..\Middlewares\Third_Party\LwIP\src\include\lwip\dhcp.h)(0x69D6197A)
 I (D:\Keil_v5\ARM\ARMCC_V6.22\include\string.h)(0x65F0855A)
 F (../Middlewares/Third_Party/LwIP/src/core/altcp.c)(0x69D6197A)(-xc -std=c99 --target=arm-arm-none-eabi -mcpu=cortex-m33+nodsp -mfpu=fpv5-sp-d16 -mfloat-abi=hard -c-fno-rtti -funsigned-char -fshort-enums -fshort-wchar-gdwarf-4 -O3 -ffunction-sections -Wno-packed -Wno-missing-variable-declarations -Wno-missing-prototypes -Wno-missing-noreturn -Wno-sign-conversion -Wno-nonportable-include-path -Wno-reserved-id-macro -Wno-unused-macros -Wno-documentation-unknown-command -Wno-documentation -Wno-license-management -Wno-parentheses-equality -Wno-reserved-identifier -I ../Core/Inc -I ../Drivers/STM32H5xx_HAL_Driver/Inc -I ../Drivers/STM32H5xx_HAL_Driver/Inc/Legacy -I ../Drivers/CMSIS/Device/ST/STM32H5xx/Include -I ../Drivers/CMSIS/Include -I ../Middlewares/Third_Party/LwIP/src/include -I ../Middlewares/Third_Party/LwIP/src/include/lwip -I ../Middlewares/Third_Party/LwIP/src/include/netif-I./RTE/_ALM_ETH-ID:/Keil_v5/ARM/PACK/ARM/CMSIS/6.0.0/CMSIS/Core/Include-D__UVISION_VERSION="539" -D_RTE_ -DSTM32H563xx -D_RTE_ -DUSE_HAL_DRIVER -DSTM32H563xx-o alm_eth/altcp.o -MD)
 I (..\Middlewares\Third_Party\LwIP\src\include\lwip\opt.h)(0x69D6197A)
-I (..\Core\Inc\lwipopts.h)(0x69D61994)
+I (..\Core\Inc\lwipopts.h)(0x69D62925)
 I (..\Middlewares\Third_Party\LwIP\src\include\lwip\debug.h)(0x69D6197A)
 I (..\Middlewares\Third_Party\LwIP\src\include\lwip\arch.h)(0x69D6197A)
 I (..\Core\Inc\arch\cc.h)(0x69D61DE3)
@@ -2056,7 +2096,7 @@ I (D:\Keil_v5\ARM\ARMCC_V6.22\include\limits.h)(0x65F0855A)
 I (D:\Keil_v5\ARM\ARMCC_V6.22\include\ctype.h)(0x65F0855A)
 F (../Middlewares/Third_Party/LwIP/src/core/altcp_alloc.c)(0x69D6197A)(-xc -std=c99 --target=arm-arm-none-eabi -mcpu=cortex-m33+nodsp -mfpu=fpv5-sp-d16 -mfloat-abi=hard -c-fno-rtti -funsigned-char -fshort-enums -fshort-wchar-gdwarf-4 -O3 -ffunction-sections -Wno-packed -Wno-missing-variable-declarations -Wno-missing-prototypes -Wno-missing-noreturn -Wno-sign-conversion -Wno-nonportable-include-path -Wno-reserved-id-macro -Wno-unused-macros -Wno-documentation-unknown-command -Wno-documentation -Wno-license-management -Wno-parentheses-equality -Wno-reserved-identifier -I ../Core/Inc -I ../Drivers/STM32H5xx_HAL_Driver/Inc -I ../Drivers/STM32H5xx_HAL_Driver/Inc/Legacy -I ../Drivers/CMSIS/Device/ST/STM32H5xx/Include -I ../Drivers/CMSIS/Include -I ../Middlewares/Third_Party/LwIP/src/include -I ../Middlewares/Third_Party/LwIP/src/include/lwip -I ../Middlewares/Third_Party/LwIP/src/include/netif-I./RTE/_ALM_ETH-ID:/Keil_v5/ARM/PACK/ARM/CMSIS/6.0.0/CMSIS/Core/Include-D__UVISION_VERSION="539" -D_RTE_ -DSTM32H563xx -D_RTE_ -DUSE_HAL_DRIVER -DSTM32H563xx-o alm_eth/altcp_alloc.o -MD)
 I (..\Middlewares\Third_Party\LwIP\src\include\lwip\opt.h)(0x69D6197A)
-I (..\Core\Inc\lwipopts.h)(0x69D61994)
+I (..\Core\Inc\lwipopts.h)(0x69D62925)
 I (..\Middlewares\Third_Party\LwIP\src\include\lwip\debug.h)(0x69D6197A)
 I (..\Middlewares\Third_Party\LwIP\src\include\lwip\arch.h)(0x69D6197A)
 I (..\Core\Inc\arch\cc.h)(0x69D61DE3)
@@ -2068,7 +2108,7 @@ I (D:\Keil_v5\ARM\ARMCC_V6.22\include\limits.h)(0x65F0855A)
 I (D:\Keil_v5\ARM\ARMCC_V6.22\include\ctype.h)(0x65F0855A)
 F (../Middlewares/Third_Party/LwIP/src/core/altcp_tcp.c)(0x69D6197A)(-xc -std=c99 --target=arm-arm-none-eabi -mcpu=cortex-m33+nodsp -mfpu=fpv5-sp-d16 -mfloat-abi=hard -c-fno-rtti -funsigned-char -fshort-enums -fshort-wchar-gdwarf-4 -O3 -ffunction-sections -Wno-packed -Wno-missing-variable-declarations -Wno-missing-prototypes -Wno-missing-noreturn -Wno-sign-conversion -Wno-nonportable-include-path -Wno-reserved-id-macro -Wno-unused-macros -Wno-documentation-unknown-command -Wno-documentation -Wno-license-management -Wno-parentheses-equality -Wno-reserved-identifier -I ../Core/Inc -I ../Drivers/STM32H5xx_HAL_Driver/Inc -I ../Drivers/STM32H5xx_HAL_Driver/Inc/Legacy -I ../Drivers/CMSIS/Device/ST/STM32H5xx/Include -I ../Drivers/CMSIS/Include -I ../Middlewares/Third_Party/LwIP/src/include -I ../Middlewares/Third_Party/LwIP/src/include/lwip -I ../Middlewares/Third_Party/LwIP/src/include/netif-I./RTE/_ALM_ETH-ID:/Keil_v5/ARM/PACK/ARM/CMSIS/6.0.0/CMSIS/Core/Include-D__UVISION_VERSION="539" -D_RTE_ -DSTM32H563xx -D_RTE_ -DUSE_HAL_DRIVER -DSTM32H563xx-o alm_eth/altcp_tcp.o -MD)
 I (..\Middlewares\Third_Party\LwIP\src\include\lwip\opt.h)(0x69D6197A)
-I (..\Core\Inc\lwipopts.h)(0x69D61994)
+I (..\Core\Inc\lwipopts.h)(0x69D62925)
 I (..\Middlewares\Third_Party\LwIP\src\include\lwip\debug.h)(0x69D6197A)
 I (..\Middlewares\Third_Party\LwIP\src\include\lwip\arch.h)(0x69D6197A)
 I (..\Core\Inc\arch\cc.h)(0x69D61DE3)
@@ -2080,7 +2120,7 @@ I (D:\Keil_v5\ARM\ARMCC_V6.22\include\limits.h)(0x65F0855A)
 I (D:\Keil_v5\ARM\ARMCC_V6.22\include\ctype.h)(0x65F0855A)
 F (../Middlewares/Third_Party/LwIP/src/core/ipv4/autoip.c)(0x69D6197A)(-xc -std=c99 --target=arm-arm-none-eabi -mcpu=cortex-m33+nodsp -mfpu=fpv5-sp-d16 -mfloat-abi=hard -c-fno-rtti -funsigned-char -fshort-enums -fshort-wchar-gdwarf-4 -O3 -ffunction-sections -Wno-packed -Wno-missing-variable-declarations -Wno-missing-prototypes -Wno-missing-noreturn -Wno-sign-conversion -Wno-nonportable-include-path -Wno-reserved-id-macro -Wno-unused-macros -Wno-documentation-unknown-command -Wno-documentation -Wno-license-management -Wno-parentheses-equality -Wno-reserved-identifier -I ../Core/Inc -I ../Drivers/STM32H5xx_HAL_Driver/Inc -I ../Drivers/STM32H5xx_HAL_Driver/Inc/Legacy -I ../Drivers/CMSIS/Device/ST/STM32H5xx/Include -I ../Drivers/CMSIS/Include -I ../Middlewares/Third_Party/LwIP/src/include -I ../Middlewares/Third_Party/LwIP/src/include/lwip -I ../Middlewares/Third_Party/LwIP/src/include/netif-I./RTE/_ALM_ETH-ID:/Keil_v5/ARM/PACK/ARM/CMSIS/6.0.0/CMSIS/Core/Include-D__UVISION_VERSION="539" -D_RTE_ -DSTM32H563xx -D_RTE_ -DUSE_HAL_DRIVER -DSTM32H563xx-o alm_eth/autoip.o -MD)
 I (..\Middlewares\Third_Party\LwIP\src\include\lwip\opt.h)(0x69D6197A)
-I (..\Core\Inc\lwipopts.h)(0x69D61994)
+I (..\Core\Inc\lwipopts.h)(0x69D62925)
 I (..\Middlewares\Third_Party\LwIP\src\include\lwip\debug.h)(0x69D6197A)
 I (..\Middlewares\Third_Party\LwIP\src\include\lwip\arch.h)(0x69D6197A)
 I (..\Core\Inc\arch\cc.h)(0x69D61DE3)
@@ -2090,9 +2130,31 @@ I (D:\Keil_v5\ARM\ARMCC_V6.22\include\stdint.h)(0x65F0855A)
 I (D:\Keil_v5\ARM\ARMCC_V6.22\include\inttypes.h)(0x65F0855A)
 I (D:\Keil_v5\ARM\ARMCC_V6.22\include\limits.h)(0x65F0855A)
 I (D:\Keil_v5\ARM\ARMCC_V6.22\include\ctype.h)(0x65F0855A)
+I (..\Middlewares\Third_Party\LwIP\src\include\lwip\mem.h)(0x69D6197A)
+I (..\Middlewares\Third_Party\LwIP\src\include\lwip\ip_addr.h)(0x69D6197A)
+I (..\Middlewares\Third_Party\LwIP\src\include\lwip\def.h)(0x69D6197A)
+I (..\Middlewares\Third_Party\LwIP\src\include\lwip\ip4_addr.h)(0x69D6197A)
+I (..\Middlewares\Third_Party\LwIP\src\include\lwip\ip6_addr.h)(0x69D6197A)
+I (..\Middlewares\Third_Party\LwIP\src\include\lwip\netif.h)(0x69D6197A)
+I (..\Middlewares\Third_Party\LwIP\src\include\lwip\err.h)(0x69D6197A)
+I (..\Middlewares\Third_Party\LwIP\src\include\lwip\pbuf.h)(0x69D6197A)
+I (..\Middlewares\Third_Party\LwIP\src\include\lwip\stats.h)(0x69D6197A)
+I (..\Middlewares\Third_Party\LwIP\src\include\lwip\memp.h)(0x69D6197A)
+I (..\Middlewares\Third_Party\LwIP\src\include\lwip\priv\memp_std.h)(0x69D6197A)
+I (..\Middlewares\Third_Party\LwIP\src\include\lwip\priv\memp_priv.h)(0x69D6197A)
+I (..\Middlewares\Third_Party\LwIP\src\include\lwip\priv\mem_priv.h)(0x69D6197A)
+I (..\Middlewares\Third_Party\LwIP\src\include\lwip\autoip.h)(0x69D6197A)
+I (..\Middlewares\Third_Party\LwIP\src\include\lwip\etharp.h)(0x69D6197A)
+I (..\Middlewares\Third_Party\LwIP\src\include\lwip\ip4.h)(0x69D6197A)
+I (..\Middlewares\Third_Party\LwIP\src\include\lwip\prot\ip4.h)(0x69D6197A)
+I (..\Middlewares\Third_Party\LwIP\src\include\lwip\prot\ethernet.h)(0x69D6197A)
+I (..\Middlewares\Third_Party\LwIP\src\include\lwip\prot\ieee.h)(0x69D6197A)
+I (..\Middlewares\Third_Party\LwIP\src\include\lwip\prot\etharp.h)(0x69D6197A)
+I (..\Middlewares\Third_Party\LwIP\src\include\lwip\prot\autoip.h)(0x69D6197A)
+I (D:\Keil_v5\ARM\ARMCC_V6.22\include\string.h)(0x65F0855A)
 F (../Middlewares/Third_Party/LwIP/src/core/ipv4/dhcp.c)(0x69D6197A)(-xc -std=c99 --target=arm-arm-none-eabi -mcpu=cortex-m33+nodsp -mfpu=fpv5-sp-d16 -mfloat-abi=hard -c-fno-rtti -funsigned-char -fshort-enums -fshort-wchar-gdwarf-4 -O3 -ffunction-sections -Wno-packed -Wno-missing-variable-declarations -Wno-missing-prototypes -Wno-missing-noreturn -Wno-sign-conversion -Wno-nonportable-include-path -Wno-reserved-id-macro -Wno-unused-macros -Wno-documentation-unknown-command -Wno-documentation -Wno-license-management -Wno-parentheses-equality -Wno-reserved-identifier -I ../Core/Inc -I ../Drivers/STM32H5xx_HAL_Driver/Inc -I ../Drivers/STM32H5xx_HAL_Driver/Inc/Legacy -I ../Drivers/CMSIS/Device/ST/STM32H5xx/Include -I ../Drivers/CMSIS/Include -I ../Middlewares/Third_Party/LwIP/src/include -I ../Middlewares/Third_Party/LwIP/src/include/lwip -I ../Middlewares/Third_Party/LwIP/src/include/netif-I./RTE/_ALM_ETH-ID:/Keil_v5/ARM/PACK/ARM/CMSIS/6.0.0/CMSIS/Core/Include-D__UVISION_VERSION="539" -D_RTE_ -DSTM32H563xx -D_RTE_ -DUSE_HAL_DRIVER -DSTM32H563xx-o alm_eth/dhcp.o -MD)
 I (..\Middlewares\Third_Party\LwIP\src\include\lwip\opt.h)(0x69D6197A)
-I (..\Core\Inc\lwipopts.h)(0x69D61994)
+I (..\Core\Inc\lwipopts.h)(0x69D62925)
 I (..\Middlewares\Third_Party\LwIP\src\include\lwip\debug.h)(0x69D6197A)
 I (..\Middlewares\Third_Party\LwIP\src\include\lwip\arch.h)(0x69D6197A)
 I (..\Core\Inc\arch\cc.h)(0x69D61DE3)
@@ -2124,17 +2186,17 @@ I (..\Middlewares\Third_Party\LwIP\src\include\lwip\prot\ip.h)(0x69D6197A)
 I (..\Middlewares\Third_Party\LwIP\src\include\lwip\prot\udp.h)(0x69D6197A)
 I (..\Middlewares\Third_Party\LwIP\src\include\lwip\dhcp.h)(0x69D6197A)
 I (..\Middlewares\Third_Party\LwIP\src\include\lwip\autoip.h)(0x69D6197A)
-I (..\Middlewares\Third_Party\LwIP\src\include\lwip\dns.h)(0x69D6197A)
 I (..\Middlewares\Third_Party\LwIP\src\include\lwip\etharp.h)(0x69D6197A)
 I (..\Middlewares\Third_Party\LwIP\src\include\lwip\prot\ethernet.h)(0x69D6197A)
 I (..\Middlewares\Third_Party\LwIP\src\include\lwip\prot\ieee.h)(0x69D6197A)
 I (..\Middlewares\Third_Party\LwIP\src\include\lwip\prot\etharp.h)(0x69D6197A)
+I (..\Middlewares\Third_Party\LwIP\src\include\lwip\dns.h)(0x69D6197A)
 I (..\Middlewares\Third_Party\LwIP\src\include\lwip\prot\dhcp.h)(0x69D6197A)
 I (..\Middlewares\Third_Party\LwIP\src\include\lwip\prot\iana.h)(0x69D6197A)
 I (D:\Keil_v5\ARM\ARMCC_V6.22\include\string.h)(0x65F0855A)
 F (../Middlewares/Third_Party/LwIP/src/core/ipv4/etharp.c)(0x69D6197A)(-xc -std=c99 --target=arm-arm-none-eabi -mcpu=cortex-m33+nodsp -mfpu=fpv5-sp-d16 -mfloat-abi=hard -c-fno-rtti -funsigned-char -fshort-enums -fshort-wchar-gdwarf-4 -O3 -ffunction-sections -Wno-packed -Wno-missing-variable-declarations -Wno-missing-prototypes -Wno-missing-noreturn -Wno-sign-conversion -Wno-nonportable-include-path -Wno-reserved-id-macro -Wno-unused-macros -Wno-documentation-unknown-command -Wno-documentation -Wno-license-management -Wno-parentheses-equality -Wno-reserved-identifier -I ../Core/Inc -I ../Drivers/STM32H5xx_HAL_Driver/Inc -I ../Drivers/STM32H5xx_HAL_Driver/Inc/Legacy -I ../Drivers/CMSIS/Device/ST/STM32H5xx/Include -I ../Drivers/CMSIS/Include -I ../Middlewares/Third_Party/LwIP/src/include -I ../Middlewares/Third_Party/LwIP/src/include/lwip -I ../Middlewares/Third_Party/LwIP/src/include/netif-I./RTE/_ALM_ETH-ID:/Keil_v5/ARM/PACK/ARM/CMSIS/6.0.0/CMSIS/Core/Include-D__UVISION_VERSION="539" -D_RTE_ -DSTM32H563xx -D_RTE_ -DUSE_HAL_DRIVER -DSTM32H563xx-o alm_eth/etharp.o -MD)
 I (..\Middlewares\Third_Party\LwIP\src\include\lwip\opt.h)(0x69D6197A)
-I (..\Core\Inc\lwipopts.h)(0x69D61994)
+I (..\Core\Inc\lwipopts.h)(0x69D62925)
 I (..\Middlewares\Third_Party\LwIP\src\include\lwip\debug.h)(0x69D6197A)
 I (..\Middlewares\Third_Party\LwIP\src\include\lwip\arch.h)(0x69D6197A)
 I (..\Core\Inc\arch\cc.h)(0x69D61DE3)
@@ -2176,7 +2238,7 @@ I (..\Middlewares\Third_Party\LwIP\src\include\netif\ethernet.h)(0x69D6197A)
 I (D:\Keil_v5\ARM\ARMCC_V6.22\include\string.h)(0x65F0855A)
 F (../Middlewares/Third_Party/LwIP/src/core/ipv4/icmp.c)(0x69D6197A)(-xc -std=c99 --target=arm-arm-none-eabi -mcpu=cortex-m33+nodsp -mfpu=fpv5-sp-d16 -mfloat-abi=hard -c-fno-rtti -funsigned-char -fshort-enums -fshort-wchar-gdwarf-4 -O3 -ffunction-sections -Wno-packed -Wno-missing-variable-declarations -Wno-missing-prototypes -Wno-missing-noreturn -Wno-sign-conversion -Wno-nonportable-include-path -Wno-reserved-id-macro -Wno-unused-macros -Wno-documentation-unknown-command -Wno-documentation -Wno-license-management -Wno-parentheses-equality -Wno-reserved-identifier -I ../Core/Inc -I ../Drivers/STM32H5xx_HAL_Driver/Inc -I ../Drivers/STM32H5xx_HAL_Driver/Inc/Legacy -I ../Drivers/CMSIS/Device/ST/STM32H5xx/Include -I ../Drivers/CMSIS/Include -I ../Middlewares/Third_Party/LwIP/src/include -I ../Middlewares/Third_Party/LwIP/src/include/lwip -I ../Middlewares/Third_Party/LwIP/src/include/netif-I./RTE/_ALM_ETH-ID:/Keil_v5/ARM/PACK/ARM/CMSIS/6.0.0/CMSIS/Core/Include-D__UVISION_VERSION="539" -D_RTE_ -DSTM32H563xx -D_RTE_ -DUSE_HAL_DRIVER -DSTM32H563xx-o alm_eth/icmp.o -MD)
 I (..\Middlewares\Third_Party\LwIP\src\include\lwip\opt.h)(0x69D6197A)
-I (..\Core\Inc\lwipopts.h)(0x69D61994)
+I (..\Core\Inc\lwipopts.h)(0x69D62925)
 I (..\Middlewares\Third_Party\LwIP\src\include\lwip\debug.h)(0x69D6197A)
 I (..\Middlewares\Third_Party\LwIP\src\include\lwip\arch.h)(0x69D6197A)
 I (..\Core\Inc\arch\cc.h)(0x69D61DE3)
@@ -2210,7 +2272,7 @@ I (..\Middlewares\Third_Party\LwIP\src\include\lwip\prot\ip.h)(0x69D6197A)
 I (D:\Keil_v5\ARM\ARMCC_V6.22\include\string.h)(0x65F0855A)
 F (../Middlewares/Third_Party/LwIP/src/core/ipv4/igmp.c)(0x69D6197A)(-xc -std=c99 --target=arm-arm-none-eabi -mcpu=cortex-m33+nodsp -mfpu=fpv5-sp-d16 -mfloat-abi=hard -c-fno-rtti -funsigned-char -fshort-enums -fshort-wchar-gdwarf-4 -O3 -ffunction-sections -Wno-packed -Wno-missing-variable-declarations -Wno-missing-prototypes -Wno-missing-noreturn -Wno-sign-conversion -Wno-nonportable-include-path -Wno-reserved-id-macro -Wno-unused-macros -Wno-documentation-unknown-command -Wno-documentation -Wno-license-management -Wno-parentheses-equality -Wno-reserved-identifier -I ../Core/Inc -I ../Drivers/STM32H5xx_HAL_Driver/Inc -I ../Drivers/STM32H5xx_HAL_Driver/Inc/Legacy -I ../Drivers/CMSIS/Device/ST/STM32H5xx/Include -I ../Drivers/CMSIS/Include -I ../Middlewares/Third_Party/LwIP/src/include -I ../Middlewares/Third_Party/LwIP/src/include/lwip -I ../Middlewares/Third_Party/LwIP/src/include/netif-I./RTE/_ALM_ETH-ID:/Keil_v5/ARM/PACK/ARM/CMSIS/6.0.0/CMSIS/Core/Include-D__UVISION_VERSION="539" -D_RTE_ -DSTM32H563xx -D_RTE_ -DUSE_HAL_DRIVER -DSTM32H563xx-o alm_eth/igmp.o -MD)
 I (..\Middlewares\Third_Party\LwIP\src\include\lwip\opt.h)(0x69D6197A)
-I (..\Core\Inc\lwipopts.h)(0x69D61994)
+I (..\Core\Inc\lwipopts.h)(0x69D62925)
 I (..\Middlewares\Third_Party\LwIP\src\include\lwip\debug.h)(0x69D6197A)
 I (..\Middlewares\Third_Party\LwIP\src\include\lwip\arch.h)(0x69D6197A)
 I (..\Core\Inc\arch\cc.h)(0x69D61DE3)
@@ -2222,7 +2284,7 @@ I (D:\Keil_v5\ARM\ARMCC_V6.22\include\limits.h)(0x65F0855A)
 I (D:\Keil_v5\ARM\ARMCC_V6.22\include\ctype.h)(0x65F0855A)
 F (../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4.c)(0x69D6197A)(-xc -std=c99 --target=arm-arm-none-eabi -mcpu=cortex-m33+nodsp -mfpu=fpv5-sp-d16 -mfloat-abi=hard -c-fno-rtti -funsigned-char -fshort-enums -fshort-wchar-gdwarf-4 -O3 -ffunction-sections -Wno-packed -Wno-missing-variable-declarations -Wno-missing-prototypes -Wno-missing-noreturn -Wno-sign-conversion -Wno-nonportable-include-path -Wno-reserved-id-macro -Wno-unused-macros -Wno-documentation-unknown-command -Wno-documentation -Wno-license-management -Wno-parentheses-equality -Wno-reserved-identifier -I ../Core/Inc -I ../Drivers/STM32H5xx_HAL_Driver/Inc -I ../Drivers/STM32H5xx_HAL_Driver/Inc/Legacy -I ../Drivers/CMSIS/Device/ST/STM32H5xx/Include -I ../Drivers/CMSIS/Include -I ../Middlewares/Third_Party/LwIP/src/include -I ../Middlewares/Third_Party/LwIP/src/include/lwip -I ../Middlewares/Third_Party/LwIP/src/include/netif-I./RTE/_ALM_ETH-ID:/Keil_v5/ARM/PACK/ARM/CMSIS/6.0.0/CMSIS/Core/Include-D__UVISION_VERSION="539" -D_RTE_ -DSTM32H563xx -D_RTE_ -DUSE_HAL_DRIVER -DSTM32H563xx-o alm_eth/ip4.o -MD)
 I (..\Middlewares\Third_Party\LwIP\src\include\lwip\opt.h)(0x69D6197A)
-I (..\Core\Inc\lwipopts.h)(0x69D61994)
+I (..\Core\Inc\lwipopts.h)(0x69D62925)
 I (..\Middlewares\Third_Party\LwIP\src\include\lwip\debug.h)(0x69D6197A)
 I (..\Middlewares\Third_Party\LwIP\src\include\lwip\arch.h)(0x69D6197A)
 I (..\Core\Inc\arch\cc.h)(0x69D61DE3)
@@ -2263,11 +2325,15 @@ I (..\Middlewares\Third_Party\LwIP\src\include\lwip\tcp.h)(0x69D6197A)
 I (..\Middlewares\Third_Party\LwIP\src\include\lwip\tcpbase.h)(0x69D6197A)
 I (..\Middlewares\Third_Party\LwIP\src\include\lwip\prot\tcp.h)(0x69D6197A)
 I (..\Middlewares\Third_Party\LwIP\src\include\lwip\autoip.h)(0x69D6197A)
+I (..\Middlewares\Third_Party\LwIP\src\include\lwip\etharp.h)(0x69D6197A)
+I (..\Middlewares\Third_Party\LwIP\src\include\lwip\prot\ethernet.h)(0x69D6197A)
+I (..\Middlewares\Third_Party\LwIP\src\include\lwip\prot\ieee.h)(0x69D6197A)
+I (..\Middlewares\Third_Party\LwIP\src\include\lwip\prot\etharp.h)(0x69D6197A)
 I (..\Middlewares\Third_Party\LwIP\src\include\lwip\prot\iana.h)(0x69D6197A)
 I (D:\Keil_v5\ARM\ARMCC_V6.22\include\string.h)(0x65F0855A)
 F (../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c)(0x69D6197A)(-xc -std=c99 --target=arm-arm-none-eabi -mcpu=cortex-m33+nodsp -mfpu=fpv5-sp-d16 -mfloat-abi=hard -c-fno-rtti -funsigned-char -fshort-enums -fshort-wchar-gdwarf-4 -O3 -ffunction-sections -Wno-packed -Wno-missing-variable-declarations -Wno-missing-prototypes -Wno-missing-noreturn -Wno-sign-conversion -Wno-nonportable-include-path -Wno-reserved-id-macro -Wno-unused-macros -Wno-documentation-unknown-command -Wno-documentation -Wno-license-management -Wno-parentheses-equality -Wno-reserved-identifier -I ../Core/Inc -I ../Drivers/STM32H5xx_HAL_Driver/Inc -I ../Drivers/STM32H5xx_HAL_Driver/Inc/Legacy -I ../Drivers/CMSIS/Device/ST/STM32H5xx/Include -I ../Drivers/CMSIS/Include -I ../Middlewares/Third_Party/LwIP/src/include -I ../Middlewares/Third_Party/LwIP/src/include/lwip -I ../Middlewares/Third_Party/LwIP/src/include/netif-I./RTE/_ALM_ETH-ID:/Keil_v5/ARM/PACK/ARM/CMSIS/6.0.0/CMSIS/Core/Include-D__UVISION_VERSION="539" -D_RTE_ -DSTM32H563xx -D_RTE_ -DUSE_HAL_DRIVER -DSTM32H563xx-o alm_eth/ip4_addr.o -MD)
 I (..\Middlewares\Third_Party\LwIP\src\include\lwip\opt.h)(0x69D6197A)
-I (..\Core\Inc\lwipopts.h)(0x69D61994)
+I (..\Core\Inc\lwipopts.h)(0x69D62925)
 I (..\Middlewares\Third_Party\LwIP\src\include\lwip\debug.h)(0x69D6197A)
 I (..\Middlewares\Third_Party\LwIP\src\include\lwip\arch.h)(0x69D6197A)
 I (..\Core\Inc\arch\cc.h)(0x69D61DE3)
@@ -2292,7 +2358,7 @@ I (..\Middlewares\Third_Party\LwIP\src\include\lwip\priv\memp_priv.h)(0x69D6197A
 I (..\Middlewares\Third_Party\LwIP\src\include\lwip\priv\mem_priv.h)(0x69D6197A)
 F (../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_frag.c)(0x69D6197A)(-xc -std=c99 --target=arm-arm-none-eabi -mcpu=cortex-m33+nodsp -mfpu=fpv5-sp-d16 -mfloat-abi=hard -c-fno-rtti -funsigned-char -fshort-enums -fshort-wchar-gdwarf-4 -O3 -ffunction-sections -Wno-packed -Wno-missing-variable-declarations -Wno-missing-prototypes -Wno-missing-noreturn -Wno-sign-conversion -Wno-nonportable-include-path -Wno-reserved-id-macro -Wno-unused-macros -Wno-documentation-unknown-command -Wno-documentation -Wno-license-management -Wno-parentheses-equality -Wno-reserved-identifier -I ../Core/Inc -I ../Drivers/STM32H5xx_HAL_Driver/Inc -I ../Drivers/STM32H5xx_HAL_Driver/Inc/Legacy -I ../Drivers/CMSIS/Device/ST/STM32H5xx/Include -I ../Drivers/CMSIS/Include -I ../Middlewares/Third_Party/LwIP/src/include -I ../Middlewares/Third_Party/LwIP/src/include/lwip -I ../Middlewares/Third_Party/LwIP/src/include/netif-I./RTE/_ALM_ETH-ID:/Keil_v5/ARM/PACK/ARM/CMSIS/6.0.0/CMSIS/Core/Include-D__UVISION_VERSION="539" -D_RTE_ -DSTM32H563xx -D_RTE_ -DUSE_HAL_DRIVER -DSTM32H563xx-o alm_eth/ip4_frag.o -MD)
 I (..\Middlewares\Third_Party\LwIP\src\include\lwip\opt.h)(0x69D6197A)
-I (..\Core\Inc\lwipopts.h)(0x69D61994)
+I (..\Core\Inc\lwipopts.h)(0x69D62925)
 I (..\Middlewares\Third_Party\LwIP\src\include\lwip\debug.h)(0x69D6197A)
 I (..\Middlewares\Third_Party\LwIP\src\include\lwip\arch.h)(0x69D6197A)
 I (..\Core\Inc\arch\cc.h)(0x69D61DE3)
@@ -2328,7 +2394,7 @@ I (D:\Keil_v5\ARM\ARMCC_V6.22\include\string.h)(0x65F0855A)
 F (../Middlewares/Third_Party/LwIP/src/api/err.c)(0x69D6197A)(-xc -std=c99 --target=arm-arm-none-eabi -mcpu=cortex-m33+nodsp -mfpu=fpv5-sp-d16 -mfloat-abi=hard -c-fno-rtti -funsigned-char -fshort-enums -fshort-wchar-gdwarf-4 -O3 -ffunction-sections -Wno-packed -Wno-missing-variable-declarations -Wno-missing-prototypes -Wno-missing-noreturn -Wno-sign-conversion -Wno-nonportable-include-path -Wno-reserved-id-macro -Wno-unused-macros -Wno-documentation-unknown-command -Wno-documentation -Wno-license-management -Wno-parentheses-equality -Wno-reserved-identifier -I ../Core/Inc -I ../Drivers/STM32H5xx_HAL_Driver/Inc -I ../Drivers/STM32H5xx_HAL_Driver/Inc/Legacy -I ../Drivers/CMSIS/Device/ST/STM32H5xx/Include -I ../Drivers/CMSIS/Include -I ../Middlewares/Third_Party/LwIP/src/include -I ../Middlewares/Third_Party/LwIP/src/include/lwip -I ../Middlewares/Third_Party/LwIP/src/include/netif-I./RTE/_ALM_ETH-ID:/Keil_v5/ARM/PACK/ARM/CMSIS/6.0.0/CMSIS/Core/Include-D__UVISION_VERSION="539" -D_RTE_ -DSTM32H563xx -D_RTE_ -DUSE_HAL_DRIVER -DSTM32H563xx-o alm_eth/err.o -MD)
 I (..\Middlewares\Third_Party\LwIP\src\include\lwip\err.h)(0x69D6197A)
 I (..\Middlewares\Third_Party\LwIP\src\include\lwip\opt.h)(0x69D6197A)
-I (..\Core\Inc\lwipopts.h)(0x69D61994)
+I (..\Core\Inc\lwipopts.h)(0x69D62925)
 I (..\Middlewares\Third_Party\LwIP\src\include\lwip\debug.h)(0x69D6197A)
 I (..\Middlewares\Third_Party\LwIP\src\include\lwip\arch.h)(0x69D6197A)
 I (..\Core\Inc\arch\cc.h)(0x69D61DE3)
@@ -2343,7 +2409,7 @@ I (..\Middlewares\Third_Party\LwIP\src\include\lwip\sys.h)(0x69D6197A)
 I (..\Middlewares\Third_Party\LwIP\src\include\lwip\errno.h)(0x69D6197A)
 F (../Middlewares/Third_Party/LwIP/src/netif/ethernet.c)(0x69D6197A)(-xc -std=c99 --target=arm-arm-none-eabi -mcpu=cortex-m33+nodsp -mfpu=fpv5-sp-d16 -mfloat-abi=hard -c-fno-rtti -funsigned-char -fshort-enums -fshort-wchar-gdwarf-4 -O3 -ffunction-sections -Wno-packed -Wno-missing-variable-declarations -Wno-missing-prototypes -Wno-missing-noreturn -Wno-sign-conversion -Wno-nonportable-include-path -Wno-reserved-id-macro -Wno-unused-macros -Wno-documentation-unknown-command -Wno-documentation -Wno-license-management -Wno-parentheses-equality -Wno-reserved-identifier -I ../Core/Inc -I ../Drivers/STM32H5xx_HAL_Driver/Inc -I ../Drivers/STM32H5xx_HAL_Driver/Inc/Legacy -I ../Drivers/CMSIS/Device/ST/STM32H5xx/Include -I ../Drivers/CMSIS/Include -I ../Middlewares/Third_Party/LwIP/src/include -I ../Middlewares/Third_Party/LwIP/src/include/lwip -I ../Middlewares/Third_Party/LwIP/src/include/netif-I./RTE/_ALM_ETH-ID:/Keil_v5/ARM/PACK/ARM/CMSIS/6.0.0/CMSIS/Core/Include-D__UVISION_VERSION="539" -D_RTE_ -DSTM32H563xx -D_RTE_ -DUSE_HAL_DRIVER -DSTM32H563xx-o alm_eth/ethernet.o -MD)
 I (..\Middlewares\Third_Party\LwIP\src\include\lwip\opt.h)(0x69D6197A)
-I (..\Core\Inc\lwipopts.h)(0x69D61994)
+I (..\Core\Inc\lwipopts.h)(0x69D62925)
 I (..\Middlewares\Third_Party\LwIP\src\include\lwip\debug.h)(0x69D6197A)
 I (..\Middlewares\Third_Party\LwIP\src\include\lwip\arch.h)(0x69D6197A)
 I (..\Core\Inc\arch\cc.h)(0x69D61DE3)
