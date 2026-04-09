@@ -38,6 +38,8 @@
 
 /* --------------- UDP --------------- */
 #define LWIP_UDP                        1
+#define IP_SOF_BROADCAST                1
+#define IP_SOF_BROADCAST_RECV           1
 
 /* --------------- TCP --------------- */
 #define LWIP_TCP                        1

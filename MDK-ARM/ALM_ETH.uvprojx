@@ -794,6 +794,11 @@
               <FileType>1</FileType>
               <FilePath>../BSP/systick_task.c</FilePath>
             </File>
+            <File>
+              <FileName>udp_discovery.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>../BSP/udp_discovery.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

@@ -586,7 +586,7 @@
             this.button_clearLog.Text = "Clear Log";
             this.button_clearLog.UseVisualStyleBackColor = true;
             this.button_clearLog.Click += new System.EventHandler(this.button_clearLog_Click);
-            // 
+            //
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(10F, 22F);

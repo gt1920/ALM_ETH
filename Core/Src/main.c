@@ -33,6 +33,7 @@
 #include "tcp_server.h"
 #include "CAN_comm.h"
 #include "systick_task.h"
+#include "udp_discovery.h"
 
 /* USER CODE END Includes */
 
@@ -190,6 +191,9 @@ int main(void)
   /* ---- TCP server on port 40000 ---- */
   TCP_Server_Init();
 
+  /* ---- UDP discovery responder on port 40001 ---- */
+  UDP_Discovery_Init();
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -202,6 +206,9 @@ int main(void)
 
 		/* LwIP: process received frames + timers (DHCP etc.) */
 		LWIP_APP_Poll();
+
+		/* UDP discovery: broadcast announcement every 3s */
+		UDP_Discovery_Poll();
 
     /* USER CODE END WHILE */
 
