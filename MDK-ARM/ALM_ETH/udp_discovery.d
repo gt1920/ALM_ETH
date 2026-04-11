@@ -1,4 +1,6 @@
-alm_eth/main.o: ..\Core\Src\main.c ..\Core\Inc\main.h \
+alm_eth/udp_discovery.o: ..\BSP\udp_discovery.c ..\BSP\udp_discovery.h \
+  D:\Keil_v5\ARM\ARMCC_V6.22\bin\..\include\stdint.h ..\BSP\tcp_server.h \
+  D:\Keil_v5\ARM\ARMCC_V6.22\bin\..\include\stdbool.h ..\Core\Inc\main.h \
   ..\Drivers\STM32H5xx_HAL_Driver\Inc\stm32h5xx_hal.h \
   ..\Core\Inc\stm32h5xx_hal_conf.h \
   ..\Drivers\STM32H5xx_HAL_Driver\Inc\stm32h5xx_hal_rcc.h \
@@ -7,7 +9,6 @@ alm_eth/main.o: ..\Core\Src\main.c ..\Core\Inc\main.h \
   D:\Keil_v5\ARM\ARMCC_V6.22\bin\..\include\math.h \
   ..\Drivers\CMSIS\Device\ST\STM32H5xx\Include\stm32h563xx.h \
   ..\Drivers\CMSIS\Include\core_cm33.h \
-  D:\Keil_v5\ARM\ARMCC_V6.22\bin\..\include\stdint.h \
   ..\Drivers\CMSIS\Include\cmsis_version.h \
   ..\Drivers\CMSIS\Include\cmsis_compiler.h \
   ..\Drivers\CMSIS\Include\cmsis_armclang.h \
@@ -36,10 +37,33 @@ alm_eth/main.o: ..\Core\Src\main.c ..\Core\Inc\main.h \
   ..\Drivers\STM32H5xx_HAL_Driver\Inc\stm32h5xx_hal_eth.h \
   ..\Drivers\STM32H5xx_HAL_Driver\Inc\stm32h5xx_hal_eth_ex.h \
   ..\Drivers\STM32H5xx_HAL_Driver\Inc\stm32h5xx_hal_fdcan.h \
-  ..\Core\Inc\dcache.h ..\Core\Inc\eth.h ..\Core\Inc\fdcan.h \
-  ..\Core\Inc\icache.h ..\Core\Inc\octospi.h ..\Core\Inc\usb.h \
-  ..\Core\Inc\gpio.h ..\Core\Inc\bsp_lan8742.h ..\Core\Inc\lwip_app.h \
-  ..\BSP\tcp_server.h \
-  D:\Keil_v5\ARM\ARMCC_V6.22\bin\..\include\stdbool.h ..\BSP\CAN_comm.h \
-  ..\BSP\systick_task.h ..\BSP\udp_discovery.h \
+  ..\Middlewares\Third_Party\LwIP\src\include\lwip\udp.h \
+  ..\Middlewares\Third_Party\LwIP\src\include\lwip\opt.h \
+  ..\Core\Inc\lwipopts.h \
+  ..\Middlewares\Third_Party\LwIP\src\include\lwip\debug.h \
+  ..\Middlewares\Third_Party\LwIP\src\include\lwip\arch.h \
+  ..\Core\Inc\arch\cc.h \
+  D:\Keil_v5\ARM\ARMCC_V6.22\bin\..\include\stdlib.h \
+  D:\Keil_v5\ARM\ARMCC_V6.22\bin\..\include\inttypes.h \
+  D:\Keil_v5\ARM\ARMCC_V6.22\bin\..\include\limits.h \
+  D:\Keil_v5\ARM\ARMCC_V6.22\bin\..\include\ctype.h \
+  ..\Middlewares\Third_Party\LwIP\src\include\lwip\pbuf.h \
+  ..\Middlewares\Third_Party\LwIP\src\include\lwip\err.h \
+  ..\Middlewares\Third_Party\LwIP\src\include\lwip\netif.h \
+  ..\Middlewares\Third_Party\LwIP\src\include\lwip\ip_addr.h \
+  ..\Middlewares\Third_Party\LwIP\src\include\lwip\def.h \
+  ..\Middlewares\Third_Party\LwIP\src\include\lwip\ip4_addr.h \
+  ..\Middlewares\Third_Party\LwIP\src\include\lwip\ip6_addr.h \
+  ..\Middlewares\Third_Party\LwIP\src\include\lwip\stats.h \
+  ..\Middlewares\Third_Party\LwIP\src\include\lwip\mem.h \
+  ..\Middlewares\Third_Party\LwIP\src\include\lwip\memp.h \
+  ..\Middlewares\Third_Party\LwIP\src\include\lwip\priv\memp_std.h \
+  ..\Middlewares\Third_Party\LwIP\src\include\lwip\priv\memp_priv.h \
+  ..\Middlewares\Third_Party\LwIP\src\include\lwip\priv\mem_priv.h \
+  ..\Middlewares\Third_Party\LwIP\src\include\lwip\ip.h \
+  ..\Middlewares\Third_Party\LwIP\src\include\lwip\ip4.h \
+  ..\Middlewares\Third_Party\LwIP\src\include\lwip\prot\ip4.h \
+  ..\Middlewares\Third_Party\LwIP\src\include\lwip\ip6.h \
+  ..\Middlewares\Third_Party\LwIP\src\include\lwip\prot\ip.h \
+  ..\Middlewares\Third_Party\LwIP\src\include\lwip\prot\udp.h \
   D:\Keil_v5\ARM\ARMCC_V6.22\bin\..\include\string.h

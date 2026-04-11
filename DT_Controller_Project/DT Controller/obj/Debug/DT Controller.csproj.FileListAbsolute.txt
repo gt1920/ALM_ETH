@@ -215,3 +215,18 @@ X:\GT_IAP_Done\DT_Controller\DT_Controller_V1.0\DT_Controller_260303_1226_PC对�
 X:\GT_IAP_Done\DT_Controller\DT_Controller_V1.0\DT_Controller_260303_1226_PC对调XY - v6\DT Controller\obj\Debug\DT Contr.932558DF.Up2Date
 X:\GT_IAP_Done\DT_Controller\DT_Controller_V1.0\DT_Controller_260303_1226_PC对调XY - v6\DT Controller\obj\Debug\DT Controller.exe
 X:\GT_IAP_Done\DT_Controller\DT_Controller_V1.0\DT_Controller_260303_1226_PC对调XY - v6\DT Controller\obj\Debug\DT Controller.pdb
+x:\GT_IAP_Done\app_\app_LaserDriver\ALM\ALM_ETH\ALM_ETH_260314_1816\DT_Controller_Project\DT Controller\bin\Debug\DT Controller.exe.config
+x:\GT_IAP_Done\app_\app_LaserDriver\ALM\ALM_ETH\ALM_ETH_260314_1816\DT_Controller_Project\DT Controller\bin\Debug\DT Controller.exe
+x:\GT_IAP_Done\app_\app_LaserDriver\ALM\ALM_ETH\ALM_ETH_260314_1816\DT_Controller_Project\DT Controller\bin\Debug\DT Controller.pdb
+x:\GT_IAP_Done\app_\app_LaserDriver\ALM\ALM_ETH\ALM_ETH_260314_1816\DT_Controller_Project\DT Controller\bin\Debug\HidLibrary.dll
+x:\GT_IAP_Done\app_\app_LaserDriver\ALM\ALM_ETH\ALM_ETH_260314_1816\DT_Controller_Project\DT Controller\bin\Debug\System.CodeDom.dll
+x:\GT_IAP_Done\app_\app_LaserDriver\ALM\ALM_ETH\ALM_ETH_260314_1816\DT_Controller_Project\DT Controller\bin\Debug\HidLibrary.pdb
+x:\GT_IAP_Done\app_\app_LaserDriver\ALM\ALM_ETH\ALM_ETH_260314_1816\DT_Controller_Project\DT Controller\bin\Debug\System.CodeDom.xml
+x:\GT_IAP_Done\app_\app_LaserDriver\ALM\ALM_ETH\ALM_ETH_260314_1816\DT_Controller_Project\DT Controller\obj\Debug\DT Controller.csproj.AssemblyReference.cache
+x:\GT_IAP_Done\app_\app_LaserDriver\ALM\ALM_ETH\ALM_ETH_260314_1816\DT_Controller_Project\DT Controller\obj\Debug\DT_Controller.Form1.resources
+x:\GT_IAP_Done\app_\app_LaserDriver\ALM\ALM_ETH\ALM_ETH_260314_1816\DT_Controller_Project\DT Controller\obj\Debug\DT_Controller.Properties.Resources.resources
+x:\GT_IAP_Done\app_\app_LaserDriver\ALM\ALM_ETH\ALM_ETH_260314_1816\DT_Controller_Project\DT Controller\obj\Debug\DT Controller.csproj.GenerateResource.cache
+x:\GT_IAP_Done\app_\app_LaserDriver\ALM\ALM_ETH\ALM_ETH_260314_1816\DT_Controller_Project\DT Controller\obj\Debug\DT Controller.csproj.CoreCompileInputs.cache
+x:\GT_IAP_Done\app_\app_LaserDriver\ALM\ALM_ETH\ALM_ETH_260314_1816\DT_Controller_Project\DT Controller\obj\Debug\DT Contr.932558DF.Up2Date
+x:\GT_IAP_Done\app_\app_LaserDriver\ALM\ALM_ETH\ALM_ETH_260314_1816\DT_Controller_Project\DT Controller\obj\Debug\DT Controller.exe
+x:\GT_IAP_Done\app_\app_LaserDriver\ALM\ALM_ETH\ALM_ETH_260314_1816\DT_Controller_Project\DT Controller\obj\Debug\DT Controller.pdb
