@@ -1,5 +1,6 @@
 #include "comm_protocol.h"
 #include "device_config.h"
+#include "iap_handler.h"
 #include "eth_send_queue.h"
 #include <string.h>
 
@@ -111,6 +112,11 @@ void Process_ETH_Command(const uint8_t *buf, uint16_t len)
         uint16_t value16  = (uint16_t)buf[11] | ((uint16_t)buf[12] << 8);
 
         CAN_Send_ParamSet(node_id, 0xFFu, param_id, value16);
+    }
+    /* ---- IAP command ---- */
+    else if (cmd == CMD_IAP)
+    {
+        IAP_Process_Command(buf, len, seq);
     }
     /* ---- Motion command ---- */
     else if (cmd == CMD_MOTION || cmd == CMD_MOTION_LEGACY)

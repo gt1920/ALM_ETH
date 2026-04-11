@@ -18,6 +18,7 @@ extern "C" {
 #define CMD_MOTION              0x10
 #define CMD_MOTION_LEGACY       0x02
 #define CMD_PARAM_SET           0x20
+#define CMD_IAP                 0x30
 
 #define SUBCMD_GET_VERSION_INFO 0x01
 #define SUBCMD_GET_MODULE_LIST  0x02

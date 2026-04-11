@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Management;
@@ -120,6 +121,12 @@ namespace DT_Controller
         private TcpTransport _tcpTransport;
         private bool _usingTcp = false;
 
+        // ---- IAP (firmware upgrade) state ----
+        private bool _iapInProgress = false;
+        private ManualResetEventSlim _iapAckEvent = new ManualResetEventSlim(false);
+        private byte _iapAckStatus = 0xFF;
+        private uint _iapAckNextOffset = 0;
+
         // ETH device IP (for Device_Info display)
         private string _pendingEthIp;
 
@@ -234,7 +241,7 @@ namespace DT_Controller
             // �����Ҽ��˵�
             deviceContextMenu = new ContextMenuStrip();
             var miChange = new ToolStripMenuItem("Change Name", null, ChangeName_Click);
-            var miUpgrade = new ToolStripMenuItem("Upgrade", null, Upgrade_Click) { Enabled = false }; // ��ʱ��ɫ������
+            var miUpgrade = new ToolStripMenuItem("Upgrade", null, Upgrade_Click);
             deviceContextMenu.Items.AddRange(new ToolStripItem[] { miChange, new ToolStripSeparator(), miUpgrade });
 
             // �� ListBox �Ҽ��¼�
@@ -267,15 +274,14 @@ namespace DT_Controller
 
                     if (obj is EthDeviceItem)
                     {
-                        // ETH device: Change Name always enabled
-                        deviceContextMenu.Items[0].Enabled = true;
-                        deviceContextMenu.Items[2].Enabled = false; // Upgrade
+                        deviceContextMenu.Items[0].Enabled = true;  // Change Name
+                        deviceContextMenu.Items[2].Enabled = _usingTcp && !_iapInProgress; // Upgrade (ETH only, not during IAP)
                     }
                     else if (obj is HidDeviceItem hid)
                     {
                         bool hasSerial = !string.IsNullOrWhiteSpace(hid.Serial);
                         deviceContextMenu.Items[0].Enabled = hasSerial;
-                        deviceContextMenu.Items[2].Enabled = false; // Upgrade
+                        deviceContextMenu.Items[2].Enabled = false; // Upgrade not supported via HID
                     }
 
                     deviceContextMenu.Show(MainDevice, e.Location);
@@ -355,10 +361,296 @@ namespace DT_Controller
             SendToHID(cmd);
         }
 
-        // Upgrade �����Ŀǰ�����ã�
-        private void Upgrade_Click(object sender, EventArgs e)
+        // ---- Firmware Upgrade (IAP) ----
+        private async void Upgrade_Click(object sender, EventArgs e)
         {
-            MessageBox.Show(this, "Upgrade is not available.", "Upgrade", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            if (!_usingTcp || _tcpTransport == null || !_tcpTransport.IsConnected)
+            {
+                MessageBox.Show(this, "Upgrade requires an active TCP connection.", "Upgrade",
+                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            if (_iapInProgress)
+            {
+                MessageBox.Show(this, "Upgrade already in progress.", "Upgrade",
+                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            // Select firmware .bin file
+            using (var ofd = new OpenFileDialog())
+            {
+                ofd.Title = "Select firmware binary";
+                ofd.Filter = "Binary files (*.bin)|*.bin|All files (*.*)|*.*";
+                if (ofd.ShowDialog(this) != DialogResult.OK)
+                    return;
+
+                byte[] firmware;
+                try
+                {
+                    firmware = File.ReadAllBytes(ofd.FileName);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(this, "Failed to read file: " + ex.Message, "Upgrade",
+                        MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+
+                if (firmware.Length == 0 || firmware.Length > 960 * 1024)
+                {
+                    MessageBox.Show(this, $"Invalid firmware size: {firmware.Length} bytes (max 960KB).", "Upgrade",
+                        MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+
+                var result = MessageBox.Show(this,
+                    $"Upgrade firmware?\n\nFile: {Path.GetFileName(ofd.FileName)}\nSize: {firmware.Length:N0} bytes\n\nThe device will reboot after upgrade.",
+                    "Confirm Upgrade", MessageBoxButtons.OKCancel, MessageBoxIcon.Question);
+                if (result != DialogResult.OK)
+                    return;
+
+                await RunIAPUpgrade(firmware);
+            }
+        }
+
+        private async Task RunIAPUpgrade(byte[] firmware)
+        {
+            _iapInProgress = true;
+            const int IAP_CHUNK_SIZE = 48;
+            const int IAP_TIMEOUT_MS = 5000;
+            const int IAP_MAX_RETRIES = 3;
+
+            try
+            {
+                uint fwSize = (uint)firmware.Length;
+                uint fwCrc32 = IAPCalcCRC32(firmware);
+
+                AppendReceivedText($"[IAP] Starting upgrade: {fwSize} bytes, CRC32=0x{fwCrc32:X8}\n");
+
+                // 1. IAP_BEGIN
+                if (!await SendIAPAndWaitAck(BuildIAPBegin(fwSize, fwCrc32, 0), IAP_TIMEOUT_MS, IAP_MAX_RETRIES))
+                {
+                    AppendReceivedText($"[IAP] BEGIN failed (status=0x{_iapAckStatus:X2})\n");
+                    MessageBox.Show(this, "Upgrade BEGIN failed. Check connection.", "Upgrade Error",
+                        MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+                AppendReceivedText("[IAP] BEGIN OK\n");
+
+                // 2. IAP_DATA chunks
+                uint offset = 0;
+                int totalChunks = (int)((fwSize + IAP_CHUNK_SIZE - 1) / IAP_CHUNK_SIZE);
+                int chunkNum = 0;
+
+                while (offset < fwSize)
+                {
+                    uint remaining = fwSize - offset;
+                    byte chunkLen = (byte)(remaining > IAP_CHUNK_SIZE ? IAP_CHUNK_SIZE : remaining);
+
+                    byte[] chunk = new byte[chunkLen];
+                    Array.Copy(firmware, (int)offset, chunk, 0, chunkLen);
+
+                    if (!await SendIAPAndWaitAck(BuildIAPData(offset, chunk), IAP_TIMEOUT_MS, IAP_MAX_RETRIES))
+                    {
+                        AppendReceivedText($"[IAP] DATA failed at offset {offset} (status=0x{_iapAckStatus:X2})\n");
+                        MessageBox.Show(this, $"Upgrade failed at offset {offset}.", "Upgrade Error",
+                            MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        return;
+                    }
+
+                    offset += chunkLen;
+                    chunkNum++;
+
+                    // Update progress every 50 chunks
+                    if (chunkNum % 50 == 0 || offset >= fwSize)
+                    {
+                        int pct = (int)(offset * 100 / fwSize);
+                        AppendReceivedText($"[IAP] Progress: {pct}% ({offset}/{fwSize})\n");
+                    }
+                }
+
+                // 3. IAP_END (verify)
+                AppendReceivedText("[IAP] Verifying...\n");
+                if (!await SendIAPAndWaitAck(BuildIAPEnd(), 30000, IAP_MAX_RETRIES)) // longer timeout for CRC verify
+                {
+                    AppendReceivedText($"[IAP] END/verify failed (status=0x{_iapAckStatus:X2})\n");
+                    MessageBox.Show(this, "Firmware verification failed on device.", "Upgrade Error",
+                        MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+                AppendReceivedText("[IAP] Verification OK\n");
+
+                // 4. IAP_REBOOT
+                AppendReceivedText("[IAP] Rebooting device...\n");
+                SendIAPFrame(BuildIAPReboot());
+                // Don't wait for ACK — device will reset
+
+                MessageBox.Show(this, "Firmware upgrade complete!\nDevice is rebooting.", "Upgrade Success",
+                    MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            catch (Exception ex)
+            {
+                AppendReceivedText($"[IAP] Error: {ex.Message}\n");
+                MessageBox.Show(this, "Upgrade error: " + ex.Message, "Upgrade Error",
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            finally
+            {
+                _iapInProgress = false;
+            }
+        }
+
+        private async Task<bool> SendIAPAndWaitAck(byte[] frame, int timeoutMs, int maxRetries)
+        {
+            for (int attempt = 0; attempt < maxRetries; attempt++)
+            {
+                _iapAckEvent.Reset();
+                _iapAckStatus = 0xFF;
+
+                SendIAPFrame(frame);
+
+                bool got = await Task.Run(() => _iapAckEvent.Wait(timeoutMs));
+                if (got && _iapAckStatus == 0x00)
+                    return true;
+
+                if (got && _iapAckStatus != 0x00)
+                    return false; // device returned an error, don't retry
+
+                // Timeout — retry
+                AppendReceivedText($"[IAP] Timeout, retry {attempt + 1}/{maxRetries}\n");
+            }
+            return false;
+        }
+
+        private void SendIAPFrame(byte[] frame)
+        {
+            SendToHID(frame);
+        }
+
+        // --- IAP frame builders ---
+
+        private byte[] BuildIAPBegin(uint fwSize, uint fwCrc32, uint fwVersion)
+        {
+            var cmd = new byte[64];
+            cmd[0] = 0xA5;
+            cmd[1] = 0x30; // CMD_IAP
+            cmd[2] = 0x02; // PC -> MCU
+            ushort seq = GetNextSeq();
+            cmd[3] = (byte)(seq & 0xFF);
+            cmd[4] = (byte)(seq >> 8);
+            cmd[5] = 14;   // payload length
+            cmd[6] = 0x01; // IAP_SUBCMD_BEGIN
+
+            cmd[7]  = (byte)(fwSize);
+            cmd[8]  = (byte)(fwSize >> 8);
+            cmd[9]  = (byte)(fwSize >> 16);
+            cmd[10] = (byte)(fwSize >> 24);
+
+            cmd[11] = (byte)(fwCrc32);
+            cmd[12] = (byte)(fwCrc32 >> 8);
+            cmd[13] = (byte)(fwCrc32 >> 16);
+            cmd[14] = (byte)(fwCrc32 >> 24);
+
+            cmd[15] = (byte)(fwVersion);
+            cmd[16] = (byte)(fwVersion >> 8);
+            cmd[17] = (byte)(fwVersion >> 16);
+            cmd[18] = (byte)(fwVersion >> 24);
+
+            return cmd;
+        }
+
+        private byte[] BuildIAPData(uint offset, byte[] chunk)
+        {
+            var cmd = new byte[64];
+            cmd[0] = 0xA5;
+            cmd[1] = 0x30; // CMD_IAP
+            cmd[2] = 0x02; // PC -> MCU
+            ushort seq = GetNextSeq();
+            cmd[3] = (byte)(seq & 0xFF);
+            cmd[4] = (byte)(seq >> 8);
+            cmd[5] = (byte)(7 + chunk.Length); // subcmd(1) + offset(4) + chunkLen(1) + crc16(2) + data
+            cmd[6] = 0x02; // IAP_SUBCMD_DATA
+
+            cmd[7]  = (byte)(offset);
+            cmd[8]  = (byte)(offset >> 8);
+            cmd[9]  = (byte)(offset >> 16);
+            cmd[10] = (byte)(offset >> 24);
+
+            cmd[11] = (byte)chunk.Length;
+
+            ushort crc16 = IAPCalcCRC16(chunk);
+            cmd[12] = (byte)(crc16 & 0xFF);
+            cmd[13] = (byte)(crc16 >> 8);
+
+            Array.Copy(chunk, 0, cmd, 14, chunk.Length);
+
+            return cmd;
+        }
+
+        private byte[] BuildIAPEnd()
+        {
+            var cmd = new byte[64];
+            cmd[0] = 0xA5;
+            cmd[1] = 0x30;
+            cmd[2] = 0x02;
+            ushort seq = GetNextSeq();
+            cmd[3] = (byte)(seq & 0xFF);
+            cmd[4] = (byte)(seq >> 8);
+            cmd[5] = 1;
+            cmd[6] = 0x03; // IAP_SUBCMD_END
+            return cmd;
+        }
+
+        private byte[] BuildIAPReboot()
+        {
+            var cmd = new byte[64];
+            cmd[0] = 0xA5;
+            cmd[1] = 0x30;
+            cmd[2] = 0x02;
+            ushort seq = GetNextSeq();
+            cmd[3] = (byte)(seq & 0xFF);
+            cmd[4] = (byte)(seq >> 8);
+            cmd[5] = 1;
+            cmd[6] = 0x04; // IAP_SUBCMD_REBOOT
+            return cmd;
+        }
+
+        // --- CRC calculations (must match MCU) ---
+
+        private static uint IAPCalcCRC32(byte[] data)
+        {
+            uint crc = 0xFFFFFFFF;
+            for (int i = 0; i < data.Length; i++)
+            {
+                crc ^= data[i];
+                for (int j = 0; j < 8; j++)
+                {
+                    if ((crc & 1) != 0)
+                        crc = (crc >> 1) ^ 0xEDB88320U;
+                    else
+                        crc >>= 1;
+                }
+            }
+            return ~crc;
+        }
+
+        private static ushort IAPCalcCRC16(byte[] data)
+        {
+            ushort crc = 0xFFFF;
+            for (int i = 0; i < data.Length; i++)
+            {
+                crc ^= (ushort)(data[i] << 8);
+                for (int j = 0; j < 8; j++)
+                {
+                    if ((crc & 0x8000) != 0)
+                        crc = (ushort)((crc << 1) ^ 0x1021);
+                    else
+                        crc <<= 1;
+                }
+            }
+            return crc;
         }
 
         // Module List �Ҽ���ѡ�в���ʾ�����Ĳ˵�
@@ -954,10 +1246,18 @@ namespace DT_Controller
         {
             if (data == null || data.Length < 6) return;
 
-                // Ĭ�ϲ���ӡÿ��ԭʼ���ݣ�������־����ˢ��
-                // ����ץ�����ԣ����ֶ��ָ��������У�
-                // var rawText = FormatReportData(data);
-                // AppendReceivedText(rawText);
+                // IAP ACK handling: CMD_IAP=0x30, SubCmd=0x81 (ACK)
+                try
+                {
+                    if (data.Length >= 12 && data[0] == 0xA5 && data[1] == 0x30 && data[6] == 0x81)
+                    {
+                        _iapAckStatus = data[7];
+                        _iapAckNextOffset = (uint)(data[8] | (data[9] << 8) |
+                                                   (data[10] << 16) | (data[11] << 24));
+                        _iapAckEvent.Set();
+                    }
+                }
+                catch { }
 
                 // Parse Remaining Step report (Device -> PC): [ReportId?] A5 10 01 ...
                 try

@@ -804,6 +804,21 @@
               <FileType>1</FileType>
               <FilePath>../BSP/device_config.c</FilePath>
             </File>
+            <File>
+              <FileName>bsp_ext_flash.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>../BSP/bsp_ext_flash.c</FilePath>
+            </File>
+            <File>
+              <FileName>bsp_crc.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>../BSP/bsp_crc.c</FilePath>
+            </File>
+            <File>
+              <FileName>iap_handler.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>../BSP/iap_handler.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
