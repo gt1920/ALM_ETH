@@ -89,7 +89,7 @@ void UDP_Discovery_Poll(void)
 
     /* Hostname */
     if (nif->hostname != NULL)
-        strncpy((char *)(buf + 10), nif->hostname, 15);
+        strncpy((char *)(buf + 10), nif->hostname, 16);
 
     /* FW version */
     buf[26] = FW_HW_VER;

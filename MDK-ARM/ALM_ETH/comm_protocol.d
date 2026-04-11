@@ -36,6 +36,7 @@ alm_eth/comm_protocol.o: ..\BSP\comm_protocol.c ..\BSP\comm_protocol.h \
   ..\Drivers\STM32H5xx_HAL_Driver\Inc\stm32h5xx_hal_eth.h \
   ..\Drivers\STM32H5xx_HAL_Driver\Inc\stm32h5xx_hal_eth_ex.h \
   ..\Drivers\STM32H5xx_HAL_Driver\Inc\stm32h5xx_hal_fdcan.h \
-  ..\BSP\CAN_comm.h ..\Core\Inc\fdcan.h ..\BSP\eth_send_queue.h \
+  ..\BSP\CAN_comm.h ..\Core\Inc\fdcan.h ..\BSP\device_config.h \
+  ..\BSP\eth_send_queue.h \
   D:\Keil_v5\ARM\ARMCC_V6.22\bin\..\include\stdbool.h \
   D:\Keil_v5\ARM\ARMCC_V6.22\bin\..\include\string.h

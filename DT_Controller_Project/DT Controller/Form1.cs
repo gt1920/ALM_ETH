@@ -234,9 +234,8 @@ namespace DT_Controller
             // �����Ҽ��˵�
             deviceContextMenu = new ContextMenuStrip();
             var miChange = new ToolStripMenuItem("Change Name", null, ChangeName_Click);
-            var miClear = new ToolStripMenuItem("Clear Name", null, ClearName_Click);
             var miUpgrade = new ToolStripMenuItem("Upgrade", null, Upgrade_Click) { Enabled = false }; // ��ʱ��ɫ������
-            deviceContextMenu.Items.AddRange(new ToolStripItem[] { miChange, miClear, new ToolStripSeparator(), miUpgrade });
+            deviceContextMenu.Items.AddRange(new ToolStripItem[] { miChange, new ToolStripSeparator(), miUpgrade });
 
             // �� ListBox �Ҽ��¼�
             MainDevice.MouseDown += MainDevice_MouseDown;
@@ -264,21 +263,52 @@ namespace DT_Controller
                 if (idx >= 0 && idx < MainDevice.Items.Count)
                 {
                     MainDevice.SelectedIndex = idx;
-                    // ������ѡ���Ƿ������о����˵��������
-                    var item = MainDevice.Items[idx] as HidDeviceItem;
-                    bool hasSerial = !string.IsNullOrWhiteSpace(item?.Serial);
-                    deviceContextMenu.Items[0].Enabled = hasSerial; // Change Name
-                    deviceContextMenu.Items[1].Enabled = hasSerial && nameMappings.ContainsKey(item.Serial); // Clear Name only if mapping exists
-                    deviceContextMenu.Items[3].Enabled = false; // Upgrade ���ֲ�����
+                    var obj = MainDevice.Items[idx];
+
+                    if (obj is EthDeviceItem)
+                    {
+                        // ETH device: Change Name always enabled
+                        deviceContextMenu.Items[0].Enabled = true;
+                        deviceContextMenu.Items[2].Enabled = false; // Upgrade
+                    }
+                    else if (obj is HidDeviceItem hid)
+                    {
+                        bool hasSerial = !string.IsNullOrWhiteSpace(hid.Serial);
+                        deviceContextMenu.Items[0].Enabled = hasSerial;
+                        deviceContextMenu.Items[2].Enabled = false; // Upgrade
+                    }
+
                     deviceContextMenu.Show(MainDevice, e.Location);
                 }
             }
         }
 
-        // Change Name �������������ӳ�䲢����ˢ�� ListBox ��ʾ��
+        // Change Name
         private void ChangeName_Click(object sender, EventArgs e)
         {
-            if (MainDevice.SelectedItem is HidDeviceItem item && !string.IsNullOrWhiteSpace(item.Serial))
+            int idx = MainDevice.SelectedIndex;
+            if (idx < 0) return;
+
+            var obj = MainDevice.Items[idx];
+
+            if (obj is EthDeviceItem ethItem)
+            {
+                using (var prompt = new SingleLinePrompt("Change Name", "Enter new name (max 16 chars, empty to reset):", ethItem.Hostname ?? string.Empty, 16))
+                {
+                    if (prompt.ShowDialog(this) != DialogResult.OK)
+                        return;
+                    var newName = (prompt.Value ?? string.Empty).Trim();
+
+                    // Send to MCU (empty = clear custom name, revert to default)
+                    SendSetDeviceName(newName);
+
+                    // Update display: empty means default will come from next UDP broadcast
+                    if (!string.IsNullOrEmpty(newName))
+                        ethItem.Hostname = newName;
+                    MainDevice.Items[idx] = ethItem;
+                }
+            }
+            else if (obj is HidDeviceItem item && !string.IsNullOrWhiteSpace(item.Serial))
             {
                 using (var prompt = new SingleLinePrompt("Change Name", "Enter new name:", nameMappings.ContainsKey(item.Serial) ? nameMappings[item.Serial] : item.Serial))
                 {
@@ -288,42 +318,41 @@ namespace DT_Controller
                         if (!string.IsNullOrWhiteSpace(newName))
                         {
                             nameMappings[item.Serial] = newName;
-                            // �������µ�ǰ�����ʾ����ǿ�� ListBox ������Ⱦ����
                             item.DisplayName = newName;
-                            var idx = MainDevice.SelectedIndex;
                             if (idx >= 0)
-                                MainDevice.Items[idx] = item; // ���� ListBox ����
+                                MainDevice.Items[idx] = item;
                             SaveNameMappingsSafe();
-                            RefreshDisplayNames(); // ȷ��������Ҳ������
+                            RefreshDisplayNames();
                         }
                     }
                 }
             }
         }
 
-        // Clear Name ����������Ƴ�ӳ�䲢����ˢ�� ListBox ��ʾ��
-        private void ClearName_Click(object sender, EventArgs e)
+        private void SendSetDeviceName(string name)
         {
-            if (MainDevice.SelectedItem is HidDeviceItem item && !string.IsNullOrWhiteSpace(item.Serial))
+            var nameBytes = new byte[16];
+            if (!string.IsNullOrEmpty(name))
             {
-                var idx = MainDevice.SelectedIndex;
-                if (nameMappings.Remove(item.Serial))
-                {
-                    SaveNameMappingsSafe();
-
-                    // �ָ���ʾ��Ϊ���кŻ��Ʒ����ǿ�ƴ��� ListBox ����
-                    item.DisplayName = !string.IsNullOrWhiteSpace(item.Serial)
-                        ? item.Serial
-                        : (string.IsNullOrWhiteSpace(item.Product)
-                            ? $"HID {item.VendorId:X4}:{item.ProductId:X4}"
-                            : $"{item.Product} ({item.VendorId:X4}:{item.ProductId:X4})");
-
-                    if (idx >= 0 && idx < MainDevice.Items.Count)
-                        MainDevice.Items[idx] = item; // ���� ListBox ����ȡֵ
-
-                    RefreshDisplayNames();
-                }
+                var ascii = Encoding.ASCII.GetBytes(name);
+                Array.Copy(ascii, 0, nameBytes, 0, Math.Min(16, ascii.Length));
             }
+
+            var cmd = new byte[64];
+            cmd[0] = 0xA5;
+            cmd[1] = 0x01; // CMD_INFO
+            cmd[2] = 0x02; // PC -> MCU
+
+            ushort seq = GetNextSeq();
+            cmd[3] = (byte)(seq & 0xFF);
+            cmd[4] = (byte)((seq >> 8) & 0xFF);
+
+            cmd[5] = 17;   // payload length: subcmd(1) + name(16)
+            cmd[6] = 0x06; // SUBCMD_SET_DEVICE_NAME
+
+            Array.Copy(nameBytes, 0, cmd, 7, 16);
+
+            SendToHID(cmd);
         }
 
         // Upgrade �����Ŀǰ�����ã�
@@ -2577,12 +2606,16 @@ namespace DT_Controller
 
             if (existing != null)
             {
+                bool nameChanged = existing.Hostname != hostname;
                 existing.IP = ip;
                 existing.Hostname = hostname;
                 existing.TcpPort = tcpPort;
                 existing.FW = fw;
                 existing.LastSeen = DateTime.UtcNow;
-                // Do NOT reassign Items[] - it triggers SelectedIndexChanged
+
+                // Refresh ListBox text when hostname changed (e.g. after device rename)
+                if (nameChanged && existingIdx >= 0 && existingIdx != MainDevice.SelectedIndex)
+                    MainDevice.Items[existingIdx] = existing;
             }
             else
             {

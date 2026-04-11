@@ -1,4 +1,5 @@
 #include "comm_protocol.h"
+#include "device_config.h"
 #include "eth_send_queue.h"
 #include <string.h>
 
@@ -73,6 +74,20 @@ void Process_ETH_Command(const uint8_t *buf, uint16_t len)
                     ((uint32_t)buf[11] << 24);
 
                 CAN_Send_SetModuleName(node_id, &buf[12]);
+                break;
+            }
+
+            case SUBCMD_SET_DEVICE_NAME:
+            {
+                /* buf[7..22] = 16-byte device name (ASCII, 0-padded).
+                   len=0 clears the custom name. */
+                uint8_t name_len = 0;
+                for (int i = 0; i < DEVICE_NAME_MAX_LEN; i++)
+                {
+                    if (buf[7 + i] == 0) break;
+                    name_len++;
+                }
+                DeviceConfig_SetName((const char *)&buf[7], name_len);
                 break;
             }
 

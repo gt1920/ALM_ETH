@@ -799,6 +799,11 @@
               <FileType>1</FileType>
               <FilePath>../BSP/udp_discovery.c</FilePath>
             </File>
+            <File>
+              <FileName>device_config.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>../BSP/device_config.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

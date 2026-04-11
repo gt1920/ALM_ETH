@@ -9,6 +9,7 @@
 #include "ethernetif.h"
 #include "eth.h"
 #include "main.h"
+#include "device_config.h"
 #include "string.h"
 
 #include "lwip/opt.h"
@@ -216,19 +217,9 @@ err_t ethernetif_init(struct netif *netif)
 
 #if LWIP_NETIF_HOSTNAME
   {
-    static char hostname[10];  /* "DT-XXYYZZ\0" */
-    static const char hex[] = "0123456789ABCDEF";
-    hostname[0] = 'D';
-    hostname[1] = 'T';
-    hostname[2] = '-';
-    hostname[3] = hex[(netif->hwaddr[3] >> 4) & 0x0F];
-    hostname[4] = hex[ netif->hwaddr[3]       & 0x0F];
-    hostname[5] = hex[(netif->hwaddr[4] >> 4) & 0x0F];
-    hostname[6] = hex[ netif->hwaddr[4]       & 0x0F];
-    hostname[7] = hex[(netif->hwaddr[5] >> 4) & 0x0F];
-    hostname[8] = hex[ netif->hwaddr[5]       & 0x0F];
-    hostname[9] = '\0';
-    netif->hostname = hostname;
+    /* Build hostname: custom name from flash, or default "DT-XXYYZZ" */
+    DeviceConfig_BuildHostname(netif->hwaddr);
+    netif->hostname = g_device_hostname;
   }
 #endif
 

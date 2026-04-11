@@ -34,6 +34,7 @@
 #include "CAN_comm.h"
 #include "systick_task.h"
 #include "udp_discovery.h"
+#include "device_config.h"
 #include <string.h>
 
 /* USER CODE END Includes */
@@ -182,6 +183,9 @@ int main(void)
   {
     Error_Handler();
   }
+
+  /* Load custom device name from flash (before LWIP so hostname is ready) */
+  DeviceConfig_Init();
 
   /* Initialize LwIP + DHCP (this re-inits ETH with non-cacheable DMA buffers) */
   LWIP_APP_Init();

@@ -24,6 +24,7 @@ extern "C" {
 #define SUBCMD_GET_MODULE_INFO  0x03
 #define SUBCMD_SET_MODULE_NAME  0x04
 #define SUBCMD_SET_PARAM        0x05
+#define SUBCMD_SET_DEVICE_NAME  0x06
 #define SUBCMD_PARAM_FEEDBACK   0x85
 
 void Process_ETH_Command(const uint8_t *buf, uint16_t len);
