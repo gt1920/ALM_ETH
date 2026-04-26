@@ -38,6 +38,8 @@
 
 /* --------------- UDP --------------- */
 #define LWIP_UDP                        1
+#define IP_SOF_BROADCAST                1
+#define IP_SOF_BROADCAST_RECV           1
 
 /* --------------- TCP --------------- */
 #define LWIP_TCP                        1
@@ -45,6 +47,7 @@
 #define TCP_WND                         (4 * TCP_MSS)
 #define TCP_SND_BUF                     (4 * TCP_MSS)
 #define TCP_SND_QUEUELEN                (2 * TCP_SND_BUF / TCP_MSS)
+#define LWIP_TCP_KEEPALIVE              1
 
 /* --------------- ARP --------------- */
 #define LWIP_ARP                        1

@@ -57,7 +57,7 @@
 /* External variables --------------------------------------------------------*/
 extern ETH_HandleTypeDef heth;
 /* USER CODE BEGIN EV */
-
+extern FDCAN_HandleTypeDef hfdcan1;
 /* USER CODE END EV */
 
 /******************************************************************************/
@@ -187,7 +187,8 @@ void SysTick_Handler(void)
   /* USER CODE END SysTick_IRQn 0 */
   HAL_IncTick();
   /* USER CODE BEGIN SysTick_IRQn 1 */
-
+  extern void SysTick_Task(void);
+  SysTick_Task();
   /* USER CODE END SysTick_IRQn 1 */
 }
 
@@ -213,5 +214,8 @@ void ETH_IRQHandler(void)
 }
 
 /* USER CODE BEGIN 1 */
-
+void FDCAN1_IT0_IRQHandler(void)
+{
+  HAL_FDCAN_IRQHandler(&hfdcan1);
+}
 /* USER CODE END 1 */

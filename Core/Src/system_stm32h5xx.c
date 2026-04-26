@@ -144,8 +144,8 @@
      Internal SRAM. */
 /* #define VECT_TAB_SRAM */
 #if !defined(VECT_TAB_OFFSET)
-#define VECT_TAB_OFFSET  0x00U /*!< Vector Table base offset field.
-                                   This value must be a multiple of 0x200. */
+#define VECT_TAB_OFFSET  0x10000U /*!< Vector Table base offset field.
+                                      App starts at 0x08010000 (64KB bootloader). */
 #endif /* VECT_TAB_OFFSET */
 /******************************************************************************/
 

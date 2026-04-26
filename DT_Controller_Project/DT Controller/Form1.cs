@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Management;
@@ -10,16 +11,17 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.IO;
 using System.Drawing;
+using System.Net.Sockets;
 
 namespace DT_Controller
 {
     public partial class Form1 : Form
     {
-        // ½öÏÔÊ¾´Ë¹ýÂËÆ÷µÄÉè±¸
+        // ï¿½ï¿½ï¿½ï¿½Ê¾ï¿½Ë¹ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½è±¸
         private const int FilterVendorId = 0x0483;
         private const int FilterProductId = 0xA7D1;
 
-        // WM_DEVICECHANGE ÏûÏûÏ¢ÓëÊÂ¼þ
+        // WM_DEVICECHANGE ï¿½ï¿½ï¿½ï¿½Ï¢ï¿½ï¿½ï¿½Â¼ï¿½
         private const int WM_DEVICECHANGE = 0x0219;
         private const int DBT_DEVICEARRIVAL = 0x8000;
         private const int DBT_DEVICEREMOVECOMPLETE = 0x8004;
@@ -28,44 +30,44 @@ namespace DT_Controller
         private const int WM_SYSKEYDOWN = 0x0104;
         private const int WM_SYSKEYUP = 0x0105;
 
-        // ×¢²áÉè±¸Í¨ÖªÓÃ³£Á¿
+        // ×¢ï¿½ï¿½ï¿½è±¸Í¨Öªï¿½Ã³ï¿½ï¿½ï¿½
         private const int DBT_DEVTYP_DEVICEINTERFACE = 0x00000005;
         private const uint DEVICE_NOTIFY_WINDOW_HANDLE = 0x00000000;
 
-        // USB Éè±¸½Ó¿Ú GUID£¨USB device interface£©
-        // ÓÃÓÚ½ÓÊÕ²å°ÎÍ¨Öª£º{A5DCBF10-6530-11D2-901F-00C04FB951ED}
+        // USB ï¿½è±¸ï¿½Ó¿ï¿½ GUIDï¿½ï¿½USB device interfaceï¿½ï¿½
+        // ï¿½ï¿½ï¿½Ú½ï¿½ï¿½Õ²ï¿½ï¿½Í¨Öªï¿½ï¿½{A5DCBF10-6530-11D2-901F-00C04FB951ED}
         private static readonly Guid GUID_DEVINTERFACE_USB_DEVICE = new Guid("A5DCBF10-6530-11D2-901F-00C04FB951ED");
 
-        // ÓÃÓÚÈ¥¶¶¶¯¶à´Î²å°ÎÍ¨ÖªµÄ UI ¼ÆÊ±Æ÷
+        // ï¿½ï¿½ï¿½ï¿½È¥ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Î²ï¿½ï¿½Í¨Öªï¿½ï¿½ UI ï¿½ï¿½Ê±ï¿½ï¿½
         private readonly System.Windows.Forms.Timer deviceChangeTimer;
 
-        // ×¢²á¾ä±ú
+        // ×¢ï¿½ï¿½ï¿½ï¿½
         private IntPtr deviceNotificationHandle = IntPtr.Zero;
 
-        // ³Ö¾Ã»¯µÄÐòÁÐºÅ->Ãû³ÆÓ³Éä
+        // ï¿½Ö¾Ã»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ðºï¿½->ï¿½ï¿½ï¿½ï¿½Ó³ï¿½ï¿½
         private readonly Dictionary<string, string> nameMappings = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
         private readonly string mappingsFilePath;
 
-        // ÓÒ¼ü²Ëµ¥ (Device List)
+        // ï¿½Ò¼ï¿½ï¿½Ëµï¿½ (Device List)
         private readonly ContextMenuStrip deviceContextMenu;
 
-        // Module List ÓÒ¼ü²Ëµ¥
+        // Module List ï¿½Ò¼ï¿½ï¿½Ëµï¿½
         private readonly ContextMenuStrip moduleContextMenu;
 
-        // µ±Ç°ÓÃÓÚ¶ÁÈ¡ HID ±¨ÎÄµÄÉè±¸£¨½öÒ»¸öÊµÀý£©
+        // ï¿½ï¿½Ç°ï¿½ï¿½ï¿½Ú¶ï¿½È¡ HID ï¿½ï¿½ï¿½Äµï¿½ï¿½è±¸ï¿½ï¿½ï¿½ï¿½Ò»ï¿½ï¿½Êµï¿½ï¿½ï¿½ï¿½
         private HidDevice currentHidDevice;
         private readonly object hidLock = new object();
 
-        // ½ÓÊÕÊý¾Ý¼ÆÊý/Ê±¼ä´Á
+        // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ý¼ï¿½ï¿½ï¿½/Ê±ï¿½ï¿½ï¿½
         private DateTime lastReceiveTime = DateTime.MinValue;
 
-        // ÐÂÔö×Ö¶Î£ºÓÃÓÚÐòÁÐºÅ£¨seq£©¼ÆÊý£¨·ÅÔÚ×Ö¶ÎÇø£©
+        // ï¿½ï¿½ï¿½ï¿½ï¿½Ö¶Î£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ÐºÅ£ï¿½seqï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö¶ï¿½ï¿½ï¿½ï¿½ï¿½
         private int seqCounter = 0;
 
-        // ÐÂÔö×Ö¶Î£º·ÀÖ¹ÖØ¸´·¢ËÍ Module ²éÑ¯£¨Ã¿´ÎÁ¬½ÓÖ»·¢ËÍÒ»´Î£©
+        // ï¿½ï¿½ï¿½ï¿½ï¿½Ö¶Î£ï¿½ï¿½ï¿½Ö¹ï¿½Ø¸ï¿½ï¿½ï¿½ï¿½ï¿½ Module ï¿½ï¿½Ñ¯ï¿½ï¿½Ã¿ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö»ï¿½ï¿½ï¿½ï¿½Ò»ï¿½Î£ï¿½
         private bool moduleQuerySent = false;
 
-        // ´æ´¢µ±Ç°Éè±¸µÄ module ÁÐ±í
+        // ï¿½æ´¢ï¿½ï¿½Ç°ï¿½è±¸ï¿½ï¿½ module ï¿½Ð±ï¿½
         private readonly List<ModuleInfo> currentModules = new List<ModuleInfo>();
 
         // Remaining step cache (Device -> PC report CMD_MOTION 0x10)
@@ -115,7 +117,23 @@ namespace DT_Controller
             Speed = 0x04
         }
 
-        private readonly ITransport _transport;
+        private ITransport _transport;
+        private TcpTransport _tcpTransport;
+        private bool _usingTcp = false;
+
+        // ---- IAP (firmware upgrade) state ----
+        private bool _iapInProgress = false;
+        private ManualResetEventSlim _iapAckEvent = new ManualResetEventSlim(false);
+        private byte _iapAckStatus = 0xFF;
+        private uint _iapAckNextOffset = 0;
+
+        // ETH device IP (for Device_Info display)
+        private string _pendingEthIp;
+
+        // UDP discovery (listen for MCU broadcast announcements)
+        private UdpClient _discoveryClient;
+        private System.Windows.Forms.Timer _discoveryCleanupTimer;
+        private const int UDP_DISCOVERY_PORT = 40001;
         private readonly Dictionary<Button, Image> _pressedButtonImages = new Dictionary<Button, Image>();
         private readonly Dictionary<Button, Image> _normalButtonImages = new Dictionary<Button, Image>();
         private readonly Dictionary<Button, int> _buttonPressRefCount = new Dictionary<Button, int>();
@@ -179,10 +197,10 @@ namespace DT_Controller
 
             _transport = new HidTransport(() => currentHidDevice, hidLock);
 
-            // Designer ÒÑÎª MainDevice °ó¶¨ SelectedIndexChanged£¬ÕâÀïÖ»°ó¶¨ Load
+            // Designer ï¿½ï¿½Îª MainDevice ï¿½ï¿½ SelectedIndexChangedï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö»ï¿½ï¿½ Load
             this.Load += Form1_Load;
 
-            // ¶©ÔÄ SubDevice µã»÷ÒÔÏÔÊ¾ Module Info
+            // ï¿½ï¿½ï¿½ï¿½ SubDevice ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê¾ Module Info
             SubDevice.SelectedIndexChanged += SubDevice_SelectedIndexChanged;
 
             // Bind param +/- buttons
@@ -202,12 +220,12 @@ namespace DT_Controller
                 // ignore
             }
 
-            // ³õÊ¼»¯È¥¶¶¶¯¼ÆÊ±Æ÷£¨500ms£©
+            // ï¿½ï¿½Ê¼ï¿½ï¿½È¥ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½ï¿½ï¿½500msï¿½ï¿½
             deviceChangeTimer = new System.Windows.Forms.Timer();
             deviceChangeTimer.Interval = 500;
             deviceChangeTimer.Tick += DeviceChangeTimer_Tick;
 
-            // ÔÚ´°Ìå¹Ø±ÕÊ±ÊÍ·Å¼ÆÊ±Æ÷²¢×¢ÏúÉè±¸Í¨Öª£¬Í¬Ê±Í£Ö¹ HID ¶ÁÈ¡
+            // ï¿½Ú´ï¿½ï¿½ï¿½Ø±ï¿½Ê±ï¿½Í·Å¼ï¿½Ê±ï¿½ï¿½ï¿½ï¿½×¢ï¿½ï¿½ï¿½è±¸Í¨Öªï¿½ï¿½Í¬Ê±Í£Ö¹ HID ï¿½ï¿½È¡
             this.FormClosed += (s, e) =>
             {
                 deviceChangeTimer?.Dispose();
@@ -217,34 +235,33 @@ namespace DT_Controller
             };
             this.Deactivate += (s, e) => ReleaseAllPressedDirectionButtons();
 
-            // Ó³ÉäÎÄ¼þÎ»ÖÃ£¨ÓÃ»§Ó¦ÓÃÊý¾ÝÄ¿Â¼£©
+            // Ó³ï¿½ï¿½ï¿½Ä¼ï¿½Î»ï¿½Ã£ï¿½ï¿½Ã»ï¿½Ó¦ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä¿Â¼ï¿½ï¿½
             mappingsFilePath = Path.Combine(Application.UserAppDataPath, "device_names.map");
 
-            // ´´½¨ÓÒ¼ü²Ëµ¥
+            // ï¿½ï¿½ï¿½ï¿½ï¿½Ò¼ï¿½ï¿½Ëµï¿½
             deviceContextMenu = new ContextMenuStrip();
             var miChange = new ToolStripMenuItem("Change Name", null, ChangeName_Click);
-            var miClear = new ToolStripMenuItem("Clear Name", null, ClearName_Click);
-            var miUpgrade = new ToolStripMenuItem("Upgrade", null, Upgrade_Click) { Enabled = false }; // ÔÝÊ±»ÒÉ«²»¿ÉÓÃ
-            deviceContextMenu.Items.AddRange(new ToolStripItem[] { miChange, miClear, new ToolStripSeparator(), miUpgrade });
+            var miUpgrade = new ToolStripMenuItem("Upgrade", null, Upgrade_Click);
+            deviceContextMenu.Items.AddRange(new ToolStripItem[] { miChange, new ToolStripSeparator(), miUpgrade });
 
-            // °ó¶¨ ListBox ÓÒ¼üÊÂ¼þ
+            // ï¿½ï¿½ ListBox ï¿½Ò¼ï¿½ï¿½Â¼ï¿½
             MainDevice.MouseDown += MainDevice_MouseDown;
 
-            // ´´½¨ÓÒ¼ü²Ëµ¥£¨Module List£©
+            // ï¿½ï¿½ï¿½ï¿½ï¿½Ò¼ï¿½ï¿½Ëµï¿½ï¿½ï¿½Module Listï¿½ï¿½
             moduleContextMenu = new ContextMenuStrip();
             var miModChange = new ToolStripMenuItem("Change name", null, ModuleChangeName_Click);
             var miModReset = new ToolStripMenuItem("Reset name", null, ModuleResetName_Click);
             var miModFwUpgrade = new ToolStripMenuItem("FW upgrade", null, ModuleFwUpgrade_Click) { Enabled = false };
             moduleContextMenu.Items.AddRange(new ToolStripItem[] { miModChange, miModReset, new ToolStripSeparator(), miModFwUpgrade });
 
-            // °ó¶¨ Module List ÓÒ¼üÊÂ¼þ
+            // ï¿½ï¿½ Module List ï¿½Ò¼ï¿½ï¿½Â¼ï¿½
             SubDevice.MouseDown += SubDevice_MouseDown;
 
-            // ¼ÓÔØÒÑÓÐÓ³Éä£¨Èç¹û´æÔÚ£©
+            // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ó³ï¿½ä£¨ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ú£ï¿½
             LoadNameMappingsSafe();
         }
 
-        // ListBox ÓÒ¼ü£ºÑ¡ÖÐ²¢ÏÔÊ¾ÉÏÏÂÎÄ²Ëµ¥
+        // ListBox ï¿½Ò¼ï¿½ï¿½ï¿½Ñ¡ï¿½Ð²ï¿½ï¿½ï¿½Ê¾ï¿½ï¿½ï¿½ï¿½ï¿½Ä²Ëµï¿½
         private void MainDevice_MouseDown(object sender, MouseEventArgs e)
         {
             if (e.Button == MouseButtons.Right)
@@ -253,21 +270,51 @@ namespace DT_Controller
                 if (idx >= 0 && idx < MainDevice.Items.Count)
                 {
                     MainDevice.SelectedIndex = idx;
-                    // ¸ù¾ÝËùÑ¡ÏîÊÇ·ñÓÐÐòÁÐ¾ö¶¨²Ëµ¥Ïî¿ÉÓÃÐÔ
-                    var item = MainDevice.Items[idx] as HidDeviceItem;
-                    bool hasSerial = !string.IsNullOrWhiteSpace(item?.Serial);
-                    deviceContextMenu.Items[0].Enabled = hasSerial; // Change Name
-                    deviceContextMenu.Items[1].Enabled = hasSerial && nameMappings.ContainsKey(item.Serial); // Clear Name only if mapping exists
-                    deviceContextMenu.Items[3].Enabled = false; // Upgrade ±£³Ö²»¿ÉÓÃ
+                    var obj = MainDevice.Items[idx];
+
+                    if (obj is EthDeviceItem)
+                    {
+                        deviceContextMenu.Items[0].Enabled = true;  // Change Name
+                        deviceContextMenu.Items[2].Enabled = _usingTcp && !_iapInProgress; // Upgrade (ETH only, not during IAP)
+                    }
+                    else if (obj is HidDeviceItem hid)
+                    {
+                        bool hasSerial = !string.IsNullOrWhiteSpace(hid.Serial);
+                        deviceContextMenu.Items[0].Enabled = hasSerial;
+                        deviceContextMenu.Items[2].Enabled = false; // Upgrade not supported via HID
+                    }
+
                     deviceContextMenu.Show(MainDevice, e.Location);
                 }
             }
         }
 
-        // Change Name µã»÷´¦Àí£¨¸üÐÂÓ³Éä²¢Á¢¼´Ë¢ÐÂ ListBox ÏÔÊ¾£©
+        // Change Name
         private void ChangeName_Click(object sender, EventArgs e)
         {
-            if (MainDevice.SelectedItem is HidDeviceItem item && !string.IsNullOrWhiteSpace(item.Serial))
+            int idx = MainDevice.SelectedIndex;
+            if (idx < 0) return;
+
+            var obj = MainDevice.Items[idx];
+
+            if (obj is EthDeviceItem ethItem)
+            {
+                using (var prompt = new SingleLinePrompt("Change Name", "Enter new name (max 16 chars, empty to reset):", ethItem.Hostname ?? string.Empty, 16))
+                {
+                    if (prompt.ShowDialog(this) != DialogResult.OK)
+                        return;
+                    var newName = (prompt.Value ?? string.Empty).Trim();
+
+                    // Send to MCU (empty = clear custom name, revert to default)
+                    SendSetDeviceName(newName);
+
+                    // Update display: empty means default will come from next UDP broadcast
+                    if (!string.IsNullOrEmpty(newName))
+                        ethItem.Hostname = newName;
+                    MainDevice.Items[idx] = ethItem;
+                }
+            }
+            else if (obj is HidDeviceItem item && !string.IsNullOrWhiteSpace(item.Serial))
             {
                 using (var prompt = new SingleLinePrompt("Change Name", "Enter new name:", nameMappings.ContainsKey(item.Serial) ? nameMappings[item.Serial] : item.Serial))
                 {
@@ -277,51 +324,336 @@ namespace DT_Controller
                         if (!string.IsNullOrWhiteSpace(newName))
                         {
                             nameMappings[item.Serial] = newName;
-                            // Á¢¼´¸üÐÂµ±Ç°ÏîµÄÏÔÊ¾Ãû²¢Ç¿ÖÆ ListBox ÖØÐÂäÖÈ¾¸ÃÏî
                             item.DisplayName = newName;
-                            var idx = MainDevice.SelectedIndex;
                             if (idx >= 0)
-                                MainDevice.Items[idx] = item; // ´¥·¢ ListBox ¸üÐÂ
+                                MainDevice.Items[idx] = item;
                             SaveNameMappingsSafe();
-                            RefreshDisplayNames(); // È·±£ÆäËüÏîÒ²±»¸üÐÂ
+                            RefreshDisplayNames();
                         }
                     }
                 }
             }
         }
 
-        // Clear Name µã»÷´¦Àí£¨ÒÆ³ýÓ³Éä²¢Á¢¼´Ë¢ÐÂ ListBox ÏÔÊ¾£©
-        private void ClearName_Click(object sender, EventArgs e)
+        private void SendSetDeviceName(string name)
         {
-            if (MainDevice.SelectedItem is HidDeviceItem item && !string.IsNullOrWhiteSpace(item.Serial))
+            var nameBytes = new byte[16];
+            if (!string.IsNullOrEmpty(name))
             {
-                var idx = MainDevice.SelectedIndex;
-                if (nameMappings.Remove(item.Serial))
+                var ascii = Encoding.ASCII.GetBytes(name);
+                Array.Copy(ascii, 0, nameBytes, 0, Math.Min(16, ascii.Length));
+            }
+
+            var cmd = new byte[64];
+            cmd[0] = 0xA5;
+            cmd[1] = 0x01; // CMD_INFO
+            cmd[2] = 0x02; // PC -> MCU
+
+            ushort seq = GetNextSeq();
+            cmd[3] = (byte)(seq & 0xFF);
+            cmd[4] = (byte)((seq >> 8) & 0xFF);
+
+            cmd[5] = 17;   // payload length: subcmd(1) + name(16)
+            cmd[6] = 0x06; // SUBCMD_SET_DEVICE_NAME
+
+            Array.Copy(nameBytes, 0, cmd, 7, 16);
+
+            SendToHID(cmd);
+        }
+
+        // ---- Firmware Upgrade (IAP) ----
+        private async void Upgrade_Click(object sender, EventArgs e)
+        {
+            if (!_usingTcp || _tcpTransport == null || !_tcpTransport.IsConnected)
+            {
+                MessageBox.Show(this, "Upgrade requires an active TCP connection.", "Upgrade",
+                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            if (_iapInProgress)
+            {
+                MessageBox.Show(this, "Upgrade already in progress.", "Upgrade",
+                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            // Select firmware .bin file
+            using (var ofd = new OpenFileDialog())
+            {
+                ofd.Title = "Select firmware binary";
+                ofd.Filter = "Binary files (*.bin)|*.bin|All files (*.*)|*.*";
+                if (ofd.ShowDialog(this) != DialogResult.OK)
+                    return;
+
+                byte[] firmware;
+                try
                 {
-                    SaveNameMappingsSafe();
-
-                    // »Ö¸´ÏÔÊ¾ÃûÎªÐòÁÐºÅ»ò²úÆ·Ãû²¢Ç¿ÖÆ´¥·¢ ListBox ¸üÐÂ
-                    item.DisplayName = !string.IsNullOrWhiteSpace(item.Serial)
-                        ? item.Serial
-                        : (string.IsNullOrWhiteSpace(item.Product)
-                            ? $"HID {item.VendorId:X4}:{item.ProductId:X4}"
-                            : $"{item.Product} ({item.VendorId:X4}:{item.ProductId:X4})");
-
-                    if (idx >= 0 && idx < MainDevice.Items.Count)
-                        MainDevice.Items[idx] = item; // ´¥·¢ ListBox ÖØÐÂÈ¡Öµ
-
-                    RefreshDisplayNames();
+                    firmware = File.ReadAllBytes(ofd.FileName);
                 }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(this, "Failed to read file: " + ex.Message, "Upgrade",
+                        MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+
+                if (firmware.Length == 0 || firmware.Length > 960 * 1024)
+                {
+                    MessageBox.Show(this, $"Invalid firmware size: {firmware.Length} bytes (max 960KB).", "Upgrade",
+                        MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+
+                var result = MessageBox.Show(this,
+                    $"Upgrade firmware?\n\nFile: {Path.GetFileName(ofd.FileName)}\nSize: {firmware.Length:N0} bytes\n\nThe device will reboot after upgrade.",
+                    "Confirm Upgrade", MessageBoxButtons.OKCancel, MessageBoxIcon.Question);
+                if (result != DialogResult.OK)
+                    return;
+
+                await RunIAPUpgrade(firmware);
             }
         }
 
-        // Upgrade µã»÷£¨Ä¿Ç°²»¿ÉÓÃ£©
-        private void Upgrade_Click(object sender, EventArgs e)
+        private async Task RunIAPUpgrade(byte[] firmware)
         {
-            MessageBox.Show(this, "Upgrade is not available.", "Upgrade", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            _iapInProgress = true;
+            const int IAP_CHUNK_SIZE = 48;
+            const int IAP_TIMEOUT_MS = 5000;
+            const int IAP_MAX_RETRIES = 3;
+
+            try
+            {
+                uint fwSize = (uint)firmware.Length;
+                uint fwCrc32 = IAPCalcCRC32(firmware);
+
+                AppendReceivedText($"[IAP] Starting upgrade: {fwSize} bytes, CRC32=0x{fwCrc32:X8}\n");
+
+                // 1. IAP_BEGIN
+                if (!await SendIAPAndWaitAck(BuildIAPBegin(fwSize, fwCrc32, 0), IAP_TIMEOUT_MS, IAP_MAX_RETRIES))
+                {
+                    AppendReceivedText($"[IAP] BEGIN failed (status=0x{_iapAckStatus:X2})\n");
+                    MessageBox.Show(this, "Upgrade BEGIN failed. Check connection.", "Upgrade Error",
+                        MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+                AppendReceivedText("[IAP] BEGIN OK\n");
+
+                // 2. IAP_DATA chunks
+                uint offset = 0;
+                int totalChunks = (int)((fwSize + IAP_CHUNK_SIZE - 1) / IAP_CHUNK_SIZE);
+                int chunkNum = 0;
+
+                while (offset < fwSize)
+                {
+                    uint remaining = fwSize - offset;
+                    byte chunkLen = (byte)(remaining > IAP_CHUNK_SIZE ? IAP_CHUNK_SIZE : remaining);
+
+                    byte[] chunk = new byte[chunkLen];
+                    Array.Copy(firmware, (int)offset, chunk, 0, chunkLen);
+
+                    if (!await SendIAPAndWaitAck(BuildIAPData(offset, chunk), IAP_TIMEOUT_MS, IAP_MAX_RETRIES))
+                    {
+                        AppendReceivedText($"[IAP] DATA failed at offset {offset} (status=0x{_iapAckStatus:X2})\n");
+                        MessageBox.Show(this, $"Upgrade failed at offset {offset}.", "Upgrade Error",
+                            MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        return;
+                    }
+
+                    offset += chunkLen;
+                    chunkNum++;
+
+                    // Update progress every 50 chunks
+                    if (chunkNum % 50 == 0 || offset >= fwSize)
+                    {
+                        int pct = (int)(offset * 100 / fwSize);
+                        AppendReceivedText($"[IAP] Progress: {pct}% ({offset}/{fwSize})\n");
+                    }
+                }
+
+                // 3. IAP_END (verify)
+                AppendReceivedText("[IAP] Verifying...\n");
+                if (!await SendIAPAndWaitAck(BuildIAPEnd(), 30000, IAP_MAX_RETRIES)) // longer timeout for CRC verify
+                {
+                    AppendReceivedText($"[IAP] END/verify failed (status=0x{_iapAckStatus:X2})\n");
+                    MessageBox.Show(this, "Firmware verification failed on device.", "Upgrade Error",
+                        MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+                AppendReceivedText("[IAP] Verification OK\n");
+
+                // 4. IAP_REBOOT
+                AppendReceivedText("[IAP] Rebooting device...\n");
+                SendIAPFrame(BuildIAPReboot());
+                // Don't wait for ACK â€” device will reset
+
+                MessageBox.Show(this, "Firmware upgrade complete!\nDevice is rebooting.", "Upgrade Success",
+                    MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            catch (Exception ex)
+            {
+                AppendReceivedText($"[IAP] Error: {ex.Message}\n");
+                MessageBox.Show(this, "Upgrade error: " + ex.Message, "Upgrade Error",
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            finally
+            {
+                _iapInProgress = false;
+            }
         }
 
-        // Module List ÓÒ¼ü£ºÑ¡ÖÐ²¢ÏÔÊ¾ÉÏÏÂÎÄ²Ëµ¥
+        private async Task<bool> SendIAPAndWaitAck(byte[] frame, int timeoutMs, int maxRetries)
+        {
+            for (int attempt = 0; attempt < maxRetries; attempt++)
+            {
+                _iapAckEvent.Reset();
+                _iapAckStatus = 0xFF;
+
+                SendIAPFrame(frame);
+
+                bool got = await Task.Run(() => _iapAckEvent.Wait(timeoutMs));
+                if (got && _iapAckStatus == 0x00)
+                    return true;
+
+                if (got && _iapAckStatus != 0x00)
+                    return false; // device returned an error, don't retry
+
+                // Timeout â€” retry
+                AppendReceivedText($"[IAP] Timeout, retry {attempt + 1}/{maxRetries}\n");
+            }
+            return false;
+        }
+
+        private void SendIAPFrame(byte[] frame)
+        {
+            SendToHID(frame);
+        }
+
+        // --- IAP frame builders ---
+
+        private byte[] BuildIAPBegin(uint fwSize, uint fwCrc32, uint fwVersion)
+        {
+            var cmd = new byte[64];
+            cmd[0] = 0xA5;
+            cmd[1] = 0x30; // CMD_IAP
+            cmd[2] = 0x02; // PC -> MCU
+            ushort seq = GetNextSeq();
+            cmd[3] = (byte)(seq & 0xFF);
+            cmd[4] = (byte)(seq >> 8);
+            cmd[5] = 14;   // payload length
+            cmd[6] = 0x01; // IAP_SUBCMD_BEGIN
+
+            cmd[7]  = (byte)(fwSize);
+            cmd[8]  = (byte)(fwSize >> 8);
+            cmd[9]  = (byte)(fwSize >> 16);
+            cmd[10] = (byte)(fwSize >> 24);
+
+            cmd[11] = (byte)(fwCrc32);
+            cmd[12] = (byte)(fwCrc32 >> 8);
+            cmd[13] = (byte)(fwCrc32 >> 16);
+            cmd[14] = (byte)(fwCrc32 >> 24);
+
+            cmd[15] = (byte)(fwVersion);
+            cmd[16] = (byte)(fwVersion >> 8);
+            cmd[17] = (byte)(fwVersion >> 16);
+            cmd[18] = (byte)(fwVersion >> 24);
+
+            return cmd;
+        }
+
+        private byte[] BuildIAPData(uint offset, byte[] chunk)
+        {
+            var cmd = new byte[64];
+            cmd[0] = 0xA5;
+            cmd[1] = 0x30; // CMD_IAP
+            cmd[2] = 0x02; // PC -> MCU
+            ushort seq = GetNextSeq();
+            cmd[3] = (byte)(seq & 0xFF);
+            cmd[4] = (byte)(seq >> 8);
+            cmd[5] = (byte)(7 + chunk.Length); // subcmd(1) + offset(4) + chunkLen(1) + crc16(2) + data
+            cmd[6] = 0x02; // IAP_SUBCMD_DATA
+
+            cmd[7]  = (byte)(offset);
+            cmd[8]  = (byte)(offset >> 8);
+            cmd[9]  = (byte)(offset >> 16);
+            cmd[10] = (byte)(offset >> 24);
+
+            cmd[11] = (byte)chunk.Length;
+
+            ushort crc16 = IAPCalcCRC16(chunk);
+            cmd[12] = (byte)(crc16 & 0xFF);
+            cmd[13] = (byte)(crc16 >> 8);
+
+            Array.Copy(chunk, 0, cmd, 14, chunk.Length);
+
+            return cmd;
+        }
+
+        private byte[] BuildIAPEnd()
+        {
+            var cmd = new byte[64];
+            cmd[0] = 0xA5;
+            cmd[1] = 0x30;
+            cmd[2] = 0x02;
+            ushort seq = GetNextSeq();
+            cmd[3] = (byte)(seq & 0xFF);
+            cmd[4] = (byte)(seq >> 8);
+            cmd[5] = 1;
+            cmd[6] = 0x03; // IAP_SUBCMD_END
+            return cmd;
+        }
+
+        private byte[] BuildIAPReboot()
+        {
+            var cmd = new byte[64];
+            cmd[0] = 0xA5;
+            cmd[1] = 0x30;
+            cmd[2] = 0x02;
+            ushort seq = GetNextSeq();
+            cmd[3] = (byte)(seq & 0xFF);
+            cmd[4] = (byte)(seq >> 8);
+            cmd[5] = 1;
+            cmd[6] = 0x04; // IAP_SUBCMD_REBOOT
+            return cmd;
+        }
+
+        // --- CRC calculations (must match MCU) ---
+
+        private static uint IAPCalcCRC32(byte[] data)
+        {
+            uint crc = 0xFFFFFFFF;
+            for (int i = 0; i < data.Length; i++)
+            {
+                crc ^= data[i];
+                for (int j = 0; j < 8; j++)
+                {
+                    if ((crc & 1) != 0)
+                        crc = (crc >> 1) ^ 0xEDB88320U;
+                    else
+                        crc >>= 1;
+                }
+            }
+            return ~crc;
+        }
+
+        private static ushort IAPCalcCRC16(byte[] data)
+        {
+            ushort crc = 0xFFFF;
+            for (int i = 0; i < data.Length; i++)
+            {
+                crc ^= (ushort)(data[i] << 8);
+                for (int j = 0; j < 8; j++)
+                {
+                    if ((crc & 0x8000) != 0)
+                        crc = (ushort)((crc << 1) ^ 0x1021);
+                    else
+                        crc <<= 1;
+                }
+            }
+            return crc;
+        }
+
+        // Module List ï¿½Ò¼ï¿½ï¿½ï¿½Ñ¡ï¿½Ð²ï¿½ï¿½ï¿½Ê¾ï¿½ï¿½ï¿½ï¿½ï¿½Ä²Ëµï¿½
         private void SubDevice_MouseDown(object sender, MouseEventArgs e)
         {
             if (e.Button != MouseButtons.Right)
@@ -439,14 +771,7 @@ namespace DT_Controller
                 try
                 {
                     var req = BuildDeviceInfoQueryBuffer(GetNextSeq(), 0x03, new byte[] { (byte)mi.Index });
-                    lock (hidLock)
-                    {
-                        if (currentHidDevice != null && currentHidDevice.IsOpen && currentHidDevice.IsConnected)
-                        {
-                            try { currentHidDevice.Write(req); }
-                            catch { try { currentHidDevice.WriteFeatureData(req); } catch { } }
-                        }
-                    }
+                    SendToHID(req);
                 }
                 catch
                 {
@@ -458,11 +783,11 @@ namespace DT_Controller
         private void DeviceChangeTimer_Tick(object sender, EventArgs e)
         {
             deviceChangeTimer.Stop();
-            // ÔÚ UI Ïß³Ìµ÷ÓÃÒì²½Ë¢ÐÂ
+            // ï¿½ï¿½ UI ï¿½ß³Ìµï¿½ï¿½ï¿½ï¿½ì²½Ë¢ï¿½ï¿½
             PopulateHidDevicesAsync();
         }
 
-        // ÖØÐ´ WndProc ½ÓÊÕÉè±¸²å°ÎÏûÏ¢£¨¸üÐÂ£º²åÈëÊ±Æô¶¯ÖØÊÔÃ¶¾Ù£¬ÒÆ³ýÊ±±£ÁôÁ¢¼´ÒÆ³ýÂß¼­£©
+        // ï¿½ï¿½Ð´ WndProc ï¿½ï¿½ï¿½ï¿½ï¿½è±¸ï¿½ï¿½ï¿½ï¿½ï¿½Ï¢ï¿½ï¿½ï¿½ï¿½ï¿½Â£ï¿½ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ã¶ï¿½Ù£ï¿½ï¿½Æ³ï¿½Ê±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ³ï¿½ï¿½ß¼ï¿½ï¿½ï¿½
         protected override void WndProc(ref Message m)
         {
             if (m.Msg == WM_DEVICECHANGE)
@@ -470,7 +795,7 @@ namespace DT_Controller
                 int wParam = (int)m.WParam;
                 if (wParam == DBT_DEVICEARRIVAL)
                 {
-                    // Éè±¸²åÈë£ºÁ¢¼´ÇëÇóÈ¥¶¶¶¯Ë¢ÐÂ£¬²¢Æô¶¯¶ÌÆÚÖØÊÔÒÔÓ¦¶Ô WMI/Çý¶¯×¢²áÖÍºó
+                    // ï¿½è±¸ï¿½ï¿½ï¿½ë£ºï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½È¥ï¿½ï¿½ï¿½ï¿½Ë¢ï¿½Â£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ó¦ï¿½ï¿½ WMI/ï¿½ï¿½ï¿½ï¿½×¢ï¿½ï¿½ï¿½Íºï¿½
                     RequestRefreshDevices();
                     StartArrivalRetry();
                 }
@@ -481,10 +806,10 @@ namespace DT_Controller
                         var selItem = MainDevice.SelectedItem as HidDeviceItem;
                         string selPath = selItem?.DevicePath;
 
-                        // Í£Ö¹µ±Ç° HID ¼àÌý²¢ÊÍ·Å×ÊÔ´
+                        // Í£Ö¹ï¿½ï¿½Ç° HID ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Í·ï¿½ï¿½ï¿½Ô´
                         StopListeningCurrentDevice();
 
-                        // Á¢¼´´ÓÁÐ±íÖÐÒÆ³ýÓë selPath Æ¥ÅäµÄÏî
+                        // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð±ï¿½ï¿½ï¿½ï¿½Æ³ï¿½ï¿½ï¿½ selPath Æ¥ï¿½ï¿½ï¿½ï¿½ï¿½
                         if (!string.IsNullOrWhiteSpace(selPath))
                         {
                             for (int i = MainDevice.Items.Count - 1; i >= 0; i--)
@@ -498,11 +823,11 @@ namespace DT_Controller
                             }
                         }
 
-                        // Çå³ýÑ¡ÖÐÏî²¢Ë¢ÐÂÏà¹Ø UI ÏÔÊ¾
+                        // ï¿½ï¿½ï¿½Ñ¡ï¿½ï¿½ï¿½î²¢Ë¢ï¿½ï¿½ï¿½ï¿½ï¿½ UI ï¿½ï¿½Ê¾
                         MainDevice.SelectedIndex = -1;
                         UpdateDeviceInfo(null);
 
-                        // ÐÂÔö£ºÍ¬Ê±Çå¿Õ SubDevice ÁÐ±íºÍ Module_Info ÏÔÊ¾£¬ÇåÀíÄÚ´æÖÐÄ£¿éÁÐ±í
+                        // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Í¬Ê±ï¿½ï¿½ï¿½ SubDevice ï¿½Ð±ï¿½ï¿½ï¿½ Module_Info ï¿½ï¿½Ê¾ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ú´ï¿½ï¿½ï¿½Ä£ï¿½ï¿½ï¿½Ð±ï¿½
                         try
                         {
                             InvokeIfRequired(() =>
@@ -515,18 +840,18 @@ namespace DT_Controller
                                 }
                                 catch
                                 {
-                                    // ºöÂÔ UI ÇåÀí´íÎó
+                                    // ï¿½ï¿½ï¿½ï¿½ UI ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
                                 }
                             });
                         }
                         catch
                         {
-                            // ºöÂÔÒì³£
+                            // ï¿½ï¿½ï¿½ï¿½ï¿½ì³£
                         }
                     }
                     catch
                     {
-                        // ºöÂÔÍ£Ö¹/ÒÆ³ýÊ§°Ü
+                        // ï¿½ï¿½ï¿½ï¿½Í£Ö¹/ï¿½Æ³ï¿½Ê§ï¿½ï¿½
                     }
 
                     RequestRefreshDevices();
@@ -536,7 +861,7 @@ namespace DT_Controller
             base.WndProc(ref m);
         }
 
-        // ÇëÇóË¢ÐÂ£¨ÖØÆôÈ¥¶¶¶¯¼ÆÊ±Æ÷£©
+        // ï¿½ï¿½ï¿½ï¿½Ë¢ï¿½Â£ï¿½ï¿½ï¿½ï¿½ï¿½È¥ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½ï¿½ï¿½
         private void RequestRefreshDevices()
         {
             try
@@ -546,7 +871,7 @@ namespace DT_Controller
             }
             catch
             {
-                // ºöÂÔ¼ÆÊ±Æ÷Òì³£
+                // ï¿½ï¿½ï¿½Ô¼ï¿½Ê±ï¿½ï¿½ï¿½ì³£
             }
         }
 
@@ -554,7 +879,7 @@ namespace DT_Controller
         {
         }
 
-        // ¸üÐÂÔË¶¯°´Å¥µÄÊ¹ÄÜ×´Ì¬
+        // ï¿½ï¿½ï¿½ï¿½ï¿½Ë¶ï¿½ï¿½ï¿½Å¥ï¿½ï¿½Ê¹ï¿½ï¿½×´Ì¬
         private void UpdateMotionButtonsEnabledState()
         {
             InvokeIfRequired(() =>
@@ -630,11 +955,12 @@ namespace DT_Controller
             });
         }
 
-        // Ñ¡ÔñÉè±¸Ê±¿ªÊ¼/ÇÐ»»¼àÌý
+        // Ñ¡ï¿½ï¿½ï¿½è±¸Ê±ï¿½ï¿½Ê¼/ï¿½Ð»ï¿½ï¿½ï¿½ï¿½ï¿½
         private void MainDevice_SelectedIndexChanged(object sender, EventArgs e)
         {
-            // ÏÈÍ£Ö¹Ö®Ç°µÄ¼àÌý
+            // ï¿½ï¿½Í£Ö¹Ö®Ç°ï¿½Ä¼ï¿½ï¿½ï¿½
             StopListeningCurrentDevice();
+            _pendingEthIp = null;
 
             // reset remaining steps & buttons for new selection
             remainingStepX = 0;
@@ -643,6 +969,34 @@ namespace DT_Controller
             try { remain.Text = "X: 0 / Y: 0"; } catch { }
             try { label_pos.Text = "Pos  X:0000  Y:0000"; } catch { }
             UpdateMotionButtonsEnabledState();
+
+            // Disconnect previous TCP if switching away
+            if (_usingTcp)
+                DisconnectTcp();
+
+            if (MainDevice.SelectedItem is EthDeviceItem ethItem)
+            {
+                richTextBox1.Clear();
+                richTextBox1.AppendText($"ETH Device: {ethItem.Hostname}\n");
+                richTextBox1.AppendText($"IP: {ethItem.IP}  Port: {ethItem.TcpPort}\n");
+                richTextBox1.AppendText($"MAC: {BitConverter.ToString(ethItem.MAC)}\n");
+                richTextBox1.AppendText($"FW: {ethItem.FW}\n");
+
+                InvokeIfRequired(() =>
+                {
+                    _manualStepSpeedByNodeId.Clear();
+                    currentModules.Clear();
+                    SubDevice.Items.Clear();
+                    Module_Info_richTextBox.Clear();
+                });
+
+                // Show IP in Device_Info (FW/Date will be filled after TCP query)
+                _pendingEthIp = ethItem.IP;
+                UpdateDeviceInfo(null);
+
+                ConnectTcp(ethItem.IP, ethItem.TcpPort);
+                return;
+            }
 
             if (MainDevice.SelectedItem is HidDeviceItem item)
             {
@@ -653,12 +1007,10 @@ namespace DT_Controller
                 richTextBox1.AppendText($"Manufacturer: {item.Manufacturer}\n");
                 richTextBox1.AppendText($"Product: {item.Product}\n");
 
-                // SN_Lab removed; do not overwrite remain label
-
-                // ¸üÐÂ Device_Info£ºÏÔÊ¾ SN / FW / Date£¨FW ºÍ Date Ä¿Ç°Õ¼Î»£©
+                // ï¿½ï¿½ï¿½ï¿½ Device_Infoï¿½ï¿½ï¿½ï¿½Ê¾ SN / FW / Dateï¿½ï¿½FW ï¿½ï¿½ Date Ä¿Ç°Õ¼Î»ï¿½ï¿½
                 UpdateDeviceInfo(item);
 
-                // Çå¿Õ SubDevice & Module_Info
+                // ï¿½ï¿½ï¿½ SubDevice & Module_Info
                 InvokeIfRequired(() =>
                 {
                     _manualStepSpeedByNodeId.Clear();
@@ -667,7 +1019,7 @@ namespace DT_Controller
                     Module_Info_richTextBox.Clear();
                 });
 
-                // Æô¶¯¶Ô¸ÃÉè±¸µÄ HID Êý¾Ý¼àÌý£¨Òì²½£©
+                // ï¿½ï¿½ï¿½ï¿½ï¿½Ô¸ï¿½ï¿½è±¸ï¿½ï¿½ HID ï¿½ï¿½ï¿½Ý¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ì²½ï¿½ï¿½
                 StartListeningToDevice(item);
             }
             else
@@ -678,11 +1030,10 @@ namespace DT_Controller
 
         private void Form1_Load(object sender, EventArgs e)
         {
-            // ×¢²áÉè±¸Í¨Öª£¨×¢²á USB device interface£©£¬ÔÚ Load Ê±×¢²áÒÔÈ·±£´°Ìå handle ÒÑ´´½¨
+            // ×¢ï¿½ï¿½ï¿½è±¸Í¨Öªï¿½ï¿½×¢ï¿½ï¿½ USB device interfaceï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ Load Ê±×¢ï¿½ï¿½ï¿½ï¿½È·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ handle ï¿½Ñ´ï¿½ï¿½ï¿½
             RegisterForDeviceNotifications();
-
-            // Òì²½Ã¶¾Ù£¬±ÜÃâ×èÈû UI
             PopulateHidDevicesAsync();
+            StartEthDiscovery();
         }
 
         private async void PopulateHidDevicesAsync()
@@ -691,7 +1042,7 @@ namespace DT_Controller
             {
                 MainDevice.Items.Clear();
                 richTextBox1.Clear();
-                richTextBox1.AppendText($"ÕýÔÚÃ¶¾Ù HID Éè±¸...  (½öÏÔÊ¾ VID=0x{FilterVendorId:X4} PID=0x{FilterProductId:X4})\n");
+                richTextBox1.AppendText($"ï¿½ï¿½ï¿½ï¿½Ã¶ï¿½ï¿½ HID ï¿½è±¸...  (ï¿½ï¿½ï¿½ï¿½Ê¾ VID=0x{FilterVendorId:X4} PID=0x{FilterProductId:X4})\n");
 
                 var items = await Task.Run(() => EnumerateHidViaWmiAndHidLibMergedPreferUsbSerial());
 
@@ -699,7 +1050,7 @@ namespace DT_Controller
                 {
                     foreach (var it in items)
                     {
-                        // Èç¹û´æÔÚÓÃ»§ÅäÖÃµÄÏÔÊ¾ÃûÔò¸²¸Ç DisplayName
+                        // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ã»ï¿½ï¿½ï¿½ï¿½Ãµï¿½ï¿½ï¿½Ê¾ï¿½ï¿½ï¿½ò¸²¸ï¿½ DisplayName
                         if (!string.IsNullOrWhiteSpace(it.Serial) && nameMappings.TryGetValue(it.Serial, out var mapped))
                         {
                             it.DisplayName = mapped;
@@ -710,7 +1061,7 @@ namespace DT_Controller
                     richTextBox1.Clear();
                     richTextBox1.AppendText($"Found {MainDevice.Items.Count} HID device(s) (filtered).\n");
 
-                    // ÈôÓÐÌõÄ¿£¬Ä¬ÈÏÏÔÊ¾µÚÒ»¸öµÄÐòÁÐºÅ
+                    // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä¿ï¿½ï¿½Ä¬ï¿½ï¿½ï¿½ï¿½Ê¾ï¿½ï¿½Ò»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ðºï¿½
                     var firstSerial = items.FirstOrDefault()?.Serial;
                     // SN_Lab removed; do not overwrite remain label
                 });
@@ -725,7 +1076,7 @@ namespace DT_Controller
             }
         }
 
-        // Æô¶¯¶ÔÖ¸¶¨ HidDeviceItem µÄ¼àÌý£¨»á³¢ÊÔÆ¥Åä²¢´ò¿ªÒ»¸ö HidLibrary.HidDevice£©
+        // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö¸ï¿½ï¿½ HidDeviceItem ï¿½Ä¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½á³¢ï¿½ï¿½Æ¥ï¿½ä²¢ï¿½ï¿½Ò»ï¿½ï¿½ HidLibrary.HidDeviceï¿½ï¿½
         private void StartListeningToDevice(HidDeviceItem item)
         {
             if (item == null || item.VendorId == 0 || item.ProductId == 0)
@@ -778,29 +1129,29 @@ namespace DT_Controller
                         StopListeningCurrentDevice();
 
                         currentHidDevice = chosen;
-                        moduleQuerySent = false; // ÐÂÉè±¸£¬ÔÊÐí·¢ËÍ Module ²éÑ¯
+                        moduleQuerySent = false; // ï¿½ï¿½ï¿½è±¸ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ Module ï¿½ï¿½Ñ¯
                         if (!currentHidDevice.IsOpen)
                             currentHidDevice.OpenDevice();
 
-                        // ·¢ËÍ Device Info ²éÑ¯°ü£¨·Ç×èÈû£¬ºöÂÔÐ´Ê§°Ü£©
+                        // ï¿½ï¿½ï¿½ï¿½ Device Info ï¿½ï¿½Ñ¯ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð´Ê§ï¿½Ü£ï¿½
                         try
                         {
                             ushort seq = (ushort)(System.Threading.Interlocked.Increment(ref seqCounter) & 0xFFFF);
-                            var buf = BuildDeviceInfoQueryBuffer(seq); // Ä¬ÈÏ SubCmd = 0x01£¨Get FW Info£©
+                            var buf = BuildDeviceInfoQueryBuffer(seq); // Ä¬ï¿½ï¿½ SubCmd = 0x01ï¿½ï¿½Get FW Infoï¿½ï¿½
                             try
                             {
-                                // HidLibrary Ò»°ãÌá¹© Write »ò WriteReport£»Ê¹ÓÃ Write ³¢ÊÔ·¢ËÍ
+                                // HidLibrary Ò»ï¿½ï¿½ï¿½á¹© Write ï¿½ï¿½ WriteReportï¿½ï¿½Ê¹ï¿½ï¿½ Write ï¿½ï¿½ï¿½Ô·ï¿½ï¿½ï¿½
                                 currentHidDevice.Write(buf);
                             }
                             catch
                             {
-                                // Èç¹û Write ²»¿ÉÓÃ»òÅ×Òì³££¬ºöÂÔÐ´Èë´íÎó
+                                // ï¿½ï¿½ï¿½ Write ï¿½ï¿½ï¿½ï¿½ï¿½Ã»ï¿½ï¿½ï¿½ï¿½ì³£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð´ï¿½ï¿½ï¿½ï¿½ï¿½
                                 try { currentHidDevice.WriteFeatureData(buf); } catch { }
                             }
                         }
                         catch
                         {
-                            // ºöÂÔ·¢ËÍ´íÎó
+                            // ï¿½ï¿½ï¿½Ô·ï¿½ï¿½Í´ï¿½ï¿½ï¿½
                         }
 
                         BeginReadLoop(currentHidDevice);
@@ -808,12 +1159,12 @@ namespace DT_Controller
                 }
                 catch
                 {
-                    // ºöÂÔÆô¶¯¶ÁÈ¡´íÎó
+                    // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½È¡ï¿½ï¿½ï¿½ï¿½
                 }
             });
         }
 
-        // Í£Ö¹²¢ÊÍ·Åµ±Ç°¼àÌýÉè±¸
+        // Í£Ö¹ï¿½ï¿½ï¿½Í·Åµï¿½Ç°ï¿½ï¿½ï¿½ï¿½ï¿½è±¸
         private void StopListeningCurrentDevice()
         {
             lock (hidLock)
@@ -824,8 +1175,8 @@ namespace DT_Controller
                     {
                         try
                         {
-                            // Í£Ö¹¶ÁÈ¡£º HidLibrary Ã»ÓÐÃ÷È· Stop API for ReadReport loop;
-                            // ¹Ø±ÕÉè±¸²¢ Dispose ¿ÉÖÐ¶ÏÕýÔÚ½øÐÐµÄ¶ÁÈ¡»Øµ÷
+                            // Í£Ö¹ï¿½ï¿½È¡ï¿½ï¿½ HidLibrary Ã»ï¿½ï¿½ï¿½ï¿½È· Stop API for ReadReport loop;
+                            // ï¿½Ø±ï¿½ï¿½è±¸ï¿½ï¿½ Dispose ï¿½ï¿½ï¿½Ð¶ï¿½ï¿½ï¿½ï¿½Ú½ï¿½ï¿½ÐµÄ¶ï¿½È¡ï¿½Øµï¿½
                             currentHidDevice.CloseDevice();
                         }
                         catch { }
@@ -833,33 +1184,33 @@ namespace DT_Controller
                         currentHidDevice = null;
                     }
 
-                    // ÖØÖÃ·¢ËÍ±êÖ¾
+                    // ï¿½ï¿½ï¿½Ã·ï¿½ï¿½Í±ï¿½Ö¾
                     moduleQuerySent = false;
                 }
                 catch
                 {
-                    // ºöÂÔ
+                    // ï¿½ï¿½ï¿½ï¿½
                 }
             }
         }
 
-        // ¿ªÊ¼µÝ¹é¶ÁÈ¡±¨ÎÄ£¨Ê¹ÓÃ ReadReport »Øµ÷£©
+        // ï¿½ï¿½Ê¼ï¿½Ý¹ï¿½ï¿½È¡ï¿½ï¿½ï¿½Ä£ï¿½Ê¹ï¿½ï¿½ ReadReport ï¿½Øµï¿½ï¿½ï¿½
         private void BeginReadLoop(HidDevice dev)
         {
             if (dev == null) return;
 
             try
             {
-                // Ê¹ÓÃÒì²½»Øµ÷¶ÁÈ¡±¨ÎÄ
+                // Ê¹ï¿½ï¿½ï¿½ì²½ï¿½Øµï¿½ï¿½ï¿½È¡ï¿½ï¿½ï¿½ï¿½
                 dev.ReadReport(OnReport);
             }
             catch
             {
-                // ºöÂÔÆô¶¯¶ÁÈ¡´íÎó
+                // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½È¡ï¿½ï¿½ï¿½ï¿½
             }
         }
 
-        // ±¨ÎÄ»Øµ÷£¨ÐÞ¸Ä£º°´ MCU ¶¨Òå½âÎö 4 ×Ö½Ú¹Ì¼þºÍ 3 ×Ö½Ú³ö³§ÈÕÆÚ£¬ÈÕÆÚ¸ñÊ½Èç 15.Dec.2025£©
+        // ï¿½ï¿½ï¿½Ä»Øµï¿½ï¿½ï¿½ï¿½Þ¸Ä£ï¿½ï¿½ï¿½ MCU ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ 4 ï¿½Ö½Ú¹Ì¼ï¿½ï¿½ï¿½ 3 ï¿½Ö½Ú³ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ú£ï¿½ï¿½ï¿½ï¿½Ú¸ï¿½Ê½ï¿½ï¿½ 15.Dec.2025ï¿½ï¿½
         private void OnReport(HidReport report)
         {
             try
@@ -868,10 +1219,45 @@ namespace DT_Controller
 
                 var data = report.Data ?? new byte[0];
 
-                // Ä¬ÈÏ²»´òÓ¡Ã¿°üÔ­Ê¼Êý¾Ý£¬±ÜÃâÈÕÖ¾³ÖÐøË¢ÆÁ
-                // ÈçÐè×¥°üµ÷ÊÔ£¬¿ÉÊÖ¶¯»Ö¸´ÒÔÏÂÁ½ÐÐ£º
-                // var rawText = FormatReportData(data);
-                // AppendReceivedText(rawText);
+                // HID report may include report ID at [0]; normalize
+                byte[] frame;
+                if (data.Length >= 21 && data[0] != 0xA5 && data[1] == 0xA5)
+                    frame = data.Skip(1).ToArray(); // strip report ID
+                else
+                    frame = data;
+
+                ProcessReceivedFrame(frame);
+
+                lastReceiveTime = DateTime.Now;
+
+                lock (hidLock)
+                {
+                    try { currentHidDevice?.ReadReport(OnReport); }
+                    catch { }
+                }
+            }
+            catch { }
+        }
+
+        /// <summary>
+        /// Process a received 64-byte protocol frame (from HID or TCP).
+        /// </summary>
+        private void ProcessReceivedFrame(byte[] data)
+        {
+            if (data == null || data.Length < 6) return;
+
+                // IAP ACK handling: CMD_IAP=0x30, SubCmd=0x81 (ACK)
+                try
+                {
+                    if (data.Length >= 12 && data[0] == 0xA5 && data[1] == 0x30 && data[6] == 0x81)
+                    {
+                        _iapAckStatus = data[7];
+                        _iapAckNextOffset = (uint)(data[8] | (data[9] << 8) |
+                                                   (data[10] << 16) | (data[11] << 24));
+                        _iapAckEvent.Set();
+                    }
+                }
+                catch { }
 
                 // Parse Remaining Step report (Device -> PC): [ReportId?] A5 10 01 ...
                 try
@@ -907,20 +1293,20 @@ namespace DT_Controller
                     // ignore parse errors
                 }
 
-                // ½âÎö Device Info / Module List / Module Info µÈ£º°´ MCU Ô¼¶¨Î»ÖÃ¶ÁÈ¡
+                // ï¿½ï¿½ï¿½ï¿½ Device Info / Module List / Module Info ï¿½È£ï¿½ï¿½ï¿½ MCU Ô¼ï¿½ï¿½Î»ï¿½Ã¶ï¿½È¡
                 try
                 {
                     if (data.Length > 5 && data[0] == 0xA5 && data[1] == 0x01)
                     {
                         byte subCmd = data.Length > 6 ? data[6] : (byte)0x00;
 
-                        // SubCmd 0x01: Device Info (FW, Date) - ±£³ÖÔ­ÓÐ´¦Àí£¨µ±³¤¶È×ã¹»Ê±£©
+                        // SubCmd 0x01: Device Info (FW, Date) - ï¿½ï¿½ï¿½ï¿½Ô­ï¿½Ð´ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ã¹»Ê±ï¿½ï¿½
                         if (subCmd == 0x01 && data.Length > 13)
                         {
-                            // ¹Ì¼þ°æ±¾£ºdata[7..10] -> FW_VER_0..FW_VER_3
+                            // ï¿½Ì¼ï¿½ï¿½æ±¾ï¿½ï¿½data[7..10] -> FW_VER_0..FW_VER_3
                             var fw = $"{data[7]:D3}.{data[8]:D2}.{data[9]:D2}.{data[10]:D2}";
 
-                            // ³ö³§ÈÕÆÚ£ºdata[11]=yy (ÀýÈç 25 -> 2025), data[12]=month, data[13]=day
+                            // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ú£ï¿½data[11]=yy (ï¿½ï¿½ï¿½ï¿½ 25 -> 2025), data[12]=month, data[13]=day
                             int year = 2000 + data[11];
                             int month = data[12];
                             int day = data[13];
@@ -938,48 +1324,41 @@ namespace DT_Controller
 
                             var dateStr = $"{day:D2}.{monthName}.{year}";
 
-                            // ÔÚ UI Ïß³Ì¸üÐÂ Device_Info£¨Ê¹ÓÃµ±Ç°Ñ¡ÖÐÉè±¸×÷ÎªÉÏÏÂÎÄ£©
+                            // SN: bytes [14..17] as 8-char hex (same as Module SN format)
+                            string deviceSn = string.Empty;
+                            if (data.Length > 17)
+                            {
+                                deviceSn = $"{data[14]:X2}{data[15]:X2}{data[16]:X2}{data[17]:X2}";
+                            }
+
+                            // ï¿½ï¿½ UI ï¿½ß³Ì¸ï¿½ï¿½ï¿½ Device_Infoï¿½ï¿½Ê¹ï¿½Ãµï¿½Ç°Ñ¡ï¿½ï¿½ï¿½è±¸ï¿½ï¿½Îªï¿½ï¿½ï¿½ï¿½ï¿½Ä£ï¿½
                             InvokeIfRequired(() =>
                             {
                                 var sel = MainDevice.SelectedItem as HidDeviceItem;
-                                UpdateDeviceInfo(sel, fw, dateStr);
+                                UpdateDeviceInfo(sel, fw, dateStr, deviceSn);
                             });
 
-                            // ×Ô¶¯·¢ËÍ Module Çåµ¥²éÑ¯£¨SubCmd = 0x02£©£¬½ö·¢ËÍÒ»´Î
+                            // Auto-query Module List (SubCmd = 0x02)
                             Task.Run(() =>
                             {
-                                lock (hidLock)
+                                try
                                 {
-                                    try
+                                    if (!moduleQuerySent)
                                     {
-                                        if (!moduleQuerySent && currentHidDevice != null && currentHidDevice.IsOpen && currentHidDevice.IsConnected)
-                                        {
-                                            ushort seq = (ushort)(System.Threading.Interlocked.Increment(ref seqCounter) & 0xFFFF);
-                                            var buf = BuildDeviceInfoQueryBuffer(seq, 0x02); // SubCmd = 0x02 (²éÑ¯Module List)
-                                            try
-                                            {
-                                                currentHidDevice.Write(buf);
-                                            }
-                                            catch
-                                            {
-                                                try { currentHidDevice.WriteFeatureData(buf); } catch { }
-                                            }
-
-                                            moduleQuerySent = true;
-                                        }
-                                    }
-                                    catch
-                                    {
-                                        // ºöÂÔ·¢ËÍÒì³£
+                                        ushort seq = (ushort)(System.Threading.Interlocked.Increment(ref seqCounter) & 0xFFFF);
+                                        var buf = BuildDeviceInfoQueryBuffer(seq, 0x02);
+                                        SendToHID(buf.Length == 65 ? buf.Skip(1).ToArray() : buf);
+                                        moduleQuerySent = true;
                                     }
                                 }
+                                catch { }
                             });
                         }
                         // SubCmd 0x02: Module List (MCU -> PC)
                         else if (subCmd == 0x02 && data.Length > 7)
                         {
                             // data[7] = Module_Count (number of module entries described or total instances?)
-                            // ¸ñÊ½: after [7] follows pairs of [Type][Count][Padding] for each entry.
+                            // ï¿½ï¿½Ê½: after [7] follows pairs of [Type][Count][Padding] for each entry.
                             try
                             {
                                 int moduleCountField = data[7];
@@ -1008,75 +1387,45 @@ namespace DT_Controller
                                     offset += 2; // move to next entry
                                 }
 
-                                // Çå¿ÕÒÑÓÐÁÐ±í£¬µÈ´ýÃ¿¸öÄ£¿éµÄÏêÏ¸ÐÅÏ¢·µ»ØºóÔÙÖð¸öÌí¼ÓÏÔÊ¾
+                                // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð±ï¿½ï¿½ï¿½ï¿½È´ï¿½Ã¿ï¿½ï¿½Ä£ï¿½ï¿½ï¿½ï¿½ï¿½Ï¸ï¿½ï¿½Ï¢ï¿½ï¿½ï¿½Øºï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê¾
                                 InvokeIfRequired(() =>
                                 {
                                     currentModules.Clear();
                                     SubDevice.Items.Clear();
                                 });
 
-                                // ¶ÔÃ¿¸ö module ·¢Æð Get Module Info (SubCmd = 0x03) ²éÑ¯
+                                // ï¿½ï¿½Ã¿ï¿½ï¿½ module ï¿½ï¿½ï¿½ï¿½ Get Module Info (SubCmd = 0x03) ï¿½ï¿½Ñ¯
                                 Task.Run(() =>
                                 {
-                                    HidDevice devRef;
-                                    lock (hidLock)
-                                    {
-                                        devRef = currentHidDevice;
-                                    }
-
                                     try
                                     {
-                                        if (devRef == null || !devRef.IsOpen || !devRef.IsConnected)
-                                            return;
-
                                         foreach (var m in parsedModules)
                                         {
                                             try
                                             {
                                                 ushort seq = (ushort)(System.Threading.Interlocked.Increment(ref seqCounter) & 0xFFFF);
-                                                var req = BuildDeviceInfoQueryBuffer(seq, 0x03, new byte[] { (byte)m.Index }); // SubCmd=0x03, payload=module index
-                                                // log the outgoing request to the UI for debugging
-                                                try
-                                                {
-                                                    var log = FormatReportData(req.Skip(1).ToArray()); // skip report id for display
-                                                    AppendReceivedText($"[TX] ModuleInfoReq idx={m.Index} seq={seq} -> {log}");
-                                                }
-                                                catch { }
-
-                                                try
-                                                {
-                                                    lock (hidLock)
-                                                    {
-                                                        if (currentHidDevice == null || !currentHidDevice.IsOpen || !currentHidDevice.IsConnected)
-                                                            break;
-                                                        currentHidDevice.Write(req);
-                                                    }
-                                                }
-                                                catch
-                                                {
-                                                    try { lock (hidLock) { currentHidDevice?.WriteFeatureData(req); } } catch { }
-                                                }
-
-                                                System.Threading.Thread.Sleep(150);
+                                                var req = BuildDeviceInfoQueryBuffer(seq, 0x03, new byte[] { (byte)m.Index });
+                                                SendToHID(req.Length == 65 ? req.Skip(1).ToArray() : req);
+                                                System.Threading.Thread.Sleep(100);
                                             }
                                             catch
                                             {
-                                                // ºöÂÔµ¥¸ö·¢ËÍÊ§°Ü£¬¼ÌÐø³¢ÊÔÆäËü
+                                                // ï¿½ï¿½ï¿½Ôµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê§ï¿½Ü£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
                                             }
                                         }
                                     }
                                     catch
                                     {
-                                        // ºöÂÔÕûÌå·¢ËÍ´íÎó
+                                        // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½å·¢ï¿½Í´ï¿½ï¿½ï¿½
                                     }
                                 });
                             }
                             catch
                             {
-                                // ºöÂÔ½âÎö Module List ´íÎó
+                                // ï¿½ï¿½ï¿½Ô½ï¿½ï¿½ï¿½ Module List ï¿½ï¿½ï¿½ï¿½
                             }
                         }
-                        // SubCmd 0x03: Module Info »Ø¸´ (MCU -> PC)
+                        // SubCmd 0x03: Module Info ï¿½Ø¸ï¿½ (MCU -> PC)
                         else if (subCmd == 0x03)
                         {
                             if (data.Length > 27)
@@ -1093,7 +1442,7 @@ namespace DT_Controller
                                     string deviceName = Encoding.ASCII.GetString(nameBytes).TrimEnd('\0').Trim();
 
                                     // NodeID bytes [17..20] => SN display
-                                    // Ê¾Àý±¨ÎÄ£º... 75 68 52 16 ... -> "75685216"
+                                    // Ê¾ï¿½ï¿½ï¿½ï¿½ï¿½Ä£ï¿½... 75 68 52 16 ... -> "75685216"
                                     string snStr;
                                     uint nodeId;
                                     try
@@ -1122,7 +1471,7 @@ namespace DT_Controller
                                     string monthName = GetMonthNameShort(month);
                                     string dateStr = $"{day:D2}.{monthName}.{year}";
 
-                                    // ======== Module Info V2 À©Õ¹Çø (Byte[28..43]) ========
+                                    // ======== Module Info V2 ï¿½ï¿½Õ¹ï¿½ï¿½ (Byte[28..43]) ========
                                     bool hasV2 = data.Length > 43;
                                     int xCurrentRaw = 0;
                                     int yCurrentRaw = 0;
@@ -1156,15 +1505,7 @@ namespace DT_Controller
                                         && holdCurrentPct == 0
                                         && speed == 0;
 
-                                    // suppress continuous RX debug logs to avoid log flooding
-                                    if (hasV2)
-                                    {
-                                        try
-                                        {
-                                            AppendReceivedText($"[RX-DBG] idx={moduleIndex} byte[32]=0x{data[32]:X2} byte[33]=0x{data[33]:X2} byte[34]=0x{data[34]:X2} byte[35]=0x{data[35]:X2} parsed_speed={speed}\n");
-                                        }
-                                        catch { }
-                                    }
+                                    // RX-DBG removed: async CAN reports are too frequent for the log window
 
                                     InvokeIfRequired(() =>
                                     {
@@ -1251,7 +1592,7 @@ namespace DT_Controller
                                 }
                                 catch
                                 {
-                                    // ºöÂÔ½âÎö Module Info Òì³£
+                                    // ï¿½ï¿½ï¿½Ô½ï¿½ï¿½ï¿½ Module Info ï¿½ì³£
                                 }
                             }
                         }
@@ -1259,30 +1600,12 @@ namespace DT_Controller
                 }
                 catch
                 {
-                    // ºöÂÔ½âÎöÒì³££¨±£³ÖÔ­ÓÐÐÐÎª£©
+                    // ï¿½ï¿½ï¿½Ô½ï¿½ï¿½ï¿½ï¿½ì³£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ô­ï¿½ï¿½ï¿½ï¿½Îªï¿½ï¿½
                 }
 
-                lastReceiveTime = DateTime.Now;
-
-                lock (hidLock)
-                {
-                    try
-                    {
-                        currentHidDevice?.ReadReport(OnReport);
-                    }
-                    catch
-                    {
-                        // ºöÂÔ
-                    }
-                }
-            }
-            catch
-            {
-                // ºöÂÔ»Øµ÷ÄÚÒì³£
-            }
         }
 
-        // SubDevice ±»Ñ¡ÔñÊ±ÏÔÊ¾ Module_Info
+        // SubDevice ï¿½ï¿½Ñ¡ï¿½ï¿½Ê±ï¿½ï¿½Ê¾ Module_Info
         private void SubDevice_SelectedIndexChanged(object sender, EventArgs e)
         {
             try
@@ -1302,11 +1625,11 @@ namespace DT_Controller
             }
             catch
             {
-                // ºöÂÔ
+                // ï¿½ï¿½ï¿½ï¿½
             }
         }
 
-        // ½« module info ÏÔÊ¾µ½ Module_Info_richTextBox
+        // ï¿½ï¿½ module info ï¿½ï¿½Ê¾ï¿½ï¿½ Module_Info_richTextBox
         private void ShowModuleInfo(ModuleInfo mi)
         {
             InvokeIfRequired(() =>
@@ -1317,11 +1640,15 @@ namespace DT_Controller
                     sb.AppendLine($"SN: {mi.SN}");
                     sb.AppendLine($"FW: {mi.FW}");
                     sb.AppendLine($"Date: {mi.Date}");
-                    Module_Info_richTextBox.Text = sb.ToString();
+                    var newText = sb.ToString();
+                    if (string.Equals(Module_Info_richTextBox.Text.Replace("\r", ""),
+                                      newText.Replace("\r", "")))
+                        return;
+                    Module_Info_richTextBox.Text = newText;
                 }
                 catch
                 {
-                    // ºöÂÔ UI ´íÎó
+                    // ï¿½ï¿½ï¿½ï¿½ UI ï¿½ï¿½ï¿½ï¿½
                 }
             });
         }
@@ -1333,19 +1660,9 @@ namespace DT_Controller
                 try
                 {
                     var req = BuildDeviceInfoQueryBuffer(GetNextSeq(), 0x03, new byte[] { (byte)moduleIndex });
-                    lock (hidLock)
-                    {
-                        if (currentHidDevice != null && currentHidDevice.IsOpen && currentHidDevice.IsConnected)
-                        {
-                            try { currentHidDevice.Write(req); }
-                            catch { try { currentHidDevice.WriteFeatureData(req); } catch { } }
-                        }
-                    }
+                    SendToHID(req.Length == 65 ? req.Skip(1).ToArray() : req);
                 }
-                catch
-                {
-                    // ignore
-                }
+                catch { }
             });
         }
 
@@ -1488,7 +1805,7 @@ namespace DT_Controller
             });
         }
 
-        // ¸¨Öú£ºÅÐ¶Ï»º³åÊÇ·ñÈ«²¿Îª 0
+        // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð¶Ï»ï¿½ï¿½ï¿½ï¿½Ç·ï¿½È«ï¿½ï¿½Îª 0
         private static bool IsAllZeros(byte[] data)
         {
             if (data == null || data.Length == 0) return true;
@@ -1499,7 +1816,7 @@ namespace DT_Controller
             return true;
         }
 
-        // ¸ñÊ½»¯ÊÕµ½µÄÊý¾ÝÎªÒ»ÐÐÎÄ±¾£¨Ê±¼ä + hex + ascii£©
+        // ï¿½ï¿½Ê½ï¿½ï¿½ï¿½Õµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ÎªÒ»ï¿½ï¿½ï¿½Ä±ï¿½ï¿½ï¿½Ê±ï¿½ï¿½ + hex + asciiï¿½ï¿½
         private string FormatReportData(byte[] data)
         {
             var sb = new StringBuilder();
@@ -1533,30 +1850,68 @@ namespace DT_Controller
             return sb.ToString();
         }
 
-        // ½«½ÓÊÕÎÄ±¾×·¼Óµ½ richTextBox1£¨Ïß³Ì°²È«£©
+        // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä±ï¿½×·ï¿½Óµï¿½ richTextBox1ï¿½ï¿½ï¿½ß³Ì°ï¿½È«ï¿½ï¿½
+        private readonly System.Collections.Concurrent.ConcurrentQueue<string> _logQueue
+            = new System.Collections.Concurrent.ConcurrentQueue<string>();
+        private int _logFlushPending = 0;
+        private const int LOG_MAX_LENGTH = 30000;
+
         private void AppendReceivedText(string text)
         {
-            if (string.IsNullOrEmpty(text)) return;
+            if (!string.IsNullOrEmpty(text))
+                _logQueue.Enqueue(text);
+            else if (_logQueue.IsEmpty)
+                return;
 
-            InvokeIfRequired(() =>
+            // Only schedule one UI flush at a time
+            if (System.Threading.Interlocked.CompareExchange(ref _logFlushPending, 1, 0) == 0)
             {
-                try
+                InvokeIfRequired(() =>
                 {
-                    // ×·¼Ó²¢¹ö¶¯µ½µ×²¿
-                    richTextBox1.AppendText(text);
-                    richTextBox1.SelectionStart = richTextBox1.Text.Length;
-                    richTextBox1.ScrollToCaret();
-                }
-                catch
-                {
-                    // ºöÂÔ UI ¸üÐÂ´íÎó
-                }
-            });
+                    try
+                    {
+                        var sb = new System.Text.StringBuilder();
+                        while (_logQueue.TryDequeue(out var line))
+                            sb.Append(line);
+
+                        if (sb.Length > 0)
+                        {
+                            // Only auto-scroll if user isn't selecting/reading
+                            bool userHasFocus = richTextBox1.Focused;
+
+                            richTextBox1.AppendText(sb.ToString());
+
+                            // Trim log if too long
+                            if (richTextBox1.TextLength > LOG_MAX_LENGTH)
+                            {
+                                int removeLen = richTextBox1.TextLength - LOG_MAX_LENGTH / 2;
+                                richTextBox1.Select(0, removeLen);
+                                richTextBox1.SelectedText = "";
+                            }
+
+                            if (!userHasFocus)
+                            {
+                                richTextBox1.SelectionStart = richTextBox1.TextLength;
+                                richTextBox1.ScrollToCaret();
+                            }
+                        }
+                    }
+                    catch { }
+                    finally
+                    {
+                        System.Threading.Interlocked.Exchange(ref _logFlushPending, 0);
+
+                        // If more items arrived during flush, schedule another
+                        if (!_logQueue.IsEmpty)
+                            AppendReceivedText("");
+                    }
+                });
+            }
         }
 
-        // ÆäÓà·½·¨±£³Ö²»±ä£¨Ã¶¾Ù/ÌáÈ¡ÐòÁÐºÅ/×¢²áÍ¨Öª/Ó³Éä¼ÓÔØ±£´æµÈ£©
-        // Ã¶¾Ù²¢ºÏ²¢£ºµ±Í¬Ò»ÎïÀíÉè±¸¼ÈÓÐ USB ²ã£¨´ø iSerial µÄ USB\...\<serial>£©ºÍ HID ½Ó¿Ú²ã£¨HID\ »ò USB\...&MI_...£©
-        // ÓÅÏÈÑ¡Ôñ¡°USB ²ã´øÐòÁÐºÅ¡±µÄ DevicePath ²¢Ö»ÏÔÊ¾Ò»Ìõ£¬ÇÒÁÐ±íÃû³ÆÖ»ÏÔÊ¾ÐòÁÐºÅ£¨ÓÐÔòÏÔÊ¾£©¡£
+        // ï¿½ï¿½ï¿½à·½ï¿½ï¿½ï¿½ï¿½ï¿½Ö²ï¿½ï¿½ä£¨Ã¶ï¿½ï¿½/ï¿½ï¿½È¡ï¿½ï¿½ï¿½Ðºï¿½/×¢ï¿½ï¿½Í¨Öª/Ó³ï¿½ï¿½ï¿½ï¿½Ø±ï¿½ï¿½ï¿½È£ï¿½
+        // Ã¶ï¿½Ù²ï¿½ï¿½Ï²ï¿½ï¿½ï¿½ï¿½ï¿½Í¬Ò»ï¿½ï¿½ï¿½ï¿½ï¿½è±¸ï¿½ï¿½ï¿½ï¿½ USB ï¿½ã£¨ï¿½ï¿½ iSerial ï¿½ï¿½ USB\...\<serial>ï¿½ï¿½ï¿½ï¿½ HID ï¿½Ó¿Ú²ã£¨HID\ ï¿½ï¿½ USB\...&MI_...ï¿½ï¿½
+        // ï¿½ï¿½ï¿½ï¿½Ñ¡ï¿½ï¿½USB ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ÐºÅ¡ï¿½ï¿½ï¿½ DevicePath ï¿½ï¿½Ö»ï¿½ï¿½Ê¾Ò»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð±ï¿½ï¿½ï¿½ï¿½ï¿½Ö»ï¿½ï¿½Ê¾ï¿½ï¿½ï¿½ÐºÅ£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê¾ï¿½ï¿½ï¿½ï¿½
         private List<HidDeviceItem> EnumerateHidViaWmiAndHidLibMergedPreferUsbSerial()
         {
             var rawList = new List<HidDeviceItem>();
@@ -1584,13 +1939,13 @@ namespace DT_Controller
                             int.TryParse(m.Groups[2].Value, System.Globalization.NumberStyles.HexNumber, null, out productId);
                         }
 
-                        // ¹ýÂË£ºÖ»±£ÁôÖ¸¶¨µÄ VID/PID
+                        // ï¿½ï¿½ï¿½Ë£ï¿½Ö»ï¿½ï¿½ï¿½ï¿½Ö¸ï¿½ï¿½ï¿½ï¿½ VID/PID
                         if (vendorId != FilterVendorId || productId != FilterProductId)
                             continue;
 
                         string productString = null;
 
-                        // ÈôÄÜ½âÎöµ½ VID/PID£¬Ôò³¢ÊÔÍ¨¹ý HidLibrary ¶ÁÈ¡ PRODUCT_STRING
+                        // ï¿½ï¿½ï¿½Ü½ï¿½ï¿½ï¿½ï¿½ï¿½ VID/PIDï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Í¨ï¿½ï¿½ HidLibrary ï¿½ï¿½È¡ PRODUCT_STRING
                         if (vendorId != 0 && productId != 0)
                         {
                             try
@@ -1619,7 +1974,7 @@ namespace DT_Controller
                                     }
                                     catch
                                     {
-                                        // ºöÂÔµ¥¸öÉè±¸¶ÁÈ¡Ê§°Ü£¬¼ÌÐø³¢ÊÔÆäËü½Ó¿Ú
+                                        // ï¿½ï¿½ï¿½Ôµï¿½ï¿½ï¿½ï¿½è±¸ï¿½ï¿½È¡Ê§ï¿½Ü£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ó¿ï¿½
                                     }
                                     finally
                                     {
@@ -1630,7 +1985,7 @@ namespace DT_Controller
                             }
                             catch
                             {
-                                // HidLibrary Ã¶¾Ù»ò¶ÁÈ¡Ê§°Ü£¬»ØÍËµ½ WMI name
+                                // HidLibrary Ã¶ï¿½Ù»ï¿½ï¿½È¡Ê§ï¿½Ü£ï¿½ï¿½ï¿½ï¿½Ëµï¿½ WMI name
                                 productString = null;
                             }
                         }
@@ -1651,12 +2006,12 @@ namespace DT_Controller
                     }
                     catch
                     {
-                        // ºöÂÔµ¥Ìõ¼ÇÂ¼´íÎó£¬¼ÌÐøÃ¶¾ÙÆäÓàÉè±¸
+                        // ï¿½ï¿½ï¿½Ôµï¿½ï¿½ï¿½ï¿½ï¿½Â¼ï¿½ï¿½ï¿½ó£¬¼ï¿½ï¿½ï¿½Ã¶ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½è±¸
                     }
                 }
             }
 
-            // °´ Vendor:Product:ProductString ·Ö×é£¬È»ºóÔÚÃ¿×éÄÚÓÅÏÈÑ¡Ôñ USB ²ãÇÒ´øÐòÁÐºÅµÄÌõÄ¿£¨ÐÎÊ½Îª USB\VID_xxxx&PID_xxxx\<serial>£¬serial ²¿·Ö²»º¬ '&'£©
+            // ï¿½ï¿½ Vendor:Product:ProductString ï¿½ï¿½ï¿½é£¬È»ï¿½ï¿½ï¿½ï¿½Ã¿ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ñ¡ï¿½ï¿½ USB ï¿½ï¿½ï¿½Ò´ï¿½ï¿½ï¿½ï¿½ÐºÅµï¿½ï¿½ï¿½Ä¿ï¿½ï¿½ï¿½ï¿½Ê½Îª USB\VID_xxxx&PID_xxxx\<serial>ï¿½ï¿½serial ï¿½ï¿½ï¿½Ö²ï¿½ï¿½ï¿½ '&'ï¿½ï¿½
             var mergedList = new List<HidDeviceItem>();
 
             // Group by vendor/product/productstring to find identical product groups
@@ -1682,7 +2037,7 @@ namespace DT_Controller
 
                     var preferred = items.FirstOrDefault(isUsbWithSerial) ?? items.FirstOrDefault(x => x.DevicePath != null && x.DevicePath.StartsWith("USB\\", StringComparison.OrdinalIgnoreCase)) ?? items[0];
 
-                    var manufacturer = items.FirstOrDefault(x => !string.IsNullOrWhiteSpace(x.Manufacturer) && x.Manufacturer != "(±ê×¼ÏµÍ³Éè±¸)")?.Manufacturer
+                    var manufacturer = items.FirstOrDefault(x => !string.IsNullOrWhiteSpace(x.Manufacturer) && x.Manufacturer != "(ï¿½ï¿½×¼ÏµÍ³ï¿½è±¸)")?.Manufacturer
                                        ?? preferred.Manufacturer;
 
                     string serial = ExtractSerialFromDevicePath(preferred.DevicePath);
@@ -1742,7 +2097,7 @@ namespace DT_Controller
             return mergedList.OrderBy(i => i.DisplayName).ToList();
         }
 
-        // ´Ó DevicePath ÌáÈ¡ÐòÁÐºÅ£º¶Ô USB\VID_xxxx&PID_xxxx\<serial> ÕâÖÖ¸ñÊ½£¬·µ»Ø×îºóÒ»¶Î£¨Èô°üº¬ '&' Ôò²»ÊÇÐòÁÐºÅ£©
+        // ï¿½ï¿½ DevicePath ï¿½ï¿½È¡ï¿½ï¿½ï¿½ÐºÅ£ï¿½ï¿½ï¿½ USB\VID_xxxx&PID_xxxx\<serial> ï¿½ï¿½ï¿½Ö¸ï¿½Ê½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ò»ï¿½Î£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ '&' ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ÐºÅ£ï¿½
         private static string ExtractSerialFromDevicePath(String devicePath)
         {
             if (string.IsNullOrWhiteSpace(devicePath))
@@ -1754,7 +2109,7 @@ namespace DT_Controller
                 var last = parts.LastOrDefault();
                 if (string.IsNullOrWhiteSpace(last))
                     return null;
-                // ÅÅ³ý°üº¬ '&' µÄ¶Î£¨Í¨³£ÎªÍØÆËÐÅÏ¢£¬Èç MI_ »ò VID_...&PID_...£©
+                // ï¿½Å³ï¿½ï¿½ï¿½ï¿½ï¿½ '&' ï¿½Ä¶Î£ï¿½Í¨ï¿½ï¿½Îªï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ï¢ï¿½ï¿½ï¿½ï¿½ MI_ ï¿½ï¿½ VID_...&PID_...ï¿½ï¿½
                 if (last.Contains("&"))
                     return null;
                 return last;
@@ -1765,12 +2120,12 @@ namespace DT_Controller
             }
         }
 
-        // ×¢²áÉè±¸Í¨Öª£¨USB device interface£©
+        // ×¢ï¿½ï¿½ï¿½è±¸Í¨Öªï¿½ï¿½USB device interfaceï¿½ï¿½
         private void RegisterForDeviceNotifications()
         {
             try
             {
-                // ¹¹Ôì DEV_BROADCAST_DEVICEINTERFACE ½á¹¹
+                // ï¿½ï¿½ï¿½ï¿½ DEV_BROADCAST_DEVICEINTERFACE ï¿½á¹¹
                 var filter = new DEV_BROADCAST_DEVICEINTERFACE
                 {
                     dbcc_size = Marshal.SizeOf(typeof(DEV_BROADCAST_DEVICEINTERFACE)),
@@ -1784,7 +2139,7 @@ namespace DT_Controller
                 {
                     Marshal.StructureToPtr(filter, buffer, false);
                     deviceNotificationHandle = RegisterDeviceNotification(this.Handle, buffer, DEVICE_NOTIFY_WINDOW_HANDLE);
-                    // RegisterDeviceNotification »á¸´ÖÆ½á¹¹Ìå£¬²»¿ÉÊÍ·ÅºóÁ¢¼´×¢ÏúÓÃµ½ pointer£¨ÈÔ¿ÉÊÍ·Å±¾µØ buffer£©
+                    // RegisterDeviceNotification ï¿½á¸´ï¿½Æ½á¹¹ï¿½å£¬ï¿½ï¿½ï¿½ï¿½ï¿½Í·Åºï¿½ï¿½ï¿½ï¿½ï¿½×¢ï¿½ï¿½ï¿½Ãµï¿½ pointerï¿½ï¿½ï¿½Ô¿ï¿½ï¿½Í·Å±ï¿½ï¿½ï¿½ bufferï¿½ï¿½
                 }
                 finally
                 {
@@ -1793,7 +2148,7 @@ namespace DT_Controller
             }
             catch
             {
-                // ºöÂÔ×¢²áÊ§°Ü£¨»ØÍËµ½ WM_DEVICECHANGE È«¾ÖÏûÏ¢´¦Àí£©
+                // ï¿½ï¿½ï¿½ï¿½×¢ï¿½ï¿½Ê§ï¿½Ü£ï¿½ï¿½ï¿½ï¿½Ëµï¿½ WM_DEVICECHANGE È«ï¿½ï¿½ï¿½ï¿½Ï¢ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
             }
         }
 
@@ -1809,11 +2164,11 @@ namespace DT_Controller
             }
             catch
             {
-                // ºöÂÔ×¢ÏúÊ§°Ü
+                // ï¿½ï¿½ï¿½ï¿½×¢ï¿½ï¿½Ê§ï¿½ï¿½
             }
         }
 
-        // ¼ÓÔØÓ³ÉäÎÄ¼þ£¨¼òµ¥µÄ key<TAB>value Ã¿ÐÐ¸ñÊ½£©
+        // ï¿½ï¿½ï¿½ï¿½Ó³ï¿½ï¿½ï¿½Ä¼ï¿½ï¿½ï¿½ï¿½òµ¥µï¿½ key<TAB>value Ã¿ï¿½Ð¸ï¿½Ê½ï¿½ï¿½
         private void LoadNameMappingsSafe()
         {
             try
@@ -1837,11 +2192,11 @@ namespace DT_Controller
             }
             catch
             {
-                // ºöÂÔ¼ÓÔØ´íÎó
+                // ï¿½ï¿½ï¿½Ô¼ï¿½ï¿½Ø´ï¿½ï¿½ï¿½
             }
         }
 
-        // ±£´æÓ³ÉäÎÄ¼þ£¨¸²¸Ç£©
+        // ï¿½ï¿½ï¿½ï¿½Ó³ï¿½ï¿½ï¿½Ä¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ç£ï¿½
         private void SaveNameMappingsSafe()
         {
             try
@@ -1862,11 +2217,11 @@ namespace DT_Controller
             }
             catch
             {
-                // ºöÂÔ±£´æ´íÎó
+                // ï¿½ï¿½ï¿½Ô±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
             }
         }
 
-        // ¼òµ¥µÄ UI Ïß³Ìµ÷¶È¸¨Öú
+        // ï¿½òµ¥µï¿½ UI ï¿½ß³Ìµï¿½ï¿½È¸ï¿½ï¿½ï¿½
         private void InvokeIfRequired(Action action)
         {
             if (this.IsHandleCreated && this.InvokeRequired)
@@ -1884,7 +2239,7 @@ namespace DT_Controller
             public int dbcc_devicetype;
             public int dbcc_reserved;
             public Guid dbcc_classguid;
-            // dbcc_name Ëæ½á¹¹ÌåºóÐø¿É±ä³¤£¬²»ÐèÒªÔÚÕâÀïÉùÃ÷ÓÃÓÚ×¢²á
+            // dbcc_name ï¿½ï¿½á¹¹ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½É±ä³¤ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Òªï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½×¢ï¿½ï¿½
         }
 
         [DllImport("user32.dll", SetLastError = true)]
@@ -1895,7 +2250,7 @@ namespace DT_Controller
 
         #endregion
 
-        // ¼òµ¥µÄµ¥ÐÐÊäÈë¶Ô»°¿ò£¨ÓÃÓÚ Change Name£©
+        // ï¿½òµ¥µÄµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ô»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ Change Nameï¿½ï¿½
         private sealed class SingleLinePrompt : Form
         {
             private readonly TextBox tb;
@@ -1943,16 +2298,27 @@ namespace DT_Controller
         private sealed class HidDeviceItem
         {
             public string DisplayName { get; set; }
-            public string DevicePath { get; set; } // PnP DeviceID
+            public string DevicePath { get; set; }
             public int VendorId { get; set; }
             public int ProductId { get; set; }
             public string Manufacturer { get; set; }
-            public string Product { get; set; } // ÏÔÊ¾µÄ²úÆ·×Ö·û´®£¨ÓÅÏÈ PRODUCT_STRING£©
-            public string Serial { get; set; }  // ´Ó DevicePath ÌáÈ¡µ½µÄÐòÁÐºÅ£¨ÈôÓÐ£©
+            public string Product { get; set; }
+            public string Serial { get; set; }
             public override string ToString() => DisplayName;
         }
 
-        // ModuleInfo ÓÃÓÚÔÚ SubDevice ÁÐ±í¼°ÏÔÊ¾ Module_Info
+        private sealed class EthDeviceItem
+        {
+            public string Hostname { get; set; }
+            public string IP { get; set; }
+            public int TcpPort { get; set; }
+            public byte[] MAC { get; set; }
+            public string FW { get; set; }
+            public DateTime LastSeen { get; set; }
+            public override string ToString() => Hostname;
+        }
+
+        // ModuleInfo ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ SubDevice ï¿½Ð±ï¿½ï¿½ï¿½ï¿½ï¿½Ê¾ Module_Info
         private sealed class ModuleInfo
         {
             public int Index { get; set; }
@@ -1985,26 +2351,28 @@ namespace DT_Controller
             }
         }
 
-        // ÔÚ Form1 ÀàÖÐÌí¼Ó´Ë·½·¨£¬ÓÃÓÚÉú³É×ÔÔöÐòºÅ
+        // ï¿½ï¿½ Form1 ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ó´Ë·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
         private ushort GetNextSeq()
         {
             return (ushort)(System.Threading.Interlocked.Increment(ref seqCounter) & 0xFFFF);
         }
 
-        // ÔÚ Form1 ÀàÖÐÌí¼Ó£º¸üÐÂ Device_Info richtextbox ÄÚÈÝ£¨ÏÔÊ¾ SN / FW / Date£©
-        private void UpdateDeviceInfo(HidDeviceItem item, string fw = null, string date = null)
+        // ï¿½ï¿½ Form1 ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ó£ï¿½ï¿½ï¿½ï¿½ï¿½ Device_Info richtextbox ï¿½ï¿½ï¿½Ý£ï¿½ï¿½ï¿½Ê¾ SN / FW / Dateï¿½ï¿½
+        private void UpdateDeviceInfo(HidDeviceItem item, string fw = null, string date = null, string sn = null)
         {
             InvokeIfRequired(() =>
             {
                 try
                 {
-                    var sn = item?.Serial ?? string.Empty;
+                    var snVal = sn ?? item?.Serial ?? string.Empty;
 
                     var fwVal = fw ?? string.Empty;
                     var dateVal = date ?? string.Empty;
 
                     var sb = new StringBuilder();
-                    sb.AppendLine($"SN: {sn}");
+                    sb.AppendLine($"SN: {snVal}");
+                    if (!string.IsNullOrEmpty(_pendingEthIp))
+                        sb.AppendLine($"IP: {_pendingEthIp}");
                     sb.AppendLine($"FW: {fwVal}");
                     sb.AppendLine($"Date: {dateVal}");
 
@@ -2022,27 +2390,27 @@ namespace DT_Controller
             });
         }
 
-        // ÐÂ°æ£ºÎª HID Ð´Èë¼ÓÈë±¨¸æ ID Ç°×º£¨report ID = 0£©
+        // ï¿½Â°æ£ºÎª HID Ð´ï¿½ï¿½ï¿½ï¿½ë±¨ï¿½ï¿½ ID Ç°×ºï¿½ï¿½report ID = 0ï¿½ï¿½
         private byte[] BuildDeviceInfoQueryBuffer(ushort seq)
         {
             return BuildDeviceInfoQueryBuffer(seq, 0x01);
         }
 
-        // ÐÂÔöÖØÔØ£ºÔÊÐíÖ¸¶¨ SubCmd£¨ÀýÈç 0x01=Get FW, 0x02=Query Module, 0x03=Get Module Info£©
+        // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ø£ï¿½ï¿½ï¿½ï¿½ï¿½Ö¸ï¿½ï¿½ SubCmdï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ 0x01=Get FW, 0x02=Query Module, 0x03=Get Module Infoï¿½ï¿½
         private byte[] BuildDeviceInfoQueryBuffer(ushort seq, byte subCmd)
         {
             return BuildDeviceInfoQueryBuffer(seq, subCmd, null);
         }
 
-        // ÐÂÔöÖØÔØ£ºÖ¸¶¨ SubCmd ÇÒ¿É´ø payload£¨payload µÄÃ¿¸ö×Ö½Ú½«·ÅÔÚ buf[8..]£©
+        // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ø£ï¿½Ö¸ï¿½ï¿½ SubCmd ï¿½Ò¿É´ï¿½ payloadï¿½ï¿½payload ï¿½ï¿½Ã¿ï¿½ï¿½ï¿½Ö½Ú½ï¿½ï¿½ï¿½ï¿½ï¿½ buf[8..]ï¿½ï¿½
         private byte[] BuildDeviceInfoQueryBuffer(ushort seq, byte subCmd, byte[] payload)
         {
-            // HidLibrary µÄ Write Í¨³£ÆÚÍûµÚÒ»¸ö×Ö½ÚÎª report ID£¨Ã»ÓÐ report Ê±Îª 0x00£©
-            var buf = new byte[65]; // +1 ÓÃÓÚ report ID
+            // HidLibrary ï¿½ï¿½ Write Í¨ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ò»ï¿½ï¿½ï¿½Ö½ï¿½Îª report IDï¿½ï¿½Ã»ï¿½ï¿½ report Ê±Îª 0x00ï¿½ï¿½
+            var buf = new byte[65]; // +1 ï¿½ï¿½ï¿½ï¿½ report ID
             buf[0] = 0x00;          // Report ID = 0
             buf[1] = 0xA5;
             buf[2] = 0x01;     // CMD_DEVICE_INFO
-            buf[3] = 0x02;     // PC ¡ú MCU
+            buf[3] = 0x02;     // PC ï¿½ï¿½ MCU
             buf[4] = (byte)(seq & 0xFF);
             buf[5] = (byte)(seq >> 8);
             if (payload != null && payload.Length > 0)
@@ -2059,11 +2427,11 @@ namespace DT_Controller
                 // put payload starting at index 8
                 Array.Copy(payload, 0, buf, 8, Math.Min(payload.Length, buf.Length - 8));
             }
-            // ÆäÓà×Ö½Ú±£³ÖÎª 0
+            // ï¿½ï¿½ï¿½ï¿½ï¿½Ö½Ú±ï¿½ï¿½ï¿½Îª 0
             return buf;
         }
 
-        // ÐÂ°æ£º½« Module_Type •RÓ³ÉäÎª·ÖÀàÃû
+        // ï¿½Â°æ£ºï¿½ï¿½ Module_Type ï¿½RÓ³ï¿½ï¿½Îªï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
         private static string ModuleTypeToCategoryName(byte t)
         {
             switch (t)
@@ -2079,7 +2447,7 @@ namespace DT_Controller
             }
         }
 
-        // »ñÈ¡¶ÌÔÂÃû£¨ÓëÇ°Ãæ Device Info ±£³ÖÒ»ÖÂ£©
+        // ï¿½ï¿½È¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ç°ï¿½ï¿½ Device Info ï¿½ï¿½ï¿½ï¿½Ò»ï¿½Â£ï¿½
         private static string GetMonthNameShort(int month)
         {
             try
@@ -2093,7 +2461,7 @@ namespace DT_Controller
             }
         }
 
-    // ÐÂÔö£ºÔÚÉè±¸²åÈëÊ±¶à´ÎÖØÊÔÃ¶¾Ù£¨´¦Àí WMI/ÏµÍ³×¢²áÖÍºó£©£¬Ê¹ÓÃÍ¬²½ Invoke Æô¶¯Ã¶¾Ù²¢¶ÁÈ¡ÁÐ±í³¤¶È
+    // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½è±¸ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ã¶ï¿½Ù£ï¿½ï¿½ï¿½ï¿½ï¿½ WMI/ÏµÍ³×¢ï¿½ï¿½ï¿½Íºó£©£ï¿½Ê¹ï¿½ï¿½Í¬ï¿½ï¿½ Invoke ï¿½ï¿½ï¿½ï¿½Ã¶ï¿½Ù²ï¿½ï¿½ï¿½È¡ï¿½Ð±ï¿½ï¿½ï¿½ï¿½ï¿½
     private void StartArrivalRetry()
     {
         Task.Run(async () =>
@@ -2105,7 +2473,7 @@ namespace DT_Controller
             {
                 try
                 {
-                    // ÔÚ UI Ïß³ÌÍ¬²½´¥·¢Ò»´ÎÃ¶¾Ù£¨±ÜÃâ BeginInvoke µÄÒì²½ÑÓ³Ù£©
+                    // ï¿½ï¿½ UI ï¿½ß³ï¿½Í¬ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ò»ï¿½ï¿½Ã¶ï¿½Ù£ï¿½ï¿½ï¿½ï¿½ï¿½ BeginInvoke ï¿½ï¿½ï¿½ì²½ï¿½Ó³Ù£ï¿½
                     if (this.IsHandleCreated && this.InvokeRequired)
                     {
                         this.Invoke((Action)(() => PopulateHidDevicesAsync()));
@@ -2117,7 +2485,7 @@ namespace DT_Controller
                 }
                 catch
                 {
-                    // ºöÂÔÆô¶¯Ã¶ÉàµÄÒì³£
+                    // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ã¶ï¿½ï¿½ï¿½ï¿½ì³£
                 }
 
                 await Task.Delay(delayMs).ConfigureAwait(false);
@@ -2135,11 +2503,11 @@ namespace DT_Controller
                     }
 
                     if (count > 0)
-                        break; // ÕÒµ½Éè±¸£¬Í£Ö¹ÖØÊÔ
+                        break; // ï¿½Òµï¿½ï¿½è±¸ï¿½ï¿½Í£Ö¹ï¿½ï¿½ï¿½ï¿½
                 }
                 catch
                 {
-                    // ºöÂÔ¶ÁÈ¡ UI Ê±µÄÒì³££¬¼ÌÐøÖØÊÔ
+                    // ï¿½ï¿½ï¿½Ô¶ï¿½È¡ UI Ê±ï¿½ï¿½ï¿½ì³£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
                 }
             }
         });
@@ -2250,7 +2618,7 @@ namespace DT_Controller
             byte axisByte = (byte)axis;
             byte dirBit0 = (byte)(direction & 0x01);
 
-            uint nodeId = GetCurrentNodeID(); // »ñÈ¡NodeID
+            uint nodeId = GetCurrentNodeID(); // ï¿½ï¿½È¡NodeID
             if (nodeId == 0)
             {
                 try
@@ -2266,7 +2634,7 @@ namespace DT_Controller
             cmd[1] = 0x10; // CMD_MOTION (NEW)
             cmd[2] = 0x02; // DIR_PC_TO_MCU
 
-            ushort seq = GetNextSeq(); // ÊµÏÖ×ÔÔöÐòºÅ
+            ushort seq = GetNextSeq(); // Êµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
             cmd[3] = (byte)(seq & 0xFF);
             cmd[4] = (byte)((seq >> 8) & 0xFF);
 
@@ -2286,7 +2654,7 @@ namespace DT_Controller
             cmd[14] = (byte)((step >> 16) & 0xFF);
             cmd[15] = (byte)((step >> 24) & 0xFF);
 
-            // [16..63] Reserved = 0 (ÒÑ³õÊ¼»¯)
+            // [16..63] Reserved = 0 (ï¿½Ñ³ï¿½Ê¼ï¿½ï¿½)
 
             try
             {
@@ -2294,10 +2662,10 @@ namespace DT_Controller
             }
             catch { }
 
-            SendToHID(cmd); // Ö±½Ó·¢ËÍµ½HID
+            SendToHID(cmd); // Ö±ï¿½Ó·ï¿½ï¿½Íµï¿½HID
 }
 
-        // ÔÚ Form1 ÀàÖÐÌí¼Ó´Ë·½·¨£¬ÓÃÓÚ»ñÈ¡µ±Ç° NodeID£¨¿É¸ù¾ÝÊµ¼ÊÐèÇóÐÞ¸ÄÊµÏÖ·½Ê½£©
+        // ï¿½ï¿½ Form1 ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ó´Ë·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ú»ï¿½È¡ï¿½ï¿½Ç° NodeIDï¿½ï¿½ï¿½É¸ï¿½ï¿½ï¿½Êµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Þ¸ï¿½Êµï¿½Ö·ï¿½Ê½ï¿½ï¿½
         private uint GetCurrentNodeID()
         {
             // NodeID MUST come from the currently selected module (parsed from ModuleInfo bytes).
@@ -2312,16 +2680,29 @@ namespace DT_Controller
             return 0;
         }
 
-        // ÔÚ Form1 ÀàÖÐÌí¼Ó SendToHID ·½·¨
+        // ï¿½ï¿½ Form1 ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ SendToHID ï¿½ï¿½ï¿½ï¿½
         private void SendToHID(byte[] data)
         {
+            // TCP mode: send via TcpTransport
+            if (_usingTcp && _tcpTransport != null && _tcpTransport.IsConnected)
+            {
+                try
+                {
+                    AppendReceivedText("[TX-TCP] " + FormatReportData(data));
+                }
+                catch { }
+
+                _tcpTransport.Write(data);
+                return;
+            }
+
+            // HID mode
             lock (hidLock)
             {
                 try
                 {
                     if (currentHidDevice != null && currentHidDevice.IsOpen && currentHidDevice.IsConnected)
                     {
-                        // HidLibrary ÒªÇóµÚÒ»¸ö×Ö½ÚÎª Report ID £¨Í¨³£Îª0£©
                         byte[] buf;
                         if (data.Length == 64)
                         {
@@ -2335,7 +2716,6 @@ namespace DT_Controller
                         }
                         else
                         {
-                            // ³¤¶È²»·û£¬Ö±½Ó·µ»Ø
                             return;
                         }
 
@@ -2351,19 +2731,224 @@ namespace DT_Controller
                     {
                         try
                         {
-                            AppendReceivedText("[TX] Skip: HID device not connected/open. Select a device in MainDevice first.\n");
+                            AppendReceivedText("[TX] Skip: device not connected.\n");
                         }
                         catch { }
                     }
                 }
-                catch
+                catch { }
+            }
+        }
+
+        // ï¿½ï¿½ Form1 ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ RefreshDisplayNames ï¿½ï¿½ï¿½ï¿½
+        // =========================================================
+        // TCP Connection
+        // =========================================================
+        private async void ConnectTcp(string host, int port)
+        {
+            try
+            {
+                if (_tcpTransport != null)
                 {
-                    // ºöÂÔÐ´ÈëÒì³£
+                    _tcpTransport.FrameReceived -= OnTcpFrameReceived;
+                    _tcpTransport.Disconnected -= OnTcpDisconnected;
+                    _tcpTransport.Dispose();
+                }
+
+                _tcpTransport = new TcpTransport();
+                _tcpTransport.FrameReceived += OnTcpFrameReceived;
+                _tcpTransport.Disconnected += OnTcpDisconnected;
+
+                AppendReceivedText($"[TCP] Connecting to {host}:{port} ...\n");
+
+                await _tcpTransport.ConnectAsync(host, port);
+
+                _usingTcp = true;
+                _transport = _tcpTransport;
+                moduleQuerySent = false;
+
+                AppendReceivedText("[TCP] Connected!\n");
+
+                // Auto-query device info
+                Task.Run(() =>
+                {
+                    try
+                    {
+                        var buf = BuildDeviceInfoQueryBuffer(GetNextSeq(), 0x01);
+                        SendToHID(buf);
+                    }
+                    catch { }
+                });
+            }
+            catch (Exception ex)
+            {
+                AppendReceivedText($"[TCP] Connect failed: {ex.Message}\n");
+                _usingTcp = false;
+            }
+        }
+
+        private void DisconnectTcp()
+        {
+            _usingTcp = false;
+            if (_tcpTransport != null)
+            {
+                _tcpTransport.FrameReceived -= OnTcpFrameReceived;
+                _tcpTransport.Disconnected -= OnTcpDisconnected;
+                _tcpTransport.Dispose();
+                _tcpTransport = null;
+            }
+
+            InvokeIfRequired(() =>
+            {
+                currentModules.Clear();
+                SubDevice.Items.Clear();
+            });
+
+            AppendReceivedText("[TCP] Disconnected.\n");
+        }
+
+        private void OnTcpFrameReceived(byte[] frame)
+        {
+            try
+            {
+                ProcessReceivedFrame(frame);
+            }
+            catch { }
+        }
+
+        private void OnTcpDisconnected()
+        {
+            _usingTcp = false;
+            AppendReceivedText("[TCP] Connection lost.\n");
+        }
+
+        // =========================================================
+        // UDP Device Discovery (passive: listen for MCU broadcasts)
+        // =========================================================
+        private void StartEthDiscovery()
+        {
+            try
+            {
+                _discoveryClient = new UdpClient();
+                _discoveryClient.Client.SetSocketOption(
+                    System.Net.Sockets.SocketOptionLevel.Socket,
+                    System.Net.Sockets.SocketOptionName.ReuseAddress, true);
+                _discoveryClient.Client.Bind(new System.Net.IPEndPoint(System.Net.IPAddress.Any, UDP_DISCOVERY_PORT));
+                BeginDiscoveryReceive();
+            }
+            catch (Exception ex)
+            {
+                AppendReceivedText($"[Discovery] Failed to bind UDP port {UDP_DISCOVERY_PORT}: {ex.Message}\n");
+            }
+
+            // Cleanup timer: remove stale devices
+            _discoveryCleanupTimer = new System.Windows.Forms.Timer();
+            _discoveryCleanupTimer.Interval = 5000;
+            _discoveryCleanupTimer.Tick += DiscoveryCleanup_Tick;
+            _discoveryCleanupTimer.Start();
+        }
+
+        private void BeginDiscoveryReceive()
+        {
+            try
+            {
+                _discoveryClient?.BeginReceive(OnDiscoveryReceive, null);
+            }
+            catch { }
+        }
+
+        private void OnDiscoveryReceive(IAsyncResult ar)
+        {
+            try
+            {
+                var ep = new System.Net.IPEndPoint(System.Net.IPAddress.Any, 0);
+                byte[] data = _discoveryClient?.EndReceive(ar, ref ep);
+
+                if (data != null && data.Length >= 32
+                    && data[0] == (byte)'D' && data[1] == (byte)'T'
+                    && data[2] == (byte)'D' && data[3] == (byte)'R')
+                {
+                    var mac = new byte[6];
+                    Array.Copy(data, 4, mac, 0, 6);
+
+                    int hostLen = 0;
+                    for (int i = 10; i < 26 && data[i] != 0; i++) hostLen++;
+                    string hostname = System.Text.Encoding.ASCII.GetString(data, 10, hostLen);
+
+                    string fw = $"{data[26]:D3}.{data[27]:D2}.{data[28]:D2}.{data[29]:D2}";
+                    int tcpPort = data[30] | (data[31] << 8);
+                    string ip = ep.Address.ToString();
+
+                    InvokeIfRequired(() => UpdateDiscoveredDevice(hostname, ip, tcpPort, mac, fw));
+                }
+            }
+            catch { }
+
+            BeginDiscoveryReceive();
+        }
+
+        private void UpdateDiscoveredDevice(string hostname, string ip, int tcpPort, byte[] mac, string fw)
+        {
+            string macStr = BitConverter.ToString(mac);
+
+            // Find existing by MAC
+            EthDeviceItem existing = null;
+            int existingIdx = -1;
+            for (int i = 0; i < MainDevice.Items.Count; i++)
+            {
+                if (MainDevice.Items[i] is EthDeviceItem ei && BitConverter.ToString(ei.MAC) == macStr)
+                {
+                    existing = ei;
+                    existingIdx = i;
+                    break;
+                }
+            }
+
+            if (existing != null)
+            {
+                bool nameChanged = existing.Hostname != hostname;
+                existing.IP = ip;
+                existing.Hostname = hostname;
+                existing.TcpPort = tcpPort;
+                existing.FW = fw;
+                existing.LastSeen = DateTime.UtcNow;
+
+                // Refresh ListBox text when hostname changed (e.g. after device rename)
+                if (nameChanged && existingIdx >= 0 && existingIdx != MainDevice.SelectedIndex)
+                    MainDevice.Items[existingIdx] = existing;
+            }
+            else
+            {
+                var item = new EthDeviceItem
+                {
+                    Hostname = hostname,
+                    IP = ip,
+                    TcpPort = tcpPort,
+                    MAC = mac,
+                    FW = fw,
+                    LastSeen = DateTime.UtcNow
+                };
+                MainDevice.Items.Add(item);
+            }
+        }
+
+        private void DiscoveryCleanup_Tick(object sender, EventArgs e)
+        {
+            // Remove stale ETH devices (not seen for 15s)
+            var now = DateTime.UtcNow;
+            for (int i = MainDevice.Items.Count - 1; i >= 0; i--)
+            {
+                if (MainDevice.Items[i] is EthDeviceItem ei
+                    && (now - ei.LastSeen).TotalSeconds > 15)
+                {
+                    bool wasSelected = (MainDevice.SelectedIndex == i);
+                    MainDevice.Items.RemoveAt(i);
+                    if (wasSelected)
+                        DisconnectTcp();
                 }
             }
         }
 
-        // ÔÚ Form1 ÀàÖÐÌí¼Ó RefreshDisplayNames ·½·¨
         private void RefreshDisplayNames()
         {
             InvokeIfRequired(() =>
@@ -2384,16 +2969,16 @@ namespace DT_Controller
                                     ? $"HID {item.VendorId:X4}:{item.ProductId:X4}"
                                     : $"{item.Product} ({item.VendorId:X4}:{item.ProductId:X4})");
                         }
-                        MainDevice.Items[i] = item; // ´¥·¢ ListBox ¸üÐÂ
+                        MainDevice.Items[i] = item; // ï¿½ï¿½ï¿½ï¿½ ListBox ï¿½ï¿½ï¿½ï¿½
                     }
                 }
             });
         }
 
-        // Ìí¼Ó´Ë·½·¨µ½ Form1 ÀàÖÐ
+        // ï¿½ï¿½ï¿½Ó´Ë·ï¿½ï¿½ï¿½ï¿½ï¿½ Form1 ï¿½ï¿½ï¿½ï¿½
         private void Device_Info_TextChanged(object sender, EventArgs e)
         {
-            // ¿ÉÒÔ¸ù¾ÝÐèÒªÌí¼Ó´¦ÀíÂß¼­£¬ÔÝÊ±Áô¿Õ
+            // ï¿½ï¿½ï¿½Ô¸ï¿½ï¿½ï¿½ï¿½ï¿½Òªï¿½ï¿½ï¿½Ó´ï¿½ï¿½ï¿½ï¿½ß¼ï¿½ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½ï¿½ï¿½
 }
 
         private void button_clearLog_Click(object sender, EventArgs e)

@@ -59,6 +59,7 @@ alm_eth/ethernetif.o: ..\Core\Src\ethernetif.c ..\Core\Inc\ethernetif.h \
   ..\Drivers\STM32H5xx_HAL_Driver\Inc\stm32h5xx_hal_eth.h \
   ..\Drivers\STM32H5xx_HAL_Driver\Inc\stm32h5xx_hal_eth_ex.h \
   ..\Drivers\STM32H5xx_HAL_Driver\Inc\stm32h5xx_hal_fdcan.h \
+  ..\BSP\device_config.h \
   D:\Keil_v5\ARM\ARMCC_V6.22\bin\..\include\string.h \
   ..\Middlewares\Third_Party\LwIP\src\include\lwip\timeouts.h \
   ..\Middlewares\Third_Party\LwIP\src\include\netif\etharp.h \

@@ -30,6 +30,12 @@
 /* USER CODE BEGIN Includes */
 #include "bsp_lan8742.h"
 #include "lwip_app.h"
+#include "tcp_server.h"
+#include "CAN_comm.h"
+#include "systick_task.h"
+#include "udp_discovery.h"
+#include "device_config.h"
+#include <string.h>
 
 /* USER CODE END Includes */
 
@@ -54,6 +60,9 @@
 __IO uint32_t TSB;
 
 uint32_t now;
+
+/* Device SN: 32-bit from UID XOR, same as Motor module's Build_NodeID_From_UID */
+uint32_t g_device_sn = 0;
 
 uint32_t ETH_Start_IT_Stat;
 BSP_LAN8742_HandleTypeDef hphy;
@@ -132,6 +141,14 @@ int main(void)
   HAL_Init();
 
   /* USER CODE BEGIN Init */
+  /* Build device SN from UID (same as Motor module's Build_NodeID_From_UID) */
+  {
+      const uint32_t *uid = (const uint32_t *)UID_BASE;
+      g_device_sn = uid[0] ^ uid[1] ^ uid[2];
+      if (g_device_sn == 0)
+          g_device_sn = uid[0] | 0x01000000UL;
+  }
+
   MPU_Config();
   /* USER CODE END Init */
 
@@ -167,8 +184,31 @@ int main(void)
     Error_Handler();
   }
 
+  /* Load custom device name from flash (before LWIP so hostname is ready) */
+  DeviceConfig_Init();
+
   /* Initialize LwIP + DHCP (this re-inits ETH with non-cacheable DMA buffers) */
   LWIP_APP_Init();
+
+  /* ---- FDCAN1: accept all standard IDs, start with RX interrupt ---- */
+  {
+    FDCAN_FilterTypeDef filter = {0};
+    filter.IdType       = FDCAN_STANDARD_ID;
+    filter.FilterIndex  = 0;
+    filter.FilterType   = FDCAN_FILTER_RANGE;
+    filter.FilterConfig = FDCAN_FILTER_TO_RXFIFO0;
+    filter.FilterID1    = 0x000;
+    filter.FilterID2    = 0x7FF;
+    HAL_FDCAN_ConfigFilter(&hfdcan1, &filter);
+    HAL_FDCAN_Start(&hfdcan1);
+    HAL_FDCAN_ActivateNotification(&hfdcan1, FDCAN_IT_RX_FIFO0_NEW_MESSAGE, 0);
+  }
+
+  /* ---- TCP server on port 40000 ---- */
+  TCP_Server_Init();
+
+  /* ---- UDP discovery responder on port 40001 ---- */
+  UDP_Discovery_Init();
 
   /* USER CODE END 2 */
 
@@ -182,6 +222,9 @@ int main(void)
 
 		/* LwIP: process received frames + timers (DHCP etc.) */
 		LWIP_APP_Poll();
+
+		/* UDP discovery: broadcast announcement every 3s */
+		UDP_Discovery_Poll();
 
     /* USER CODE END WHILE */
 

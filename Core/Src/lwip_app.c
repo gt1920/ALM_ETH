@@ -115,6 +115,8 @@ void LWIP_APP_Poll(void)
   ip4_to_array(netif_ip4_netmask(&gnetif), g_lwip_ipinfo.netmask);
   ip4_to_array(netif_ip4_gw(&gnetif),      g_lwip_ipinfo.gateway);
 
+  static uint8_t po_en_done = 0;
+
   if (dhcp_supplied_address(&gnetif))
   {
     /* DHCP成功 */
@@ -126,6 +128,13 @@ void LWIP_APP_Poll(void)
     /* 无路由器，AutoIP分配了169.254.x.x */
     g_lwip_ipinfo.dhcp_state = 4;
     g_lwip_ipinfo.ip_source  = 2;
+  }
+
+  /* IP acquired (DHCP or AutoIP) -> enable CAN bus power (PC12 = PO_EN) */
+  if (!po_en_done && (g_lwip_ipinfo.ip_source != 0))
+  {
+    HAL_GPIO_WritePin(PO_EN_GPIO_Port, PO_EN_Pin, GPIO_PIN_SET);
+    po_en_done = 1;
   }
   else if (g_lwip_ipinfo.dhcp_state == 1)
   {
