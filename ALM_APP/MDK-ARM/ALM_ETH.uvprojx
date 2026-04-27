@@ -804,6 +804,11 @@
               <FileType>1</FileType>
               <FilePath>../BSP/device_config.c</FilePath>
             </File>
+            <File>
+              <FileName>bsp_w25q16.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>../BSP/bsp_w25q16.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

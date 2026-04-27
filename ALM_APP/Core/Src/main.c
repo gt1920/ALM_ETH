@@ -29,6 +29,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "bsp_lan8742.h"
+#include "bsp_w25q16.h"
 #include "lwip_app.h"
 #include "tcp_server.h"
 #include "CAN_comm.h"
@@ -183,6 +184,9 @@ int main(void)
   {
     Error_Handler();
   }
+
+  /* External SPI flash: verify JEDEC ID and enable Quad mode (QE bit) */
+  (void)BSP_W25Q_Init();
 
   /* Load custom device name from flash (before LWIP so hostname is ready) */
   DeviceConfig_Init();
