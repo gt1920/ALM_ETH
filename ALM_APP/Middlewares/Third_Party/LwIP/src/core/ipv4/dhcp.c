@@ -1009,6 +1009,14 @@ dhcp_discover(struct netif *netif)
     for (i = 0; i < LWIP_ARRAYSIZE(dhcp_discover_request_options); i++) {
       options_out_len = dhcp_option_byte(options_out_len, msg_out->options, dhcp_discover_request_options[i]);
     }
+
+    /* [LOCAL PATCH - keep on LwIP upgrade] Append Option 12 (hostname) to
+       DISCOVER as well, so consumer routers that read the hostname only
+       from the DISCOVER frame display it in their DHCP client list. */
+#if LWIP_NETIF_HOSTNAME
+    options_out_len = dhcp_option_hostname(options_out_len, msg_out->options, netif);
+#endif /* LWIP_NETIF_HOSTNAME */
+
     LWIP_HOOK_DHCP_APPEND_OPTIONS(netif, dhcp, DHCP_STATE_SELECTING, msg_out, DHCP_DISCOVER, &options_out_len);
     dhcp_option_trailer(options_out_len, msg_out->options, p_out);
 
