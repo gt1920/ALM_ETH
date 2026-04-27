@@ -1,0 +1,13 @@
+X:\GT_IAP_Done\DT_Controller\DT_Controller_V1.0\DT_Controller_251213_2121\DT Controller\bin\x64\Debug\DT Controller.exe.config
+X:\GT_IAP_Done\DT_Controller\DT_Controller_V1.0\DT_Controller_251213_2121\DT Controller\bin\x64\Debug\DT Controller.exe
+X:\GT_IAP_Done\DT_Controller\DT_Controller_V1.0\DT_Controller_251213_2121\DT Controller\bin\x64\Debug\DT Controller.pdb
+X:\GT_IAP_Done\DT_Controller\DT_Controller_V1.0\DT_Controller_251213_2121\DT Controller\bin\x64\Debug\HidLibrary.dll
+X:\GT_IAP_Done\DT_Controller\DT_Controller_V1.0\DT_Controller_251213_2121\DT Controller\bin\x64\Debug\HidLibrary.pdb
+X:\GT_IAP_Done\DT_Controller\DT_Controller_V1.0\DT_Controller_251213_2121\DT Controller\obj\x64\Debug\DT Controller.csproj.AssemblyReference.cache
+X:\GT_IAP_Done\DT_Controller\DT_Controller_V1.0\DT_Controller_251213_2121\DT Controller\obj\x64\Debug\DT_Controller.Form1.resources
+X:\GT_IAP_Done\DT_Controller\DT_Controller_V1.0\DT_Controller_251213_2121\DT Controller\obj\x64\Debug\DT_Controller.Properties.Resources.resources
+X:\GT_IAP_Done\DT_Controller\DT_Controller_V1.0\DT_Controller_251213_2121\DT Controller\obj\x64\Debug\DT Controller.csproj.GenerateResource.cache
+X:\GT_IAP_Done\DT_Controller\DT_Controller_V1.0\DT_Controller_251213_2121\DT Controller\obj\x64\Debug\DT Controller.csproj.CoreCompileInputs.cache
+X:\GT_IAP_Done\DT_Controller\DT_Controller_V1.0\DT_Controller_251213_2121\DT Controller\obj\x64\Debug\DT Contr.932558DF.Up2Date
+X:\GT_IAP_Done\DT_Controller\DT_Controller_V1.0\DT_Controller_251213_2121\DT Controller\obj\x64\Debug\DT Controller.exe
+X:\GT_IAP_Done\DT_Controller\DT_Controller_V1.0\DT_Controller_251213_2121\DT Controller\obj\x64\Debug\DT Controller.pdb

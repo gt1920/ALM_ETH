@@ -1,0 +1,40 @@
+# ===== Keil MDK build outputs =====
+# Project-level archive / output folders
+**/Output/
+
+# MDK-ARM target build subfolders & debugger state
+**/MDK-ARM/DebugConfig/
+**/MDK-ARM/Listings/
+**/MDK-ARM/Objects/
+**/MDK-ARM/AL_USB/
+**/MDK-ARM/ALM/
+**/MDK-ARM/ALM_ETH/
+**/MDK-ARM/build_out.txt
+
+# Intermediate / build artifact files
+*.o
+*.obj
+*.crf
+*.d
+*.axf
+*.htm
+*.lst
+*.map
+*.lnp
+*.iex
+*.dep
+*.bak
+
+# Per-user Keil UI state
+*.uvguix.*
+
+# ===== Editor / IDE local state =====
+.vs/
+.claude/
+
+# ===== Renamed embedded git metadata (LwIP upstream repo) =====
+**/.git_LwIP_orig/
+
+# ===== OS junk =====
+.DS_Store
+Thumbs.db
