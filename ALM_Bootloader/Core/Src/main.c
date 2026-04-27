@@ -3,10 +3,9 @@
   * @file           : main.c
   * @brief          : ALM_Bootloader main entry
   *
-  * Minimal bootloader skeleton: clocks + GPIO + OCTOSPI1 + W25Q16 driver.
-  * After init, exercises the SPI flash with a 256 B write/read round-trip
-  * into Write_Buf / Read_Buf, which can be inspected in the Keil Watch
-  * window. Then idles in HAL_Delay so the debugger can attach freely.
+  * Brings up clocks + GPIO + ICACHE + OCTOSPI + W25Q16, then hands control
+  * to BL_Run() which decides whether to flash a pending firmware image from
+  * external W25Q into internal flash and jumps to the app at 0x08008000.
   ******************************************************************************
   */
 #include "main.h"
@@ -14,47 +13,31 @@
 #include "icache.h"
 #include "octospi.h"
 #include "bsp_w25q16.h"
+#include "cpu_id.h"
+#include "iap.h"
 
-/* ---------- debug buffers (watch in Keil) ---------- */
-uint8_t Write_Buf[W25Q_PAGE_SIZE];
-uint8_t Read_Buf [W25Q_PAGE_SIZE];
-
-/* Flash test address (first sector) */
-#define BL_TEST_ADDR     0x00000000UL
-
-/* ---------- function prototypes ---------- */
 void SystemClock_Config(void);
 
 int main(void)
 {
-  uint32_t i;
-
   HAL_Init();
   SystemClock_Config();
+
+  /* Same UID->SN derivation as ALM_APP. Populates g_device_sn for any
+     future SN-bound upgrade check or watch-window inspection. */
+  get_cpu_id();
 
   MX_GPIO_Init();
   MX_ICACHE_Init();
   MX_OCTOSPI1_Init();
 
-  /* Verify W25Q16 is present and enable Quad mode */
   (void)BSP_W25Q_Init();
 
-  /* Fill Write_Buf with a deterministic pattern */
-  for (i = 0U; i < W25Q_PAGE_SIZE; i++)
-  {
-    Write_Buf[i] = (uint8_t)(i ^ 0xA5U);
-  }
+  /* Hand off: read W25Q metadata, optionally flash from W25Q, jump to app.
+     BL_Run() never returns. */
+  BL_Run();
 
-  /* Erase the test sector (4 KB), program 256 B, then read back */
-  (void)BSP_W25Q_EraseSector4K(BL_TEST_ADDR);
-  (void)BSP_W25Q_PageProgramQuad(BL_TEST_ADDR, Write_Buf, W25Q_PAGE_SIZE);
-  (void)BSP_W25Q_Read(BL_TEST_ADDR, Read_Buf, W25Q_PAGE_SIZE);
-
-  /* Idle so the debugger can inspect Write_Buf / Read_Buf */
-  while (1)
-  {
-    HAL_Delay(500U);
-  }
+  while (1) { __NOP(); }   /* unreachable */
 }
 
 /**

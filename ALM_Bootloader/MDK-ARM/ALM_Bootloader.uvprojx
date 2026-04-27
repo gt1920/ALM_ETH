@@ -81,9 +81,9 @@
           </BeforeMake>
           <AfterMake>
             <RunUserProg1>1</RunUserProg1>
-            <RunUserProg2>0</RunUserProg2>
+            <RunUserProg2>1</RunUserProg2>
             <UserProg1Name>fromelf.exe --bin -o "$L@L.bin" "#L"</UserProg1Name>
-            <UserProg2Name></UserProg2Name>
+            <UserProg2Name>.\Copy_HEX.bat</UserProg2Name>
             <UserProg1Dos16Mode>0</UserProg1Dos16Mode>
             <UserProg2Dos16Mode>0</UserProg2Dos16Mode>
             <nStopA1X>0</nStopA1X>
@@ -523,6 +523,21 @@
               <FileName>bsp_w25q16.c</FileName>
               <FileType>1</FileType>
               <FilePath>../BSP/bsp_w25q16.c</FilePath>
+            </File>
+            <File>
+              <FileName>aes.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>../BSP/aes.c</FilePath>
+            </File>
+            <File>
+              <FileName>iap.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>../BSP/iap.c</FilePath>
+            </File>
+            <File>
+              <FileName>cpu_id.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>../BSP/cpu_id.c</FilePath>
             </File>
           </Files>
         </Group>

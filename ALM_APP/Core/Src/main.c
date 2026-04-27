@@ -30,6 +30,7 @@
 /* USER CODE BEGIN Includes */
 #include "bsp_lan8742.h"
 #include "bsp_w25q16.h"
+#include "cpu_id.h"
 #include "lwip_app.h"
 #include "tcp_server.h"
 #include "CAN_comm.h"
@@ -62,8 +63,17 @@ __IO uint32_t TSB;
 
 uint32_t now;
 
-/* Device SN: 32-bit from UID XOR, same as Motor module's Build_NodeID_From_UID */
-uint32_t g_device_sn = 0;
+/* Debug checkpoint: increment at each init step; read in debugger to find hang point.
+   0=start, 1=VTOR, 2=HAL_Init, 3=get_cpu_id, 4=SystemClock, 5=GPIO, 6=DCACHE,
+   7=ETH, 8=FDCAN, 9=ICACHE, 10=USB, 11=OCTOSPI, 12=LAN_Init, 13=LAN_Reset,
+   14=LAN_Status, 15=W25Q, 16=DeviceCfg, 17=LWIP, 18=FDCAN_start, 19=TCP, 20=UDP,
+   21=while(1) */
+volatile uint8_t g_dbg_step = 0U;
+
+/* Device SN (g_device_sn) is now defined in BSP/cpu_id.c and computed by
+   get_cpu_id() so it matches the value the bootloader derives from the
+   same MCU. Anything in this project that reads g_device_sn just needs
+   the extern in cpu_id.h. */
 
 uint32_t ETH_Start_IT_Stat;
 BSP_LAN8742_HandleTypeDef hphy;
@@ -133,28 +143,28 @@ int main(void)
 {
 
   /* USER CODE BEGIN 1 */
-
+  /* Confirm vector table is at app base (already set by SystemInit, but be explicit). */
+  SCB->VTOR = 0x08008000UL;
+  __DSB();
+  __ISB();
+  g_dbg_step = 1U;   /* VTOR set */
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
 
   /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
   HAL_Init();
+  g_dbg_step = 2U;   /* HAL_Init done */
 
   /* USER CODE BEGIN Init */
-  /* Build device SN from UID (same as Motor module's Build_NodeID_From_UID) */
-  {
-      const uint32_t *uid = (const uint32_t *)UID_BASE;
-      g_device_sn = uid[0] ^ uid[1] ^ uid[2];
-      if (g_device_sn == 0)
-          g_device_sn = uid[0] | 0x01000000UL;
-  }
-
+  get_cpu_id();
   MPU_Config();
+  g_dbg_step = 3U;   /* get_cpu_id + MPU done */
   /* USER CODE END Init */
 
   /* Configure the system clock */
   SystemClock_Config();
+  g_dbg_step = 4U;   /* SystemClock done */
 
   /* USER CODE BEGIN SysInit */
 
@@ -162,39 +172,48 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
+  g_dbg_step = 5U;   /* GPIO done */
   MX_DCACHE1_Init();
+  g_dbg_step = 6U;   /* DCACHE done */
   MX_ETH_Init();
+  g_dbg_step = 7U;   /* ETH done */
   MX_FDCAN1_Init();
+  g_dbg_step = 8U;   /* FDCAN done */
   MX_ICACHE_Init();
+  g_dbg_step = 9U;   /* ICACHE done */
   MX_USB_PCD_Init();
+  g_dbg_step = 10U;  /* USB done */
   MX_OCTOSPI1_Init();
+  g_dbg_step = 11U;  /* OCTOSPI done */
   /* USER CODE BEGIN 2 */
 
   if (BSP_LAN8742_InitOrDetect(&hphy, &heth, LAN8742A_PHY_ADDR) != HAL_OK)
   {
     Error_Handler();
   }
+  g_dbg_step = 12U;  /* LAN8742 InitOrDetect done */
 
   if (BSP_LAN8742_Reset(&hphy) != HAL_OK)
   {
     Error_Handler();
   }
+  g_dbg_step = 13U;  /* LAN8742 Reset done */
 
   if (BSP_LAN8742_GetBasicStatus(&hphy, &phy_link, &phy_speed, &phy_duplex) != HAL_OK)
   {
     Error_Handler();
   }
+  g_dbg_step = 14U;  /* LAN8742 GetBasicStatus done */
 
-  /* External SPI flash: verify JEDEC ID and enable Quad mode (QE bit) */
   (void)BSP_W25Q_Init();
+  g_dbg_step = 15U;  /* W25Q init done */
 
-  /* Load custom device name from flash (before LWIP so hostname is ready) */
   DeviceConfig_Init();
+  g_dbg_step = 16U;  /* DeviceConfig done */
 
-  /* Initialize LwIP + DHCP (this re-inits ETH with non-cacheable DMA buffers) */
   LWIP_APP_Init();
+  g_dbg_step = 17U;  /* LwIP init done */
 
-  /* ---- FDCAN1: accept all standard IDs, start with RX interrupt ---- */
   {
     FDCAN_FilterTypeDef filter = {0};
     filter.IdType       = FDCAN_STANDARD_ID;
@@ -207,17 +226,19 @@ int main(void)
     HAL_FDCAN_Start(&hfdcan1);
     HAL_FDCAN_ActivateNotification(&hfdcan1, FDCAN_IT_RX_FIFO0_NEW_MESSAGE, 0);
   }
+  g_dbg_step = 18U;  /* FDCAN start done */
 
-  /* ---- TCP server on port 40000 ---- */
   TCP_Server_Init();
+  g_dbg_step = 19U;  /* TCP server done */
 
-  /* ---- UDP discovery responder on port 40001 ---- */
   UDP_Discovery_Init();
+  g_dbg_step = 20U;  /* UDP discovery done */
 
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
+  g_dbg_step = 21U;  /* entering while(1) */
   while (1)
   {
 		now = HAL_GetTick();

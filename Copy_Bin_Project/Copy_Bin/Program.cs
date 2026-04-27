@@ -101,9 +101,9 @@ namespace Copy_Bin
                 Console.WriteLine($"在 {appDir} 目录中找不到 Full_Package.hex 文件。");
             }
 
-            // 加密 .bin 文件为 .gt 格式。文件名里嵌入 fw_sn 方便区分绑定目标
+            // 加密 .bin 文件为 .alm 格式。文件名里嵌入 fw_sn 方便区分绑定目标
             string snTag = ExtractFwSnTag(targetFile);
-            string gtFile = Path.Combine(targetDir, args[0] + "_" + snTag + "_" + DateTime.Now.ToString("yyMMdd") + "_" + DateTime.Now.ToString("HHmm") + ".gt");
+            string gtFile = Path.Combine(targetDir, args[0] + "_" + snTag + "_" + DateTime.Now.ToString("yyMMdd") + "_" + DateTime.Now.ToString("HHmm") + ".alm");
             EncryptFile(targetFile, gtFile);
             Console.WriteLine($"{targetFile} 已加密为 {gtFile}。");
 
@@ -161,10 +161,11 @@ namespace Copy_Bin
         static void EncryptFile(string inputFile, string outputFile)
         {
             const string m_Userstr = "LEDFW012";      // 8 bytes
-            const string m_IVStr = "g7k2m9pR4xW1cQ8v"; // 16 bytes
-            const string m_KeyStr = "Ht5bN8wE3jL6yA0fKr7dP2sV9mX4qU1z"; // 32 bytes
+            // Key/IV must match ALM_Bootloader/BSP/aes.c
+            const string m_IVStr = "u3F9hM2zE6vK1oQ5"; // 16 bytes
+            const string m_KeyStr = "Lp7kZ4cN9bX2vQ6mT8yJ3sD5fW0rH1aE"; // 32 bytes
             const uint FW_ID_MAGIC = 0x47544657; // "GTFW"
-            const int FW_ID_HEADER_SIZE = 16;    // 密文头: magic(4)+board(2)+ver(2)+sn(4)+crc32(4)
+            const int FW_ID_HEADER_SIZE = 16;    // 密文头: magic(4)+board(4 ASCII)+sn(4)+crc32(4)
             const uint FW_SN_WILDCARD = 0xA5C3F09E;
 
             byte[] fileContent = File.ReadAllBytes(inputFile);
@@ -188,17 +189,32 @@ namespace Copy_Bin
                 uint hdrCrc = Crc32(plainHdr, 12);
                 BitConverter.GetBytes(hdrCrc).CopyTo(plainHdr, 12);
                 fwIdFound = true;
-                ushort boardId = BitConverter.ToUInt16(fileContent, lastMatchOffset + 4);
-                ushort fwVer = BitConverter.ToUInt16(fileContent, lastMatchOffset + 6);
-                uint   fwSn   = BitConverter.ToUInt32(fileContent, lastMatchOffset + 8);
+                // New FW_HW_ID layout: magic(4) + board(4 ASCII LE) + sn(4)  → 12 B
+                // Board is ASCII-packed little-endian; e.g. "ETH\0" = 0x00485445
+                uint   board = BitConverter.ToUInt32(fileContent, lastMatchOffset + 4);
+                uint   fwSn  = BitConverter.ToUInt32(fileContent, lastMatchOffset + 8);
+
+                string boardAscii = "";
+                bool   printable  = true;
+                for (int i = 0; i < 4; i++)
+                {
+                    byte ch = (byte)((board >> (i * 8)) & 0xFF);
+                    if (ch == 0) break;
+                    if (ch < 0x20 || ch > 0x7E) { printable = false; break; }
+                    boardAscii += (char)ch;
+                }
+                string boardStr = (printable && boardAscii.Length > 0)
+                    ? $"\"{boardAscii}\" (0x{board:X8})"
+                    : $"0x{board:X8}";
+
                 string snTag = (fwSn == FW_SN_WILDCARD)
                     ? "(Unlock - 通配，任何 MCU 可装)"
                     : $"(绑定 MCU SN)";
-                Console.WriteLine($"FW_ID: magic=0x{FW_ID_MAGIC:X8}, board=0x{boardId:X4}, ver=0x{fwVer:X4}, sn=0x{fwSn:X8}, crc=0x{hdrCrc:X8} {snTag}");
+                Console.WriteLine($"FW_ID: magic=0x{FW_ID_MAGIC:X8}, board={boardStr}, sn=0x{fwSn:X8}, crc=0x{hdrCrc:X8} {snTag}");
             }
             if (!fwIdFound)
             {
-                Console.WriteLine("警告: bin中未找到FW_ID magic(0x47544657)，.gt文件不含FW_ID头");
+                Console.WriteLine("警告: bin中未找到FW_ID magic(0x47544657)，.alm文件不含FW_ID头");
             }
 
             byte[] userStrLen = BitConverter.GetBytes(m_Userstr.Length);
