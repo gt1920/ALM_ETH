@@ -11,6 +11,13 @@
 **/MDK-ARM/ALM_ETH/
 **/MDK-ARM/build_out.txt
 
+# ===== .NET (Copy_Bin tool source project) build outputs =====
+**/Copy_Bin_Project/**/bin/
+**/Copy_Bin_Project/**/obj/
+
+# ===== Large prebuilt installer (NEVER commit, easy to redownload) =====
+**/Copy_Bin/dotnet-runtime-*.exe
+
 # Intermediate / build artifact files
 *.o
 *.obj
