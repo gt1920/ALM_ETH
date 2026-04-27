@@ -35,10 +35,12 @@ extern "C" {
 #define SUBCMD_UPG_RESP         0x81   /* Dev→PC: status(1)                  */
 /* status codes */
 #define UPG_STATUS_OK           0x00
-#define UPG_STATUS_WRONG_BOARD  0x01
-#define UPG_STATUS_SIZE_ERROR   0x02
-#define UPG_STATUS_WRITE_ERROR  0x03
-#define UPG_STATUS_VERIFY_ERROR 0x04
+#define UPG_STATUS_WRONG_BOARD  0x01   /* board_id mismatch            */
+#define UPG_STATUS_SIZE_ERROR   0x02   /* file_size out of range       */
+#define UPG_STATUS_WRITE_ERROR  0x03   /* W25Q erase/write failure     */
+#define UPG_STATUS_VERIFY_ERROR 0x04   /* rx_bytes != expected         */
+#define UPG_STATUS_BAD_FW       0x05   /* .alm header decrypt/CRC fail */
+#define UPG_STATUS_WRONG_SN     0x06   /* fw_sn locked to other MCU    */
 
 void Process_ETH_Command(const uint8_t *buf, uint16_t len);
 void ETH_Report_ParamFeedback(uint32_t node_id, uint8_t axis, uint8_t param_id, uint32_t value);

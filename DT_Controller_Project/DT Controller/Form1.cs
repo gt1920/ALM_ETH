@@ -802,7 +802,7 @@ namespace DT_Controller
             {
                 MainDevice.Items.Clear();
                 richTextBox1.Clear();
-                richTextBox1.AppendText($"����ö�� HID �豸...  (����ʾ VID=0x{FilterVendorId:X4} PID=0x{FilterProductId:X4})\n");
+                richTextBox1.AppendText($"Enumerating HID devices... (filter: VID=0x{FilterVendorId:X4} PID=0x{FilterProductId:X4})" + Environment.NewLine);
 
                 var items = await Task.Run(() => EnumerateHidViaWmiAndHidLibMergedPreferUsbSerial());
 
@@ -1789,7 +1789,7 @@ namespace DT_Controller
 
                     var preferred = items.FirstOrDefault(isUsbWithSerial) ?? items.FirstOrDefault(x => x.DevicePath != null && x.DevicePath.StartsWith("USB\\", StringComparison.OrdinalIgnoreCase)) ?? items[0];
 
-                    var manufacturer = items.FirstOrDefault(x => !string.IsNullOrWhiteSpace(x.Manufacturer) && x.Manufacturer != "(��׼ϵͳ�豸)")?.Manufacturer
+                    var manufacturer = items.FirstOrDefault(x => !string.IsNullOrWhiteSpace(x.Manufacturer) && !x.Manufacturer.StartsWith("("))?.Manufacturer
                                        ?? preferred.Manufacturer;
 
                     string serial = ExtractSerialFromDevicePath(preferred.DevicePath);
@@ -3360,15 +3360,19 @@ namespace DT_Controller
                 ushort seq = 0;
 
                 // ---- 1. UPGRADE_START ----
-                var startPayload = new byte[4];
+                if (almData.Length < 16)
+                    throw new Exception("File too small to be a valid .alm firmware.");
+
+                // START payload: file_size(4) + alm header[0..15] for device-side validation
+                var startPayload = new byte[4 + 16];
                 WriteLE32(startPayload, 0, (uint)almData.Length);
+                Array.Copy(almData, 0, startPayload, 4, 16);
                 byte[] startFrame = UpgBuildFrame(SUBCMD_UPG_START, seq, startPayload);
                 await stream.WriteAsync(startFrame, 0, startFrame.Length);
 
                 var resp = await UpgReadResp(stream);
                 if (resp == null || resp[0] != 0x00)
-                    throw new Exception($"Device rejected START (status=0x{(resp?[0] ?? 0xFF):X2}). " +
-                        "Wrong board ID or size out of range.");
+                    throw new Exception("Upgrade failed: firmware invalid.");
                 seq++;
 
                 // ---- 2. UPGRADE_DATA chunks ----
