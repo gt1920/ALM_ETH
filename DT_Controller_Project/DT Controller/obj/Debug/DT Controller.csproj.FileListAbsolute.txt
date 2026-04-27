@@ -230,3 +230,19 @@ x:\GT_IAP_Done\app_\app_LaserDriver\ALM\ALM_ETH\ALM_ETH_260314_1816\DT_Controlle
 x:\GT_IAP_Done\app_\app_LaserDriver\ALM\ALM_ETH\ALM_ETH_260314_1816\DT_Controller_Project\DT Controller\obj\Debug\DT Contr.932558DF.Up2Date
 x:\GT_IAP_Done\app_\app_LaserDriver\ALM\ALM_ETH\ALM_ETH_260314_1816\DT_Controller_Project\DT Controller\obj\Debug\DT Controller.exe
 x:\GT_IAP_Done\app_\app_LaserDriver\ALM\ALM_ETH\ALM_ETH_260314_1816\DT_Controller_Project\DT Controller\obj\Debug\DT Controller.pdb
+X:\GT_IAP_Done\app_\app_LaserDriver\ALM\ALM_ETH\ETH_No_Router\DT_Controller_Project\DT Controller\obj\Debug\DT Controller.csproj.AssemblyReference.cache
+X:\GT_IAP_Done\app_\app_LaserDriver\ALM\ALM_ETH\ETH_No_Router\DT_Controller_Project\DT Controller\obj\Debug\DT Controller.exe.config
+X:\GT_IAP_Done\app_\app_LaserDriver\ALM\ALM_ETH\ETH_No_Router\DT_Controller_Project\DT Controller\obj\Debug\DT_Controller.Form1.resources
+X:\GT_IAP_Done\app_\app_LaserDriver\ALM\ALM_ETH\ETH_No_Router\DT_Controller_Project\DT Controller\obj\Debug\DT_Controller.Properties.Resources.resources
+X:\GT_IAP_Done\app_\app_LaserDriver\ALM\ALM_ETH\ETH_No_Router\DT_Controller_Project\DT Controller\obj\Debug\DT Controller.csproj.GenerateResource.cache
+X:\GT_IAP_Done\app_\app_LaserDriver\ALM\ALM_ETH\ETH_No_Router\DT_Controller_Project\DT Controller\obj\Debug\DT Controller.csproj.CoreCompileInputs.cache
+X:\GT_IAP_Done\app_\app_LaserDriver\ALM\ALM_ETH\ETH_No_Router\DT_Controller_Project\DT Controller\obj\Debug\DT Controller.exe
+X:\GT_IAP_Done\app_\app_LaserDriver\ALM\ALM_ETH\ETH_No_Router\DT_Controller_Project\DT Controller\obj\Debug\DT Controller.pdb
+X:\GT_IAP_Done\app_\app_LaserDriver\ALM\ALM_ETH\ETH_No_Router\DT_Controller_Project\DT Controller\bin\Debug\DT Controller.exe.config
+X:\GT_IAP_Done\app_\app_LaserDriver\ALM\ALM_ETH\ETH_No_Router\DT_Controller_Project\DT Controller\bin\Debug\DT Controller.exe
+X:\GT_IAP_Done\app_\app_LaserDriver\ALM\ALM_ETH\ETH_No_Router\DT_Controller_Project\DT Controller\bin\Debug\DT Controller.pdb
+X:\GT_IAP_Done\app_\app_LaserDriver\ALM\ALM_ETH\ETH_No_Router\DT_Controller_Project\DT Controller\bin\Debug\HidLibrary.dll
+X:\GT_IAP_Done\app_\app_LaserDriver\ALM\ALM_ETH\ETH_No_Router\DT_Controller_Project\DT Controller\bin\Debug\System.CodeDom.dll
+X:\GT_IAP_Done\app_\app_LaserDriver\ALM\ALM_ETH\ETH_No_Router\DT_Controller_Project\DT Controller\bin\Debug\HidLibrary.pdb
+X:\GT_IAP_Done\app_\app_LaserDriver\ALM\ALM_ETH\ETH_No_Router\DT_Controller_Project\DT Controller\bin\Debug\System.CodeDom.xml
+X:\GT_IAP_Done\app_\app_LaserDriver\ALM\ALM_ETH\ETH_No_Router\DT_Controller_Project\DT Controller\obj\Debug\DT Contr.932558DF.Up2Date

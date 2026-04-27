@@ -33,6 +33,7 @@
 #include "cpu_id.h"
 #include "lwip_app.h"
 #include "tcp_server.h"
+#include "upgrade_handler.h"
 #include "CAN_comm.h"
 #include "systick_task.h"
 #include "udp_discovery.h"
@@ -247,6 +248,9 @@ int main(void)
 
 		/* LwIP: process received frames + timers (DHCP etc.) */
 		LWIP_APP_Poll();
+
+		/* Deferred reboot after OTA upgrade END — fires after LWIP flush */
+		UPG_PollReboot();
 
 		/* UDP discovery: broadcast announcement every 3s */
 		UDP_Discovery_Poll();

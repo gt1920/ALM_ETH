@@ -267,9 +267,8 @@ namespace DT_Controller
 
                     if (obj is EthDeviceItem)
                     {
-                        // ETH device: Change Name always enabled
                         deviceContextMenu.Items[0].Enabled = true;
-                        deviceContextMenu.Items[2].Enabled = false; // Upgrade
+                        deviceContextMenu.Items[2].Enabled = true; // Upgrade enabled for ETH
                     }
                     else if (obj is HidDeviceItem hid)
                     {
@@ -356,9 +355,62 @@ namespace DT_Controller
         }
 
         // Upgrade �����Ŀǰ�����ã�
-        private void Upgrade_Click(object sender, EventArgs e)
+        private async void Upgrade_Click(object sender, EventArgs e)
         {
-            MessageBox.Show(this, "Upgrade is not available.", "Upgrade", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            var eth = MainDevice.SelectedItem as EthDeviceItem;
+            if (eth == null)
+            {
+                MessageBox.Show(this, "Please select an ETH device.", "Upgrade",
+                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            using (var dlg = new System.Windows.Forms.OpenFileDialog())
+            {
+                dlg.Filter = "ALM firmware (*.alm)|*.alm|All files (*.*)|*.*";
+                dlg.Title  = "Select firmware file";
+                if (dlg.ShowDialog(this) != DialogResult.OK)
+                    return;
+
+                byte[] almData;
+                try { almData = File.ReadAllBytes(dlg.FileName); }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(this, "Cannot read file: " + ex.Message,
+                        "Upgrade", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+
+                // disable the menu item during transfer
+                var miUp = deviceContextMenu.Items[2] as ToolStripMenuItem;
+                if (miUp != null) miUp.Enabled = false;
+                var origTitle = this.Text;
+
+                try
+                {
+                    // Release the existing TCP control connection so the device
+                    // can accept the upgrade connection (single-client server).
+                    DisconnectTcp();
+                    await Task.Delay(300);
+
+                    await UpgradeSendFirmwareAsync(eth, almData,
+                        pct => { try { this.Text = $"Upgrading... {pct}%"; } catch { } });
+
+                    MessageBox.Show(this,
+                        "Firmware sent. Device is rebooting to apply the update.",
+                        "Upgrade", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(this, "Upgrade failed: " + ex.Message,
+                        "Upgrade Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+                finally
+                {
+                    this.Text = origTitle;
+                    if (miUp != null) miUp.Enabled = true;
+                }
+            }
         }
 
         // Module List �Ҽ���ѡ�в���ʾ�����Ĳ˵�
@@ -3277,6 +3329,159 @@ namespace DT_Controller
                 // ignore
             }
         }
+        // =========================================================
+        // OTA Firmware Upgrade over TCP (CMD_UPGRADE = 0x30)
+        // =========================================================
+
+        private const byte CMD_UPGRADE     = 0x30;
+        private const byte SUBCMD_UPG_START = 0x01;
+        private const byte SUBCMD_UPG_DATA  = 0x02;
+        private const byte SUBCMD_UPG_END   = 0x03;
+        private const byte SUBCMD_UPG_RESP  = 0x81;
+        private const int  UPG_CHUNK_SIZE   = 128;
+
+        /// <summary>
+        /// Send .alm firmware to ETH device via a dedicated TCP connection.
+        /// Protocol: START -> [DATA x N] -> END, request/response per packet.
+        /// START may block up to ~15s while device erases W25Q sectors.
+        /// </summary>
+        private async Task UpgradeSendFirmwareAsync(EthDeviceItem eth, byte[] almData,
+            Action<int> progressCallback)
+        {
+            using (var tcp = new TcpClient())
+            {
+                tcp.NoDelay = true;
+                tcp.SendTimeout    = 10000;
+                tcp.ReceiveTimeout = 60000;   // START can take ~15 s while device erases flash
+
+                await tcp.ConnectAsync(eth.IP, eth.TcpPort);
+                var stream = tcp.GetStream();
+
+                ushort seq = 0;
+
+                // ---- 1. UPGRADE_START ----
+                var startPayload = new byte[4];
+                WriteLE32(startPayload, 0, (uint)almData.Length);
+                byte[] startFrame = UpgBuildFrame(SUBCMD_UPG_START, seq, startPayload);
+                await stream.WriteAsync(startFrame, 0, startFrame.Length);
+
+                var resp = await UpgReadResp(stream);
+                if (resp == null || resp[0] != 0x00)
+                    throw new Exception($"Device rejected START (status=0x{(resp?[0] ?? 0xFF):X2}). " +
+                        "Wrong board ID or size out of range.");
+                seq++;
+
+                // ---- 2. UPGRADE_DATA chunks ----
+                int offset = 0;
+                int total  = almData.Length;
+                while (offset < total)
+                {
+                    int chunkLen = Math.Min(UPG_CHUNK_SIZE, total - offset);
+                    var payload  = new byte[4 + chunkLen];
+                    WriteLE32(payload, 0, (uint)offset);
+                    Array.Copy(almData, offset, payload, 4, chunkLen);
+
+                    byte[] dataFrame = UpgBuildFrame(SUBCMD_UPG_DATA, seq, payload);
+                    await stream.WriteAsync(dataFrame, 0, dataFrame.Length);
+
+                    resp = await UpgReadResp(stream);
+                    if (resp == null || resp[0] != 0x00)
+                        throw new Exception(
+                            $"Write error at offset {offset} (status=0x{(resp?[0] ?? 0xFF):X2}).");
+
+                    offset += chunkLen;
+                    seq++;
+
+                    int pct = (int)((long)offset * 100 / total);
+                    progressCallback?.Invoke(pct);
+                }
+
+                // ---- 3. UPGRADE_END ----
+                var endPayload = new byte[4];
+                WriteLE32(endPayload, 0, (uint)almData.Length);
+                byte[] endFrame = UpgBuildFrame(SUBCMD_UPG_END, seq, endPayload);
+                await stream.WriteAsync(endFrame, 0, endFrame.Length);
+
+                resp = await UpgReadResp(stream);
+                // null = device closed connection while rebooting = success
+                if (resp != null && resp[0] != 0x00)
+                    throw new Exception(
+                        $"Device rejected END (status=0x{resp[0]:X2}). Verify failed on device.");
+            }
+        }
+
+        /// <summary>
+        /// Build a length-prefixed upgrade command frame.
+        /// Wire format: [LEN_L][LEN_H][0xA5][0x30][0x02][SEQ_L][SEQ_H][LEN_BODY][SUBCMD][payload...]
+        /// </summary>
+        private static byte[] UpgBuildFrame(byte subcmd, ushort seq, byte[] payload)
+        {
+            int payLen   = payload?.Length ?? 0;
+            int bodyLen  = 7 + payLen;           // A5+CMD+DIR+SEQ_L+SEQ_H+LEN_BODY+SUBCMD + payload
+            byte lenBody = (byte)(1 + payLen);   // SUBCMD(1) + payload
+
+            var frame = new byte[2 + bodyLen];
+            frame[0] = (byte)(bodyLen & 0xFF);
+            frame[1] = (byte)((bodyLen >> 8) & 0xFF);
+            frame[2] = 0xA5;
+            frame[3] = CMD_UPGRADE;
+            frame[4] = 0x02;              // DIR_PC_TO_DEV
+            frame[5] = (byte)(seq & 0xFF);
+            frame[6] = (byte)(seq >> 8);
+            frame[7] = lenBody;
+            frame[8] = subcmd;
+            if (payLen > 0)
+                Array.Copy(payload, 0, frame, 9, payLen);
+            return frame;
+        }
+
+        /// <summary>
+        /// Read a device response frame; return the status byte array (1 byte: status).
+        /// Returns null on connection error.
+        /// </summary>
+        private static async Task<byte[]> UpgReadResp(NetworkStream stream)
+        {
+            // Read 2-byte length prefix
+            var lenBuf = await UpgReadExact(stream, 2);
+            if (lenBuf == null) return null;
+
+            int bodyLen = lenBuf[0] | (lenBuf[1] << 8);
+            if (bodyLen < 2 || bodyLen > 256) return null;
+
+            // Read body: [A5][CMD][DIR][SEQ_L][SEQ_H][LEN_BODY][SUBCMD][status]
+            var body = await UpgReadExact(stream, bodyLen);
+            if (body == null || body.Length < 8) return null;
+
+            // Validate frame header
+            if (body[0] != 0xA5 || body[1] != CMD_UPGRADE || body[6] != SUBCMD_UPG_RESP)
+                return null;
+
+            return new[] { body[7] }; // status byte
+        }
+
+        private static async Task<byte[]> UpgReadExact(NetworkStream stream, int count)
+        {
+            var buf  = new byte[count];
+            int read = 0;
+            while (read < count)
+            {
+                int n;
+                try { n = await stream.ReadAsync(buf, read, count - read); }
+                catch { return null; }
+                if (n == 0) return null;
+                read += n;
+            }
+            return buf;
+        }
+
+        private static void WriteLE32(byte[] buf, int offset, uint value)
+        {
+            buf[offset]     = (byte)(value & 0xFF);
+            buf[offset + 1] = (byte)((value >> 8) & 0xFF);
+            buf[offset + 2] = (byte)((value >> 16) & 0xFF);
+            buf[offset + 3] = (byte)((value >> 24) & 0xFF);
+        }
+
     }
 }
 

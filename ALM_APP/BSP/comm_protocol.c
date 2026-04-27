@@ -1,10 +1,11 @@
 #include "comm_protocol.h"
+#include "upgrade_handler.h"
 #include "device_config.h"
 #include "eth_send_queue.h"
 #include <string.h>
 
 /* ---------- Firmware & Manufacturing info ---------- */
-#define FW_HW_VER  1   /* hardware version, fixed */
+#define FW_HW_VER  2   /* hardware version, fixed */
 
 /* Auto-derive build date from __DATE__ ("Mmm DD YYYY") */
 #define BUILD_DAY   ((__DATE__[4] == ' ' ? 0 : ((__DATE__[4] - '0') * 10)) + (__DATE__[5] - '0'))
@@ -116,6 +117,11 @@ void Process_ETH_Command(const uint8_t *buf, uint16_t len)
     else if (cmd == CMD_MOTION || cmd == CMD_MOTION_LEGACY)
     {
         ETH_Handle_MotionCommand(buf);
+    }
+    /* ---- OTA upgrade ---- */
+    else if (cmd == CMD_UPGRADE)
+    {
+        UPG_HandleCommand(buf, len);
     }
 }
 

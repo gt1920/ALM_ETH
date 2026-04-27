@@ -819,6 +819,11 @@
               <FileType>1</FileType>
               <FilePath>../BSP/fw_id.c</FilePath>
             </File>
+            <File>
+              <FileName>upgrade_handler.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>../BSP/upgrade_handler.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

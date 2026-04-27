@@ -27,6 +27,19 @@ extern "C" {
 #define SUBCMD_SET_DEVICE_NAME  0x06
 #define SUBCMD_PARAM_FEEDBACK   0x85
 
+/* OTA firmware upgrade (CMD_UPGRADE = 0x30) */
+#define CMD_UPGRADE             0x30
+#define SUBCMD_UPG_START        0x01   /* PC→Dev: file_size(4 LE)            */
+#define SUBCMD_UPG_DATA         0x02   /* PC→Dev: offset(4 LE) + data(≤128B) */
+#define SUBCMD_UPG_END          0x03   /* PC→Dev: total_size(4 LE)           */
+#define SUBCMD_UPG_RESP         0x81   /* Dev→PC: status(1)                  */
+/* status codes */
+#define UPG_STATUS_OK           0x00
+#define UPG_STATUS_WRONG_BOARD  0x01
+#define UPG_STATUS_SIZE_ERROR   0x02
+#define UPG_STATUS_WRITE_ERROR  0x03
+#define UPG_STATUS_VERIFY_ERROR 0x04
+
 void Process_ETH_Command(const uint8_t *buf, uint16_t len);
 void ETH_Report_ParamFeedback(uint32_t node_id, uint8_t axis, uint8_t param_id, uint32_t value);
 

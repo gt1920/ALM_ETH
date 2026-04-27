@@ -27,7 +27,7 @@
 #define ANNOUNCE_INTERVAL_MS  3000U
 
 /* FW version: hw_ver.DD.MM.YY from compile date */
-#define FW_HW_VER  1
+#define FW_HW_VER  2
 #define BUILD_DAY   ((__DATE__[4] == ' ' ? 0 : ((__DATE__[4] - '0') * 10)) + (__DATE__[5] - '0'))
 #define BUILD_MONTH ( \
     __DATE__[0] == 'J' ? (__DATE__[1] == 'a' ? 1 : (__DATE__[2] == 'n' ? 6 : 7)) : \
