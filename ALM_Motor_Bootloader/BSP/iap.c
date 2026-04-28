@@ -49,14 +49,15 @@ void BL_Run(void)
         return;
     }
 
-    /* Board ID must be "MOT". CRC32 over magic|board|sn must match. */
+    /* Board ID must be "MOT". CRC32 over magic|board|sn must match.
+       fw_sn is decrypted (silences the unused-warning) but not enforced
+       here yet — once cpu_id.c is ported into the Motor BL we'll add
+       per-MCU locking (accept wildcard OR fw_sn == g_device_sn). */
     {
         uint8_t ok = 1U;
-        if (fw_board != MOT_BOARD_ID)                          ok = 0U;
-        if (ok && fw_sn != MOT_FW_SN_WILDCARD)                 ok = 0U;
-        /* Optional per-MCU lock — not used by Motor for now;
-           accept only wildcard, otherwise reject. */
-        if (ok && bl_crc32(hdr, 12U) != hdr_crc)               ok = 0U;
+        (void)fw_sn;
+        if (fw_board != MOT_BOARD_ID)               ok = 0U;
+        if (ok && bl_crc32(hdr, 12U) != hdr_crc)    ok = 0U;
 
         if (!ok)
         {
