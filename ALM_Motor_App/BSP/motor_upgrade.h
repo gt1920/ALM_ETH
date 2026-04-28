@@ -45,6 +45,11 @@ void Upgrade_Init(void);
 void Upgrade_OnCanFrame(uint32_t id, const uint8_t *data, uint8_t len);
 void Upgrade_PollReboot(void);
 
+/* Toggle Stat_LED every ~100 ms while a .mot is being received from the
+   device. Call from main while(1). When no upgrade is in progress, this
+   is a no-op (the existing CAN-traffic LED logic stays in charge). */
+void Upgrade_LedBlinkPoll(void);
+
 #ifdef __cplusplus
 }
 #endif

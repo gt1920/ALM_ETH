@@ -173,6 +173,7 @@ int main(void)
 		Adjuster_FlashDeferred_Task();
 
 		Upgrade_PollReboot();
+		Upgrade_LedBlinkPoll();
 
 		idle_task(now);
 

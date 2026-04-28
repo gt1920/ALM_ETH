@@ -20,6 +20,7 @@
 #include "aes.h"
 #include "Motor.h"             /* FDCAN_NodeID */
 #include "CAN_Comm.h"          /* CAN_Send_FD */
+#include "LED.h"
 #include "main.h"
 #include <string.h>
 
@@ -252,5 +253,18 @@ void Upgrade_PollReboot(void)
         __disable_irq();
         NVIC_SystemReset();
         while (1) { __NOP(); }
+    }
+}
+
+void Upgrade_LedBlinkPoll(void)
+{
+    static uint32_t s_last_toggle = 0;
+    if (g_upg.state != UPG_S_RECVING) return;
+
+    uint32_t now = HAL_GetTick();
+    if ((uint32_t)(now - s_last_toggle) >= 100U)   /* ~5 Hz fast blink */
+    {
+        LED_Inv;
+        s_last_toggle = now;
     }
 }

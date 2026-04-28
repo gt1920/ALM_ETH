@@ -518,8 +518,24 @@ namespace DT_Controller
                     await ModuleUpgradeSendFirmwareAsync(eth, mi.NodeId, motData,
                         pct => { try { this.Text = $"Upgrading module... {pct}%"; } catch { } });
 
+                    // After TCP staging + CAN-FD relay completes, the Motor reboots,
+                    // bootloader applies the .mot, the new App boots and starts
+                    // emitting heartbeats. Device picks those up and updates its
+                    // g_modules[idx].fw_version. Wait ~10 s for that whole chain
+                    // (CAN relay ≈ 15 s for 17 KB / Motor BL ≈ 1 s / heartbeat
+                    // ≈ 1 s) then force a fresh GET_MODULE_INFO so the displayed
+                    // FW reflects the new firmware without the user having to
+                    // re-click the Module.
+                    int targetIndex = mi.Index;
+                    _ = Task.Run(async () =>
+                    {
+                        await Task.Delay(10000);
+                        try { RequestModuleInfoRefresh(targetIndex); } catch { }
+                    });
+
                     MessageBox.Show(this,
-                        "Firmware staged on device. Module will reboot to apply the update.",
+                        "Firmware staged on device. Module will reboot to apply the update.\n" +
+                        "FW version will refresh in ~10 seconds.",
                         "Module FW upgrade", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
                 catch (Exception ex)
