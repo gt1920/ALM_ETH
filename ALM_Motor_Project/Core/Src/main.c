@@ -40,6 +40,7 @@
 #include "adjuster_update_task.h"
 #include "adjuster_process_task.h"
 #include "adjuster_idle_task.h"
+#include "motor_upgrade.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -139,9 +140,11 @@ int main(void)
 	*/
 	
 	Motor_Init();
-	
+
 	CAN_Init();
-	
+
+	Upgrade_Init();
+
 	/* USER CODE END 2 */
 
   /* Infinite loop */
@@ -167,7 +170,9 @@ int main(void)
 
 		/* Deferred flash write (must NOT run in SysTick) */
 		Adjuster_FlashDeferred_Task();
-		
+
+		Upgrade_PollReboot();
+
 		idle_task(now);
 
     /* USER CODE END WHILE */

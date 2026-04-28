@@ -494,6 +494,11 @@
               <FileType>1</FileType>
               <FilePath>..\BSP\fw_id.c</FilePath>
             </File>
+            <File>
+              <FileName>motor_upgrade.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\BSP\motor_upgrade.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

@@ -7,6 +7,7 @@
 #include "CAN_comm.h"
 #include "adjuster_flash.h"
 #include "adjuster_motor_task.h"
+#include "motor_upgrade.h"
 
 void Motor_StartFromCommand(const CAN_MotionCmd_t *cmd);
 
@@ -97,6 +98,13 @@ void AdjusterCAN_OnRx(uint32_t id,
 
     switch (id)
     {
+        /* ================= OTA Upgrade ================= */
+        case CANID_UPG_START:
+        case CANID_UPG_DATA:
+        case CANID_UPG_END:
+            Upgrade_OnCanFrame(id, data, len);
+            return;
+
         /* ================= Motion ================= */
         case CAN_ID_MOTION_CONTROL:
         {
