@@ -401,8 +401,16 @@ namespace DT_Controller
                     await UpgradeSendFirmwareAsync(eth, almData,
                         pct => { try { this.Text = $"Upgrading... {pct}%"; } catch { } });
 
+                    // Device will reboot into the new firmware (~5 s). Then we
+                    // need to re-establish TCP and re-query everything (own FW,
+                    // module list, each module's info). Easiest: re-trigger the
+                    // device's SelectedIndexChanged after a delay, which already
+                    // does Disconnect→Reconnect→GET_VERSION_INFO→GET_MODULE_LIST.
+                    ScheduleDeviceSelectionRefresh(8000);
+
                     MessageBox.Show(this,
-                        "Firmware sent. Device is rebooting to apply the update.",
+                        "Firmware sent. Device is rebooting to apply the update.\n" +
+                        "FW info will refresh in ~8 seconds.",
                         "Upgrade", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
                 catch (Exception ex)
@@ -519,23 +527,18 @@ namespace DT_Controller
                         pct => { try { this.Text = $"Upgrading module... {pct}%"; } catch { } });
 
                     // After TCP staging + CAN-FD relay completes, the Motor reboots,
-                    // bootloader applies the .mot, the new App boots and starts
-                    // emitting heartbeats. Device picks those up and updates its
-                    // g_modules[idx].fw_version. Wait ~10 s for that whole chain
-                    // (CAN relay ≈ 15 s for 17 KB / Motor BL ≈ 1 s / heartbeat
-                    // ≈ 1 s) then force a fresh GET_MODULE_INFO so the displayed
-                    // FW reflects the new firmware without the user having to
-                    // re-click the Module.
-                    int targetIndex = mi.Index;
-                    _ = Task.Run(async () =>
-                    {
-                        await Task.Delay(10000);
-                        try { RequestModuleInfoRefresh(targetIndex); } catch { }
-                    });
+                    // its bootloader applies the .mot, the new App boots and the
+                    // device's heartbeat-cache catches up (~10 s end-to-end). The
+                    // Motor's slot also briefly disappears from g_modules during
+                    // the silent window so a single GET_MODULE_INFO at the old
+                    // index might miss. Re-trigger the device's SelectedIndexChanged
+                    // — that forces a full Disconnect→Reconnect→GET_VERSION_INFO→
+                    // GET_MODULE_LIST→per-module GET_MODULE_INFO refresh.
+                    ScheduleDeviceSelectionRefresh(12000);
 
                     MessageBox.Show(this,
                         "Firmware staged on device. Module will reboot to apply the update.\n" +
-                        "FW version will refresh in ~10 seconds.",
+                        "Module list will refresh in ~12 seconds.",
                         "Module FW upgrade", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
                 catch (Exception ex)
@@ -1495,6 +1498,36 @@ namespace DT_Controller
                 {
                     // ���� UI ����
                 }
+            });
+        }
+
+        // Schedule a "click the currently-selected device" simulation after delayMs.
+        // Re-firing MainDevice.SelectedIndexChanged causes a full reconnect +
+        // GET_VERSION_INFO + GET_MODULE_LIST + per-module GET_MODULE_INFO refresh,
+        // which is what we want after any OTA so the displayed FW catches up to
+        // what the device/modules actually report.
+        private void ScheduleDeviceSelectionRefresh(int delayMs)
+        {
+            _ = Task.Run(async () =>
+            {
+                try
+                {
+                    await Task.Delay(delayMs);
+                    InvokeIfRequired(() =>
+                    {
+                        try
+                        {
+                            int idx = MainDevice.SelectedIndex;
+                            if (idx < 0 || idx >= MainDevice.Items.Count) return;
+                            // Force the SelectedIndexChanged handler to fire again by
+                            // bouncing the selection through -1.
+                            MainDevice.SelectedIndex = -1;
+                            MainDevice.SelectedIndex = idx;
+                        }
+                        catch { }
+                    });
+                }
+                catch { }
             });
         }
 
