@@ -27,14 +27,7 @@
 #include "main.h"
 #include <string.h>
 
-/* CAN IDs and status codes — must mirror ALM_Motor_Project/BSP/motor_upgrade.h */
-#define CANID_UPG_START         0x300U
-#define CANID_UPG_DATA          0x301U
-#define CANID_UPG_END           0x302U
-#define CANID_UPG_RESP          0x305U
-
-#define MUR_RESP_TIMEOUT_MS     800U     /* Motor erase_staging is ~150 ms */
-#define MUR_INTER_FRAME_MIN_MS  0U       /* CAN FD already paces itself */
+#define MUR_RESP_TIMEOUT_MS     800U    /* Motor erase_staging is ~150 ms */
 
 /* ---- relay state machine ---- */
 typedef enum {
@@ -53,11 +46,11 @@ typedef enum {
 static struct {
     MurState_t  state;
     uint32_t    file_size;
-    uint32_t    rx_bytes;        /* bytes received from PC into W25Q     */
-    uint32_t    tx_offset;       /* next .mot offset to relay            */
+    uint32_t    rx_next;         /* next expected DATA offset (monotonic) */
+    uint32_t    tx_offset;       /* next .mot offset to relay             */
     uint32_t    target_node_id;
-    uint8_t     hdr16[16];       /* cached encrypted FW_ID hdr           */
-    uint32_t    deadline;        /* HAL tick deadline for current wait   */
+    uint8_t     hdr16[16];       /* cached encrypted FW_ID hdr            */
+    uint32_t    deadline;        /* HAL tick deadline for current wait    */
 
     /* Latest CAN RESP captured by MUR_OnCanResp (volatile: ISR context). */
     volatile uint8_t  resp_pending;
@@ -183,7 +176,7 @@ void MUR_HandleCommand(const uint8_t *buf, uint16_t len)
         memcpy(g.hdr16, hdr, 16U);
         g.file_size      = fsz;
         g.target_node_id = node;
-        g.rx_bytes       = 16U;          /* hdr already written */
+        g.rx_next        = 16U;          /* hdr already written; PC starts at 16 */
         g.tx_offset      = 0U;
         g.state          = MUR_S_STAGING;
         send_tcp_resp(seq, UPG_STATUS_OK);
@@ -200,9 +193,9 @@ void MUR_HandleCommand(const uint8_t *buf, uint16_t len)
         uint32_t data_len  = body_len - 5U;
         const uint8_t *data = &buf[11];
 
-        if (offset + data_len > g.file_size)
+        if (offset != g.rx_next || offset + data_len > g.file_size)
         {
-            send_tcp_resp(seq, UPG_STATUS_SIZE_ERROR);
+            send_tcp_resp(seq, UPG_STATUS_VERIFY_ERROR);
             return;
         }
         if (BSP_W25Q_Write(MUR_W25Q_BASE + offset, data, data_len) != W25Q_OK)
@@ -210,7 +203,7 @@ void MUR_HandleCommand(const uint8_t *buf, uint16_t len)
             send_tcp_resp(seq, UPG_STATUS_WRITE_ERROR);
             return;
         }
-        g.rx_bytes = (offset + data_len > g.rx_bytes) ? (offset + data_len) : g.rx_bytes;
+        g.rx_next = offset + data_len;
         send_tcp_resp(seq, UPG_STATUS_OK);
         break;
     }
@@ -221,7 +214,7 @@ void MUR_HandleCommand(const uint8_t *buf, uint16_t len)
         if (len < 11U)                { send_tcp_resp(seq, UPG_STATUS_SIZE_ERROR);   return; }
 
         uint32_t total = rd_le32(&buf[7]);
-        if (total != g.file_size || total != g.rx_bytes)
+        if (total != g.file_size || total != g.rx_next)
         {
             send_tcp_resp(seq, UPG_STATUS_VERIFY_ERROR);
             return;
@@ -269,7 +262,7 @@ void MUR_PollRelay(void)
         memcpy(&f[8], g.hdr16, 16U);
 
         g.resp_pending = 0U;
-        CAN_Send_FD_Frame(CANID_UPG_START, f, 24U);
+        CAN_Send_FD_Frame(MUR_CANID_START, f, 24U);
 
         g.deadline = now + MUR_RESP_TIMEOUT_MS;
         g.state    = MUR_S_WAIT_START;
@@ -313,7 +306,7 @@ void MUR_PollRelay(void)
         }
 
         g.resp_pending = 0U;
-        CAN_Send_FD_Frame(CANID_UPG_DATA, f, (uint8_t)(8U + chunk));
+        CAN_Send_FD_Frame(MUR_CANID_DATA, f, (uint8_t)(8U + chunk));
 
         g.deadline = now + MUR_RESP_TIMEOUT_MS;
         g.state    = MUR_S_WAIT_DATA;
@@ -356,7 +349,7 @@ void MUR_PollRelay(void)
         wr_le32(&f[4], g.file_size);
 
         g.resp_pending = 0U;
-        CAN_Send_FD_Frame(CANID_UPG_END, f, 8U);
+        CAN_Send_FD_Frame(MUR_CANID_END, f, 8U);
 
         g.deadline = now + MUR_RESP_TIMEOUT_MS;
         g.state    = MUR_S_WAIT_END;

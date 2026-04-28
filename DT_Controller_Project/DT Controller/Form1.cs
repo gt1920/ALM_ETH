@@ -3426,10 +3426,10 @@ namespace DT_Controller
                 var startPayload = new byte[4 + 16];
                 WriteLE32(startPayload, 0, (uint)almData.Length);
                 Array.Copy(almData, 0, startPayload, 4, 16);
-                byte[] startFrame = UpgBuildFrame(SUBCMD_UPG_START, seq, startPayload);
+                byte[] startFrame = UpgBuildFrame(CMD_UPGRADE, SUBCMD_UPG_START, seq, startPayload);
                 await stream.WriteAsync(startFrame, 0, startFrame.Length);
 
-                var resp = await UpgReadResp(stream);
+                var resp = await UpgReadResp(stream, CMD_UPGRADE, SUBCMD_UPG_RESP);
                 if (resp == null || resp[0] != 0x00)
                     throw new Exception("Upgrade failed: firmware invalid.");
                 seq++;
@@ -3444,10 +3444,10 @@ namespace DT_Controller
                     WriteLE32(payload, 0, (uint)offset);
                     Array.Copy(almData, offset, payload, 4, chunkLen);
 
-                    byte[] dataFrame = UpgBuildFrame(SUBCMD_UPG_DATA, seq, payload);
+                    byte[] dataFrame = UpgBuildFrame(CMD_UPGRADE, SUBCMD_UPG_DATA, seq, payload);
                     await stream.WriteAsync(dataFrame, 0, dataFrame.Length);
 
-                    resp = await UpgReadResp(stream);
+                    resp = await UpgReadResp(stream, CMD_UPGRADE, SUBCMD_UPG_RESP);
                     if (resp == null || resp[0] != 0x00)
                         throw new Exception(
                             $"Write error at offset {offset} (status=0x{(resp?[0] ?? 0xFF):X2}).");
@@ -3462,10 +3462,10 @@ namespace DT_Controller
                 // ---- 3. UPGRADE_END ----
                 var endPayload = new byte[4];
                 WriteLE32(endPayload, 0, (uint)almData.Length);
-                byte[] endFrame = UpgBuildFrame(SUBCMD_UPG_END, seq, endPayload);
+                byte[] endFrame = UpgBuildFrame(CMD_UPGRADE, SUBCMD_UPG_END, seq, endPayload);
                 await stream.WriteAsync(endFrame, 0, endFrame.Length);
 
-                resp = await UpgReadResp(stream);
+                resp = await UpgReadResp(stream, CMD_UPGRADE, SUBCMD_UPG_RESP);
                 // null = device closed connection while rebooting = success
                 if (resp != null && resp[0] != 0x00)
                     throw new Exception(
@@ -3475,9 +3475,9 @@ namespace DT_Controller
 
         /// <summary>
         /// Build a length-prefixed upgrade command frame.
-        /// Wire format: [LEN_L][LEN_H][0xA5][0x30][0x02][SEQ_L][SEQ_H][LEN_BODY][SUBCMD][payload...]
+        /// Wire format: [LEN_L][LEN_H][0xA5][CMD][0x02][SEQ_L][SEQ_H][LEN_BODY][SUBCMD][payload...]
         /// </summary>
-        private static byte[] UpgBuildFrame(byte subcmd, ushort seq, byte[] payload)
+        private static byte[] UpgBuildFrame(byte cmd, byte subcmd, ushort seq, byte[] payload)
         {
             int payLen   = payload?.Length ?? 0;
             int bodyLen  = 7 + payLen;           // A5+CMD+DIR+SEQ_L+SEQ_H+LEN_BODY+SUBCMD + payload
@@ -3487,7 +3487,7 @@ namespace DT_Controller
             frame[0] = (byte)(bodyLen & 0xFF);
             frame[1] = (byte)((bodyLen >> 8) & 0xFF);
             frame[2] = 0xA5;
-            frame[3] = CMD_UPGRADE;
+            frame[3] = cmd;
             frame[4] = 0x02;              // DIR_PC_TO_DEV
             frame[5] = (byte)(seq & 0xFF);
             frame[6] = (byte)(seq >> 8);
@@ -3499,27 +3499,24 @@ namespace DT_Controller
         }
 
         /// <summary>
-        /// Read a device response frame; return the status byte array (1 byte: status).
-        /// Returns null on connection error.
+        /// Read a device response frame matching `cmd` + `respSubcmd`; return the status
+        /// byte array (1 byte). Returns null on connection error or header mismatch.
         /// </summary>
-        private static async Task<byte[]> UpgReadResp(NetworkStream stream)
+        private static async Task<byte[]> UpgReadResp(NetworkStream stream, byte cmd, byte respSubcmd)
         {
-            // Read 2-byte length prefix
             var lenBuf = await UpgReadExact(stream, 2);
             if (lenBuf == null) return null;
 
             int bodyLen = lenBuf[0] | (lenBuf[1] << 8);
             if (bodyLen < 2 || bodyLen > 256) return null;
 
-            // Read body: [A5][CMD][DIR][SEQ_L][SEQ_H][LEN_BODY][SUBCMD][status]
             var body = await UpgReadExact(stream, bodyLen);
             if (body == null || body.Length < 8) return null;
 
-            // Validate frame header
-            if (body[0] != 0xA5 || body[1] != CMD_UPGRADE || body[6] != SUBCMD_UPG_RESP)
+            if (body[0] != 0xA5 || body[1] != cmd || body[6] != respSubcmd)
                 return null;
 
-            return new[] { body[7] }; // status byte
+            return new[] { body[7] };
         }
 
         private static async Task<byte[]> UpgReadExact(NetworkStream stream, int count)
@@ -3584,10 +3581,10 @@ namespace DT_Controller
                 WriteLE32(startPayload, 0, (uint)motData.Length);
                 WriteLE32(startPayload, 4, targetNodeId);
                 Array.Copy(motData, 0, startPayload, 8, 16);
-                byte[] startFrame = MupgBuildFrame(SUBCMD_MUPG_START, seq, startPayload);
+                byte[] startFrame = UpgBuildFrame(CMD_MODULE_UPGRADE, SUBCMD_MUPG_START, seq, startPayload);
                 await stream.WriteAsync(startFrame, 0, startFrame.Length);
 
-                var resp = await MupgReadResp(stream);
+                var resp = await UpgReadResp(stream, CMD_MODULE_UPGRADE, SUBCMD_MUPG_RESP);
                 if (resp == null || resp[0] != 0x00)
                     throw new Exception(
                         $"START rejected (status=0x{(resp?[0] ?? 0xFF):X2}).");
@@ -3603,10 +3600,10 @@ namespace DT_Controller
                     WriteLE32(payload, 0, (uint)offset);
                     Array.Copy(motData, offset, payload, 4, chunkLen);
 
-                    byte[] dataFrame = MupgBuildFrame(SUBCMD_MUPG_DATA, seq, payload);
+                    byte[] dataFrame = UpgBuildFrame(CMD_MODULE_UPGRADE, SUBCMD_MUPG_DATA, seq, payload);
                     await stream.WriteAsync(dataFrame, 0, dataFrame.Length);
 
-                    resp = await MupgReadResp(stream);
+                    resp = await UpgReadResp(stream, CMD_MODULE_UPGRADE, SUBCMD_MUPG_RESP);
                     if (resp == null || resp[0] != 0x00)
                         throw new Exception(
                             $"Write error at offset {offset} (status=0x{(resp?[0] ?? 0xFF):X2}).");
@@ -3621,54 +3618,16 @@ namespace DT_Controller
                 // ---- 3. MUPG_END ----
                 var endPayload = new byte[4];
                 WriteLE32(endPayload, 0, (uint)motData.Length);
-                byte[] endFrame = MupgBuildFrame(SUBCMD_MUPG_END, seq, endPayload);
+                byte[] endFrame = UpgBuildFrame(CMD_MODULE_UPGRADE, SUBCMD_MUPG_END, seq, endPayload);
                 await stream.WriteAsync(endFrame, 0, endFrame.Length);
 
-                resp = await MupgReadResp(stream);
+                resp = await UpgReadResp(stream, CMD_MODULE_UPGRADE, SUBCMD_MUPG_RESP);
                 if (resp != null && resp[0] != 0x00)
                     throw new Exception(
                         $"Device rejected END (status=0x{resp[0]:X2}).");
                 // After END_OK the device has staged .mot and starts CAN-FD
                 // relay asynchronously. The TCP connection is no longer needed.
             }
-        }
-
-        private static byte[] MupgBuildFrame(byte subcmd, ushort seq, byte[] payload)
-        {
-            int payLen   = payload?.Length ?? 0;
-            int bodyLen  = 7 + payLen;
-            byte lenBody = (byte)(1 + payLen);
-
-            var frame = new byte[2 + bodyLen];
-            frame[0] = (byte)(bodyLen & 0xFF);
-            frame[1] = (byte)((bodyLen >> 8) & 0xFF);
-            frame[2] = 0xA5;
-            frame[3] = CMD_MODULE_UPGRADE;
-            frame[4] = 0x02;              // DIR_PC_TO_DEV
-            frame[5] = (byte)(seq & 0xFF);
-            frame[6] = (byte)(seq >> 8);
-            frame[7] = lenBody;
-            frame[8] = subcmd;
-            if (payLen > 0)
-                Array.Copy(payload, 0, frame, 9, payLen);
-            return frame;
-        }
-
-        private static async Task<byte[]> MupgReadResp(NetworkStream stream)
-        {
-            var lenBuf = await UpgReadExact(stream, 2);
-            if (lenBuf == null) return null;
-
-            int bodyLen = lenBuf[0] | (lenBuf[1] << 8);
-            if (bodyLen < 2 || bodyLen > 256) return null;
-
-            var body = await UpgReadExact(stream, bodyLen);
-            if (body == null || body.Length < 8) return null;
-
-            if (body[0] != 0xA5 || body[1] != CMD_MODULE_UPGRADE || body[6] != SUBCMD_MUPG_RESP)
-                return null;
-
-            return new[] { body[7] };
         }
 
     }

@@ -297,8 +297,8 @@ void HAL_FDCAN_RxFifo0Callback(FDCAN_HandleTypeDef *hfdcan, uint32_t it)
         return;
     }
 
-    /* ---------- Module upgrade RESP 0x305 ---------- */
-    if (rxHeader.Identifier == 0x305U &&
+    /* ---------- Module upgrade RESP ---------- */
+    if (rxHeader.Identifier == MUR_CANID_RESP &&
         rxHeader.DataLength >= FDCAN_DLC_BYTES_12)
     {
         uint32_t node_id    = u32_le(&CAN_rxData[0]);

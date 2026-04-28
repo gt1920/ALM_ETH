@@ -32,9 +32,8 @@ typedef enum {
 static struct {
     UpgState_t state;
     uint32_t   file_size;       /* total .mot bytes (header + payload) */
-    uint32_t   next_offset;     /* bytes already written to STAGING */
-    uint8_t    reboot_pending;
-    uint32_t   reboot_tick;
+    uint32_t   next_offset;     /* bytes already written to STAGING    */
+    uint32_t   reboot_deadline; /* HAL_GetTick() at which to reset; 0 = none */
 } g_upg;
 
 /* ---- helpers ---- */
@@ -220,9 +219,8 @@ void Upgrade_OnCanFrame(uint32_t id, const uint8_t *data, uint8_t len)
             return;
         }
 
-        g_upg.state          = UPG_S_DONE;
-        g_upg.reboot_pending = 1U;
-        g_upg.reboot_tick    = HAL_GetTick();
+        g_upg.state           = UPG_S_DONE;
+        g_upg.reboot_deadline = HAL_GetTick() + 100U;   /* 100 ms grace */
         send_resp(UPG_OK, g_upg.next_offset);
         break;
     }
@@ -234,8 +232,8 @@ void Upgrade_OnCanFrame(uint32_t id, const uint8_t *data, uint8_t len)
 
 void Upgrade_PollReboot(void)
 {
-    /* 100 ms grace so the END RESP gets onto the bus before we reset. */
-    if (g_upg.reboot_pending && (HAL_GetTick() - g_upg.reboot_tick) >= 100U)
+    if (g_upg.reboot_deadline != 0U &&
+        (int32_t)(HAL_GetTick() - g_upg.reboot_deadline) >= 0)
     {
         __disable_irq();
         NVIC_SystemReset();

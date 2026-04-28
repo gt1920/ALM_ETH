@@ -52,9 +52,7 @@ extern "C" {
 #define SUBCMD_MUPG_DATA        0x02
 #define SUBCMD_MUPG_END         0x03
 #define SUBCMD_MUPG_RESP        0x81
-/* MUPG status codes — reuse UPG_STATUS_* and add: */
-#define MUPG_STATUS_NO_TARGET   0x10   /* target_node_id not in module list   */
-#define MUPG_STATUS_RELAY_FAIL  0x11   /* CAN-FD relay to module failed       */
+/* MUPG-only status code (others reuse UPG_STATUS_*). */
 #define MUPG_STATUS_BUSY        0x12   /* a previous relay is still running   */
 
 void Process_ETH_Command(const uint8_t *buf, uint16_t len);

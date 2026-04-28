@@ -17,8 +17,6 @@
 #include <stdint.h>
 #include "motor_partition.h"
 
-#define FW_SN_WILDCARD   MOT_FW_SN_WILDCARD
-
 __attribute__((used))
 const struct {
     uint32_t magic;
@@ -27,5 +25,5 @@ const struct {
 } FW_HW_ID = {
     MOT_FW_ID_MAGIC,
     MOT_BOARD_ID,
-    FW_SN_WILDCARD
+    MOT_FW_SN_WILDCARD
 };

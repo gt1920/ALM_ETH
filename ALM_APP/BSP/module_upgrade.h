@@ -22,8 +22,14 @@ extern "C" {
 #include <stdint.h>
 
 /* W25Q region for the Motor .mot package (1 MB offset; ETH .cic owns 0..1MB). */
-#define MUR_W25Q_BASE   0x00100000UL
-#define MUR_W25Q_SIZE   0x00020000UL    /* 128 KB ample for any .mot           */
+#define MUR_W25Q_BASE     0x00100000UL
+#define MUR_W25Q_SIZE     0x00020000UL  /* 128 KB ample for any .mot           */
+
+/* CAN-FD IDs — must mirror ALM_Motor_Project/BSP/motor_upgrade.h */
+#define MUR_CANID_START   0x300U
+#define MUR_CANID_DATA    0x301U
+#define MUR_CANID_END     0x302U
+#define MUR_CANID_RESP    0x305U
 
 /* Called from Process_ETH_Command when buf[1] == CMD_MODULE_UPGRADE */
 void MUR_HandleCommand(const uint8_t *buf, uint16_t len);

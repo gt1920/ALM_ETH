@@ -41,6 +41,7 @@
 #include "adjuster_process_task.h"
 #include "adjuster_idle_task.h"
 #include "motor_upgrade.h"
+#include "motor_partition.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -99,10 +100,10 @@ int main(void)
   /* USER CODE BEGIN 1 */
 	TSB = 0;
 
-  /* App lives at 0x08002000 (after 8 KB Bootloader). Point the vector
-     table here BEFORE HAL_Init() — HAL enables SysTick interrupt during
-     init, and the handler must dispatch through the app's table. */
-  SCB->VTOR = 0x08002000UL;
+  /* App lives at MOT_APP_BASE (after the Bootloader). Point VTOR here
+     BEFORE HAL_Init() — HAL enables SysTick during init, and the handler
+     must dispatch through the app's table. */
+  SCB->VTOR = MOT_APP_BASE;
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
