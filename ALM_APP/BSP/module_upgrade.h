@@ -25,7 +25,7 @@ extern "C" {
 #define MUR_W25Q_BASE     0x00100000UL
 #define MUR_W25Q_SIZE     0x00020000UL  /* 128 KB ample for any .mot           */
 
-/* CAN-FD IDs — must mirror ALM_Motor_Project/BSP/motor_upgrade.h */
+/* CAN-FD IDs — must mirror ALM_Motor_App/BSP/motor_upgrade.h */
 #define MUR_CANID_START   0x300U
 #define MUR_CANID_DATA    0x301U
 #define MUR_CANID_END     0x302U

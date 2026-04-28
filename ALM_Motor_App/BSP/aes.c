@@ -3,8 +3,8 @@
  *         (ported from ALM_Bootloader/BSP/aes.c, fresh KEY/IV for Motor track)
  *
  * The KEY+IV defined here MUST stay byte-identical to the copies in
- *   ALM_Motor_APP/BSP/aes.c
- *   ALM_Motor/Copy_Bin/AesCustom.cs
+ *   ALM_Motor_Bootloader/BSP/aes.c
+ *   Copy_Bin_Motor_Project/Copy_Bin/Program.cs
  * Otherwise the .mot upgrade pipeline breaks. Keep all three in sync.
  */
 #include "aes.h"

@@ -7,6 +7,7 @@
 #include "adjuster_can.h"
 #include "adjuster_flash.h"
 #include "stage_status.h"
+#include "fw_version.h"
 
 Stage_Heartbeat_t g_stage_hb;
 
@@ -141,11 +142,11 @@ static void Stage_Heartbeat_Update(void)
            g_adj_params.device_name,
            sizeof(g_stage_hb.name));   // �̶� 8 byte
 
-    /* ---------- Firmware Version ---------- */
-    g_stage_hb.fw_hw = g_adj_params.pcb_revision;
-    g_stage_hb.fw_dd = g_adj_params.fw_day;
-    g_stage_hb.fw_mm = g_adj_params.fw_month;
-    g_stage_hb.fw_yy = g_adj_params.fw_year;
+    /* ---------- Firmware Version (auto from fw_version.h) ---------- */
+    g_stage_hb.fw_hw = FW_HW_VER;
+    g_stage_hb.fw_dd = BUILD_DAY;
+    g_stage_hb.fw_mm = BUILD_MONTH;
+    g_stage_hb.fw_yy = BUILD_YEAR;
 
     /* ---------- Manufacture Date ---------- */
     g_stage_hb.mfg_year  = g_adj_params.mfg_year;
@@ -161,7 +162,7 @@ static void Stage_Heartbeat_Update(void)
     /* ˵����
      * - �㵱ǰ�� XY һ��ģ��
      * - ������ֻ��һ�� motor_hold_current
-     * - ����ѡ X ��Ϊ��������������ɸ��? max(X,Y)��
+     * - ����ѡ X ��Ϊ��������������ɸ��? max(X,Y)��
      */
 
     /* ---------- Position ---------- */

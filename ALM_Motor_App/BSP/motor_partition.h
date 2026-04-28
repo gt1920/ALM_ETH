@@ -3,7 +3,7 @@
  *
  *  This header MUST be byte-identical between:
  *    ALM_Motor_Bootloader/BSP/motor_partition.h
- *    ALM_Motor_APP/BSP/motor_partition.h
+ *    ALM_Motor_App/BSP/motor_partition.h
  *  Bootloader and App share these constants — drift breaks OTA.
  *
  *  Layout (128 KB internal flash, 2 KB sector):

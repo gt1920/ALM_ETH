@@ -8,14 +8,14 @@ namespace Copy_Bin
     /*
      * Motor pipeline Copy_Bin — encrypts a Motor APP .bin into .mot.
      *
-     * Invocation (from ALM_Motor_Project/MDK-ARM/After_Build.bat):
+     * Invocation (from ALM_Motor_App/MDK-ARM/After_Build.bat):
      *     Copy_Bin.exe ALM_Motor_App
      *   reads ..\Output\ALM_Motor_App.bin
      *   writes ..\HEX\ALM_Motor_App_<snTag>_yyMMdd_HHmm.mot
      *
      * The KEY+IV here MUST stay byte-identical to:
      *   ALM_Motor_Bootloader/BSP/aes.c
-     *   ALM_Motor_Project/BSP/aes.c (added in M3)
+     *   ALM_Motor_App/BSP/aes.c
      * Drift breaks the .mot upgrade pipeline.
      *
      * No Bootloader+App merge step (Motor's bootloader is flashed separately

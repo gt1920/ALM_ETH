@@ -8,6 +8,7 @@
 #include "adjuster_flash.h"
 #include "adjuster_motor_task.h"
 #include "motor_upgrade.h"
+#include "fw_version.h"
 
 void Motor_StartFromCommand(const CAN_MotionCmd_t *cmd);
 
@@ -583,10 +584,10 @@ static void Stage_Heartbeat_Init(void)
 		memset(g_stage_hb.name, 0, 8);
     memcpy(g_stage_hb.name, "R/GB", 6);	
 	
-		g_stage_hb.fw_hw = 0x01;  // Ӳ���汾
-		g_stage_hb.fw_dd = 17;  // ��
-		g_stage_hb.fw_mm = 12;  // ��
-		g_stage_hb.fw_yy = 24;  // ��
+		g_stage_hb.fw_hw = FW_HW_VER;
+		g_stage_hb.fw_dd = BUILD_DAY;
+		g_stage_hb.fw_mm = BUILD_MONTH;
+		g_stage_hb.fw_yy = BUILD_YEAR;
 	
 		g_stage_hb.mfg_year = 25;  // 2025
 		g_stage_hb.mfg_month = 12;

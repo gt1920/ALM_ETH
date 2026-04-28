@@ -13,7 +13,9 @@ Branch: **Build_141** | Date: 2026-04-27
 | `ALM_Bootloader/` | IAP bootloader — decrypts and flashes `.cic` upgrades from W25Q |
 | `DT_Controller_Project/` | PC control software (WinForms, .NET 4.8) |
 | `Copy_Bin_Project/` | Post-build tool — encrypts `.bin` to `.cic` upgrade package |
-| `ALM_Motor_Project/` | Motor sub-module firmware reference |
+| `ALM_Motor_App/` | Motor sub-module firmware (App) |
+| `ALM_Motor_Bootloader/` | Motor sub-module IAP bootloader |
+| `Copy_Bin_Motor_Project/` | Post-build tool — encrypts Motor `.bin` to `.mot` |
 | `G0B1_SPI_Bootloader/` | G0B1 SPI bootloader reference |
 
 ---
