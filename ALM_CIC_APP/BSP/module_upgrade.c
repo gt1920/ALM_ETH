@@ -28,6 +28,7 @@
 #include <string.h>
 
 #define MUR_RESP_TIMEOUT_MS     800U    /* Motor erase_staging is ~150 ms */
+#define MUR_END_MAX_RETRIES     3U      /* END is the reboot trigger — retry */
 
 /* ---- relay state machine ---- */
 typedef enum {
@@ -65,6 +66,7 @@ struct MurCtx {
     uint32_t tx_end_count;       /* CANID_UPG_END   frames we sent       */
     uint32_t rx_resp_count;      /* RESP frames received from Motor      */
     uint32_t timeout_count;      /* deadline expirations (per-stage)     */
+    uint8_t  end_retries;        /* current END retransmission attempt   */
 };
 struct MurCtx g;
 
@@ -183,6 +185,7 @@ void MUR_HandleCommand(const uint8_t *buf, uint16_t len)
         g.target_node_id = node;
         g.rx_next        = 0U;           /* PC streams the full .mot from 0  */
         g.tx_offset      = 0U;
+        g.end_retries    = 0U;
         g.state          = MUR_S_STAGING;
         send_tcp_resp(seq, UPG_STATUS_OK);
         break;
@@ -372,12 +375,34 @@ void MUR_PollRelay(void)
             uint8_t  st = g.resp_status;
             uint32_t nd = g.resp_node_id;
             g.resp_pending = 0U;
-            g.state = (nd == g.target_node_id && st == UPG_STATUS_OK)
-                      ? MUR_S_DONE
-                      : MUR_S_FAILED;
+            if (nd == g.target_node_id && st == UPG_STATUS_OK)
+            {
+                g.end_retries = 0;
+                g.state = MUR_S_DONE;
+            }
+            else
+            {
+                g.state = MUR_S_FAILED;
+            }
             return;
         }
-        if ((int32_t)(now - g.deadline) >= 0) { g.timeout_count++; g.state = MUR_S_FAILED; }
+        if ((int32_t)(now - g.deadline) >= 0)
+        {
+            /* END is the most fragile frame — Motor needs the reboot signal to
+               commit the staged firmware. Retry up to MUR_END_MAX_RETRIES
+               before giving up; in practice a single retransmit is plenty. */
+            g.timeout_count++;
+            if (g.end_retries < MUR_END_MAX_RETRIES)
+            {
+                g.end_retries++;
+                g.state = MUR_S_SEND_END;   /* SEND_END resends and re-arms deadline */
+            }
+            else
+            {
+                g.end_retries = 0;
+                g.state = MUR_S_FAILED;
+            }
+        }
         break;
     }
     }

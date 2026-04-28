@@ -224,6 +224,15 @@ void Upgrade_OnCanFrame(uint32_t id, const uint8_t *data, uint8_t len)
     case CANID_UPG_END:
     {
         g_upg.rx_end_count++;
+        /* Idempotent: if device retransmits END after we already accepted one
+           (e.g., our prior RESP was lost), re-send OK so the device's state
+           machine completes instead of going to FAILED. The reboot_deadline
+           is already armed from the first END — don't bump it. */
+        if (g_upg.state == UPG_S_DONE)
+        {
+            send_resp(UPG_OK, g_upg.next_offset);
+            break;
+        }
         if (g_upg.state != UPG_S_RECVING)        { send_resp(UPG_NOT_RECEIVING, 0); return; }
         if (len < 8U)                            { send_resp(UPG_FRAME_TOO_SHORT, g_upg.next_offset); return; }
 
