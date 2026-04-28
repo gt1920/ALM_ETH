@@ -433,7 +433,9 @@ namespace DT_Controller
 
             moduleContextMenu.Items[0].Enabled = hasModule; // Change name
             moduleContextMenu.Items[1].Enabled = hasModule; // Reset name
-            moduleContextMenu.Items[3].Enabled = false;     // FW upgrade (not implemented)
+            // FW upgrade: needs both an ETH device (route) and a module (target).
+            moduleContextMenu.Items[3].Enabled =
+                hasModule && (MainDevice.SelectedItem is EthDeviceItem);
 
             moduleContextMenu.Show(SubDevice, e.Location);
         }
@@ -466,9 +468,66 @@ namespace DT_Controller
             SendSetModuleName(mi, null);
         }
 
-        private void ModuleFwUpgrade_Click(object sender, EventArgs e)
+        private async void ModuleFwUpgrade_Click(object sender, EventArgs e)
         {
-            MessageBox.Show(this, "FW upgrade is not available.", "FW upgrade", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            var mi  = SubDevice.SelectedItem as ModuleInfo;
+            var eth = MainDevice.SelectedItem as EthDeviceItem;
+            if (mi == null || eth == null)
+            {
+                MessageBox.Show(this, "Select an ETH device + a Module first.",
+                    "Module FW upgrade", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            using (var dlg = new System.Windows.Forms.OpenFileDialog())
+            {
+                dlg.Filter = "Motor firmware (*.mot)|*.mot|All files (*.*)|*.*";
+                dlg.Title  = $"Select firmware for module {mi.Name} (NodeID 0x{mi.NodeId:X8})";
+                if (dlg.ShowDialog(this) != DialogResult.OK)
+                    return;
+
+                byte[] motData;
+                try { motData = File.ReadAllBytes(dlg.FileName); }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(this, "Cannot read file: " + ex.Message,
+                        "Module FW upgrade", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+                if (motData.Length < 32)
+                {
+                    MessageBox.Show(this, "File too small to be a valid .mot.",
+                        "Module FW upgrade", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+
+                var miUp = moduleContextMenu.Items[3] as ToolStripMenuItem;
+                if (miUp != null) miUp.Enabled = false;
+                var origTitle = this.Text;
+
+                try
+                {
+                    DisconnectTcp();
+                    await Task.Delay(300);
+
+                    await ModuleUpgradeSendFirmwareAsync(eth, mi.NodeId, motData,
+                        pct => { try { this.Text = $"Upgrading module... {pct}%"; } catch { } });
+
+                    MessageBox.Show(this,
+                        "Firmware staged on device. Module will reboot to apply the update.",
+                        "Module FW upgrade", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(this, "Upgrade failed: " + ex.Message,
+                        "Module FW upgrade error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+                finally
+                {
+                    this.Text = origTitle;
+                    if (miUp != null) miUp.Enabled = true;
+                }
+            }
         }
 
         private void SendSetModuleName(ModuleInfo mi, string name)
@@ -3484,6 +3543,132 @@ namespace DT_Controller
             buf[offset + 1] = (byte)((value >> 8) & 0xFF);
             buf[offset + 2] = (byte)((value >> 16) & 0xFF);
             buf[offset + 3] = (byte)((value >> 24) & 0xFF);
+        }
+
+        // -----------------------------------------------------------------
+        //  Module OTA upgrade (CMD_MODULE_UPGRADE = 0x31) — relay .mot to a
+        //  sub-module via the device's CAN-FD bus. Mirrors the device-side
+        //  staging at W25Q[0x100000] and the per-frame ACK protocol.
+        // -----------------------------------------------------------------
+
+        private const byte CMD_MODULE_UPGRADE = 0x31;
+        private const byte SUBCMD_MUPG_START  = 0x01;
+        private const byte SUBCMD_MUPG_DATA   = 0x02;
+        private const byte SUBCMD_MUPG_END    = 0x03;
+        private const byte SUBCMD_MUPG_RESP   = 0x81;
+        private const int  MUPG_CHUNK_SIZE    = 128;
+
+        /// <summary>
+        /// Send .mot firmware to a sub-module via the ETH device (relay).
+        /// Protocol: START -> [DATA x N] -> END, request/response per packet.
+        /// START erases ~ceil(filesize, 4 KB) of W25Q on the device, so it
+        /// can take up to a few seconds for large firmwares.
+        /// </summary>
+        private async Task ModuleUpgradeSendFirmwareAsync(EthDeviceItem eth,
+            uint targetNodeId, byte[] motData, Action<int> progressCallback)
+        {
+            using (var tcp = new TcpClient())
+            {
+                tcp.NoDelay        = true;
+                tcp.SendTimeout    = 10000;
+                tcp.ReceiveTimeout = 60000;
+
+                await tcp.ConnectAsync(eth.IP, eth.TcpPort);
+                var stream = tcp.GetStream();
+
+                ushort seq = 0;
+
+                // ---- 1. MUPG_START ----
+                // payload: file_size(4) + target_node_id(4) + cic_hdr_16(16) = 24
+                var startPayload = new byte[4 + 4 + 16];
+                WriteLE32(startPayload, 0, (uint)motData.Length);
+                WriteLE32(startPayload, 4, targetNodeId);
+                Array.Copy(motData, 0, startPayload, 8, 16);
+                byte[] startFrame = MupgBuildFrame(SUBCMD_MUPG_START, seq, startPayload);
+                await stream.WriteAsync(startFrame, 0, startFrame.Length);
+
+                var resp = await MupgReadResp(stream);
+                if (resp == null || resp[0] != 0x00)
+                    throw new Exception(
+                        $"START rejected (status=0x{(resp?[0] ?? 0xFF):X2}).");
+                seq++;
+
+                // ---- 2. MUPG_DATA chunks ----
+                int offset = 0;
+                int total  = motData.Length;
+                while (offset < total)
+                {
+                    int chunkLen = Math.Min(MUPG_CHUNK_SIZE, total - offset);
+                    var payload  = new byte[4 + chunkLen];
+                    WriteLE32(payload, 0, (uint)offset);
+                    Array.Copy(motData, offset, payload, 4, chunkLen);
+
+                    byte[] dataFrame = MupgBuildFrame(SUBCMD_MUPG_DATA, seq, payload);
+                    await stream.WriteAsync(dataFrame, 0, dataFrame.Length);
+
+                    resp = await MupgReadResp(stream);
+                    if (resp == null || resp[0] != 0x00)
+                        throw new Exception(
+                            $"Write error at offset {offset} (status=0x{(resp?[0] ?? 0xFF):X2}).");
+
+                    offset += chunkLen;
+                    seq++;
+
+                    int pct = (int)((long)offset * 100 / total);
+                    progressCallback?.Invoke(pct);
+                }
+
+                // ---- 3. MUPG_END ----
+                var endPayload = new byte[4];
+                WriteLE32(endPayload, 0, (uint)motData.Length);
+                byte[] endFrame = MupgBuildFrame(SUBCMD_MUPG_END, seq, endPayload);
+                await stream.WriteAsync(endFrame, 0, endFrame.Length);
+
+                resp = await MupgReadResp(stream);
+                if (resp != null && resp[0] != 0x00)
+                    throw new Exception(
+                        $"Device rejected END (status=0x{resp[0]:X2}).");
+                // After END_OK the device has staged .mot and starts CAN-FD
+                // relay asynchronously. The TCP connection is no longer needed.
+            }
+        }
+
+        private static byte[] MupgBuildFrame(byte subcmd, ushort seq, byte[] payload)
+        {
+            int payLen   = payload?.Length ?? 0;
+            int bodyLen  = 7 + payLen;
+            byte lenBody = (byte)(1 + payLen);
+
+            var frame = new byte[2 + bodyLen];
+            frame[0] = (byte)(bodyLen & 0xFF);
+            frame[1] = (byte)((bodyLen >> 8) & 0xFF);
+            frame[2] = 0xA5;
+            frame[3] = CMD_MODULE_UPGRADE;
+            frame[4] = 0x02;              // DIR_PC_TO_DEV
+            frame[5] = (byte)(seq & 0xFF);
+            frame[6] = (byte)(seq >> 8);
+            frame[7] = lenBody;
+            frame[8] = subcmd;
+            if (payLen > 0)
+                Array.Copy(payload, 0, frame, 9, payLen);
+            return frame;
+        }
+
+        private static async Task<byte[]> MupgReadResp(NetworkStream stream)
+        {
+            var lenBuf = await UpgReadExact(stream, 2);
+            if (lenBuf == null) return null;
+
+            int bodyLen = lenBuf[0] | (lenBuf[1] << 8);
+            if (bodyLen < 2 || bodyLen > 256) return null;
+
+            var body = await UpgReadExact(stream, bodyLen);
+            if (body == null || body.Length < 8) return null;
+
+            if (body[0] != 0xA5 || body[1] != CMD_MODULE_UPGRADE || body[6] != SUBCMD_MUPG_RESP)
+                return null;
+
+            return new[] { body[7] };
         }
 
     }
