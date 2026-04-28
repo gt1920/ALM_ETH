@@ -3,7 +3,7 @@
  *
  * Reads encrypted .mot from internal flash STAGING region (no W25Q on Motor),
  * validates header (magic + "MOT" board_id + CRC32), decrypts CBC-chain
- * payload and programs it into APP region. Mirrors ALM_Bootloader/BSP/iap.c
+ * payload and programs it into APP region. Mirrors ALM_CIC_Bootloader/BSP/iap.c
  * with G0 flash semantics (page=2 KB, program=DOUBLEWORD=8 B).
  */
 #include "iap.h"

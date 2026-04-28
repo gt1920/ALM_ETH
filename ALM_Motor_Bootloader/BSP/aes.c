@@ -1,6 +1,6 @@
 /**
  * aes.c - software AES-128/192/256 with CBC chaining via IV
- *         (ported from ALM_Bootloader/BSP/aes.c, fresh KEY/IV for Motor track)
+ *         (ported from ALM_CIC_Bootloader/BSP/aes.c, fresh KEY/IV for Motor track)
  *
  * The KEY+IV defined here MUST stay byte-identical to the copies in
  *   ALM_Motor_App/BSP/aes.c

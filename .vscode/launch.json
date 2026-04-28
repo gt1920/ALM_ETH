@@ -10,9 +10,9 @@
             "request": "launch",
             "preLaunchTask": "build",
             // If you have changed target frameworks, make sure to update the program path.
-            "program": "${workspaceFolder}/Copy_Bin_Project/Copy_Bin/bin/Debug/net8.0-windows7.0/Copy_Bin.dll",
+            "program": "${workspaceFolder}/Copy_Bin_CIC_Project/Copy_Bin/bin/Debug/net8.0-windows7.0/Copy_Bin.dll",
             "args": [],
-            "cwd": "${workspaceFolder}/Copy_Bin_Project/Copy_Bin",
+            "cwd": "${workspaceFolder}/Copy_Bin_CIC_Project/Copy_Bin",
             // For more information about the 'console' field, see https://aka.ms/VSCode-CS-LaunchJson-Console
             "console": "internalConsole",
             "stopAtEntry": false

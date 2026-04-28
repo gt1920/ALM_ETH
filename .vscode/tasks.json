@@ -7,7 +7,7 @@
             "type": "process",
             "args": [
                 "build",
-                "${workspaceFolder}/Copy_Bin_Project/Copy_Bin.sln",
+                "${workspaceFolder}/Copy_Bin_CIC_Project/Copy_Bin.sln",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary;ForceNoAlign"
             ],
@@ -19,7 +19,7 @@
             "type": "process",
             "args": [
                 "publish",
-                "${workspaceFolder}/Copy_Bin_Project/Copy_Bin.sln",
+                "${workspaceFolder}/Copy_Bin_CIC_Project/Copy_Bin.sln",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary;ForceNoAlign"
             ],
@@ -33,7 +33,7 @@
                 "watch",
                 "run",
                 "--project",
-                "${workspaceFolder}/Copy_Bin_Project/Copy_Bin.sln"
+                "${workspaceFolder}/Copy_Bin_CIC_Project/Copy_Bin.sln"
             ],
             "problemMatcher": "$msCompile"
         }

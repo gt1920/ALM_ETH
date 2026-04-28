@@ -521,7 +521,7 @@ void Motor_StartFromCommand(const CAN_MotionCmd_t *cmd)
 /**
  * @brief  Build a 32-bit NodeID from STM32 unique 96-bit UID
  *
- * Uses the same UID->SN algorithm as ALM_APP/BSP/cpu_id.c (SPC-byte
+ * Uses the same UID->SN algorithm as ALM_CIC_APP/BSP/cpu_id.c (SPC-byte
  * dispersion with cross-batch LOT_NUM fold), so a given MCU produces
  * a SN consistent with the rest of the system. The result is
  * deterministic and constant for the lifetime of the MCU.
@@ -539,7 +539,7 @@ void Motor_StartFromCommand(const CAN_MotionCmd_t *cmd)
 
 uint32_t Build_NodeID_From_UID(void)
 {
-    /* SN derivation — byte-identical to ALM_APP/BSP/cpu_id.c so the same
+    /* SN derivation — byte-identical to ALM_CIC_APP/BSP/cpu_id.c so the same
        UID->SN algorithm is used across all modules. Layout:
          foldLot = XOR of upper 7 bytes of (Uid1[31:8] | Uid2)
          b0 = (Uid1 & 0xFF) ^ foldLot         (cross-batch dispersion)
@@ -547,7 +547,7 @@ uint32_t Build_NodeID_From_UID(void)
          b2 = (Uid0 >>  8) & 0xFF             (wafer X low / Y mid)
          b3 = (Uid0      ) & 0xFF             (wafer Y low)
          SN = (b0<<24) | (b1<<16) | (b2<<8) | b3
-       Any change here must mirror the ALM_APP / ALM_Bootloader copy. */
+       Any change here must mirror the ALM_CIC_APP / ALM_CIC_Bootloader copy. */
     const uint32_t *uid = (const uint32_t *)STM32_UID_BASE;
     uint32_t Uid0 = uid[0];
     uint32_t Uid1 = uid[1];
