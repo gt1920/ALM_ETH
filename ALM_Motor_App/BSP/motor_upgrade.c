@@ -29,12 +29,21 @@ typedef enum {
     UPG_S_DONE    = 2,
 } UpgState_t;
 
-static struct {
+/* Made global (non-static) so Keil watch can inspect during OTA debug.
+   Also added counters that the ISR/state machine bumps on each event;
+   handy when looking at "did any frame even arrive?". */
+struct UpgCtx {
     UpgState_t state;
     uint32_t   file_size;       /* total .mot bytes (header + payload) */
     uint32_t   next_offset;     /* bytes already written to STAGING    */
     uint32_t   reboot_deadline; /* HAL_GetTick() at which to reset; 0 = none */
-} g_upg;
+    uint32_t   rx_start_count;  /* CANID_UPG_START frames seen          */
+    uint32_t   rx_data_count;   /* CANID_UPG_DATA frames seen           */
+    uint32_t   rx_end_count;    /* CANID_UPG_END frames seen            */
+    uint32_t   tx_resp_count;   /* RESP frames sent to device           */
+    uint8_t    last_resp_status;/* status byte of the last RESP we sent */
+};
+struct UpgCtx g_upg;
 
 /* ---- helpers ---- */
 static inline uint32_t rd_le32(const uint8_t *p)
@@ -73,6 +82,8 @@ static void send_resp(uint8_t status, uint32_t last_offset)
     f[9]  = (uint8_t)(last_offset >> 8);
     f[10] = (uint8_t)(last_offset >> 16);
     f[11] = (uint8_t)(last_offset >> 24);
+    g_upg.last_resp_status = status;
+    g_upg.tx_resp_count++;
     (void)CAN_Send_FD(CANID_UPG_RESP, f, 12U);
 }
 
@@ -136,6 +147,7 @@ void Upgrade_OnCanFrame(uint32_t id, const uint8_t *data, uint8_t len)
     {
     case CANID_UPG_START:
     {
+        g_upg.rx_start_count++;
         if (len < 24U) { send_resp(UPG_FRAME_TOO_SHORT, 0); return; }
 
         uint32_t file_size = rd_le32(&data[4]);
@@ -184,6 +196,7 @@ void Upgrade_OnCanFrame(uint32_t id, const uint8_t *data, uint8_t len)
 
     case CANID_UPG_DATA:
     {
+        g_upg.rx_data_count++;
         if (g_upg.state != UPG_S_RECVING)        { send_resp(UPG_NOT_RECEIVING, 0); return; }
         if (len < 12U)                            { send_resp(UPG_FRAME_TOO_SHORT, g_upg.next_offset); return; }
 
@@ -209,6 +222,7 @@ void Upgrade_OnCanFrame(uint32_t id, const uint8_t *data, uint8_t len)
 
     case CANID_UPG_END:
     {
+        g_upg.rx_end_count++;
         if (g_upg.state != UPG_S_RECVING)        { send_resp(UPG_NOT_RECEIVING, 0); return; }
         if (len < 8U)                            { send_resp(UPG_FRAME_TOO_SHORT, g_upg.next_offset); return; }
 
