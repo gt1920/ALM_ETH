@@ -2,22 +2,8 @@
 #include "upgrade_handler.h"
 #include "device_config.h"
 #include "eth_send_queue.h"
+#include "fw_version.h"
 #include <string.h>
-
-/* ---------- Firmware & Manufacturing info ---------- */
-#define FW_HW_VER  2   /* hardware version, fixed */
-
-/* Auto-derive build date from __DATE__ ("Mmm DD YYYY") */
-#define BUILD_DAY   ((__DATE__[4] == ' ' ? 0 : ((__DATE__[4] - '0') * 10)) + (__DATE__[5] - '0'))
-#define BUILD_MONTH ( \
-    __DATE__[0] == 'J' ? (__DATE__[1] == 'a' ? 1 : (__DATE__[2] == 'n' ? 6 : 7)) : \
-    __DATE__[0] == 'F' ? 2 : \
-    __DATE__[0] == 'M' ? (__DATE__[2] == 'r' ? 3 : 5) : \
-    __DATE__[0] == 'A' ? (__DATE__[1] == 'p' ? 4 : 8) : \
-    __DATE__[0] == 'S' ? 9 : \
-    __DATE__[0] == 'O' ? 10 : \
-    __DATE__[0] == 'N' ? 11 : 12)
-#define BUILD_YEAR  (((__DATE__[9] - '0') * 10) + (__DATE__[10] - '0'))
 
 /* ---------- Working buffers ---------- */
 static uint8_t send_buf[PROTO_FRAME_LEN];
