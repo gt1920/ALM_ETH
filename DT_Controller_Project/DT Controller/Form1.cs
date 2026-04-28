@@ -108,6 +108,11 @@ namespace DT_Controller
         // Cache last selected module NodeID (parsed from ModuleInfo bytes)
         private uint _currentNodeId = 0;
 
+        // Set to true around programmatic SubDevice.Items[i] = ... assignments
+        // so the resulting SelectedIndexChanged doesn't re-trigger
+        // RequestModuleInfoRefresh and create a positive-feedback loop.
+        private bool _suppressSubDeviceSelChange;
+
         internal enum ParamId : byte
         {
             X_Cur = 0x01,
@@ -1343,14 +1348,22 @@ namespace DT_Controller
                                                 }
                                             }
 
-                                            for (int i = 0; i < SubDevice.Items.Count; i++)
+                                            _suppressSubDeviceSelChange = true;
+                                            try
                                             {
-                                                var it = SubDevice.Items[i] as ModuleInfo;
-                                                if (it != null && it.Index == moduleIndex)
+                                                for (int i = 0; i < SubDevice.Items.Count; i++)
                                                 {
-                                                    SubDevice.Items[i] = target;
-                                                    break;
+                                                    var it = SubDevice.Items[i] as ModuleInfo;
+                                                    if (it != null && it.Index == moduleIndex)
+                                                    {
+                                                        SubDevice.Items[i] = target;
+                                                        break;
+                                                    }
                                                 }
+                                            }
+                                            finally
+                                            {
+                                                _suppressSubDeviceSelChange = false;
                                             }
 
                                             var sel = SubDevice.SelectedItem as ModuleInfo;
@@ -1419,6 +1432,11 @@ namespace DT_Controller
         // SubDevice ��ѡ��ʱ��ʾ Module_Info
         private void SubDevice_SelectedIndexChanged(object sender, EventArgs e)
         {
+            // Skip when this fires from programmatic Items[i] = target reassignment
+            // (would otherwise loop: refresh request → reply → reassign → refresh ...).
+            if (_suppressSubDeviceSelChange)
+                return;
+
             try
             {
                 var mi = SubDevice.SelectedItem as ModuleInfo;
