@@ -43,7 +43,8 @@ typedef enum {
     MUR_S_FAILED       = 9,
 } MurState_t;
 
-static struct {
+/* Made global (non-static) so Keil watch can inspect during OTA debug. */
+struct MurCtx {
     MurState_t  state;
     uint32_t    file_size;
     uint32_t    rx_next;         /* next expected DATA offset (monotonic) */
@@ -57,7 +58,15 @@ static struct {
     volatile uint8_t  resp_status;
     volatile uint32_t resp_node_id;
     volatile uint32_t resp_last_offset;
-} g;
+
+    /* CAN-FD relay debug counters: increments at each side of every relay edge. */
+    uint32_t tx_start_count;     /* CANID_UPG_START frames we sent       */
+    uint32_t tx_data_count;      /* CANID_UPG_DATA  frames we sent       */
+    uint32_t tx_end_count;       /* CANID_UPG_END   frames we sent       */
+    uint32_t rx_resp_count;      /* RESP frames received from Motor      */
+    uint32_t timeout_count;      /* deadline expirations (per-stage)     */
+};
+struct MurCtx g;
 
 /* =========================================================================
  *  helpers
@@ -234,6 +243,7 @@ void MUR_OnCanResp(uint32_t node_id, uint8_t status, uint32_t last_offset)
     g.resp_status      = status;
     g.resp_last_offset = last_offset;
     g.resp_pending     = 1U;
+    g.rx_resp_count++;
 }
 
 /* ---- main-loop relay state machine ---- */
@@ -259,6 +269,7 @@ void MUR_PollRelay(void)
 
         g.resp_pending = 0U;
         CAN_Send_FD_Frame(MUR_CANID_START, f, 24U);
+        g.tx_start_count++;
 
         g.deadline = now + MUR_RESP_TIMEOUT_MS;
         g.state    = MUR_S_WAIT_START;
@@ -281,7 +292,7 @@ void MUR_PollRelay(void)
             g.state     = MUR_S_SEND_DATA;
             return;
         }
-        if ((int32_t)(now - g.deadline) >= 0) g.state = MUR_S_FAILED;
+        if ((int32_t)(now - g.deadline) >= 0) { g.timeout_count++; g.state = MUR_S_FAILED; }
         break;
     }
 
@@ -303,6 +314,7 @@ void MUR_PollRelay(void)
 
         g.resp_pending = 0U;
         CAN_Send_FD_Frame(MUR_CANID_DATA, f, (uint8_t)(8U + chunk));
+        g.tx_data_count++;
 
         g.deadline = now + MUR_RESP_TIMEOUT_MS;
         g.state    = MUR_S_WAIT_DATA;
@@ -334,7 +346,7 @@ void MUR_PollRelay(void)
             g.state     = MUR_S_SEND_DATA;
             return;
         }
-        if ((int32_t)(now - g.deadline) >= 0) g.state = MUR_S_FAILED;
+        if ((int32_t)(now - g.deadline) >= 0) { g.timeout_count++; g.state = MUR_S_FAILED; }
         break;
     }
 
@@ -346,6 +358,7 @@ void MUR_PollRelay(void)
 
         g.resp_pending = 0U;
         CAN_Send_FD_Frame(MUR_CANID_END, f, 8U);
+        g.tx_end_count++;
 
         g.deadline = now + MUR_RESP_TIMEOUT_MS;
         g.state    = MUR_S_WAIT_END;
@@ -364,7 +377,7 @@ void MUR_PollRelay(void)
                       : MUR_S_FAILED;
             return;
         }
-        if ((int32_t)(now - g.deadline) >= 0) g.state = MUR_S_FAILED;
+        if ((int32_t)(now - g.deadline) >= 0) { g.timeout_count++; g.state = MUR_S_FAILED; }
         break;
     }
     }
