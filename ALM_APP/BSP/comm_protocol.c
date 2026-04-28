@@ -1,5 +1,6 @@
 #include "comm_protocol.h"
 #include "upgrade_handler.h"
+#include "module_upgrade.h"
 #include "device_config.h"
 #include "eth_send_queue.h"
 #include "fw_version.h"
@@ -104,10 +105,15 @@ void Process_ETH_Command(const uint8_t *buf, uint16_t len)
     {
         ETH_Handle_MotionCommand(buf);
     }
-    /* ---- OTA upgrade ---- */
+    /* ---- OTA upgrade (device self) ---- */
     else if (cmd == CMD_UPGRADE)
     {
         UPG_HandleCommand(buf, len);
+    }
+    /* ---- OTA upgrade relay to a sub-module (Motor) ---- */
+    else if (cmd == CMD_MODULE_UPGRADE)
+    {
+        MUR_HandleCommand(buf, len);
     }
 }
 

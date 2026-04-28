@@ -42,6 +42,21 @@ extern "C" {
 #define UPG_STATUS_BAD_FW       0x05   /* .cic header decrypt/CRC fail */
 #define UPG_STATUS_WRONG_SN     0x06   /* fw_sn locked to other MCU    */
 
+/* Module OTA upgrade — relay .mot to a sub-module via CAN FD (CMD_MODULE_UPGRADE = 0x31)
+   START payload : file_size(4 LE) + target_node_id(4 LE) + cic_hdr[0..15](16) = 24 B
+   DATA  payload : offset(4 LE) + data(≤128 B)
+   END   payload : total_size(4 LE)
+   RESP  payload : status(1)                                                            */
+#define CMD_MODULE_UPGRADE      0x31
+#define SUBCMD_MUPG_START       0x01
+#define SUBCMD_MUPG_DATA        0x02
+#define SUBCMD_MUPG_END         0x03
+#define SUBCMD_MUPG_RESP        0x81
+/* MUPG status codes — reuse UPG_STATUS_* and add: */
+#define MUPG_STATUS_NO_TARGET   0x10   /* target_node_id not in module list   */
+#define MUPG_STATUS_RELAY_FAIL  0x11   /* CAN-FD relay to module failed       */
+#define MUPG_STATUS_BUSY        0x12   /* a previous relay is still running   */
+
 void Process_ETH_Command(const uint8_t *buf, uint16_t len);
 void ETH_Report_ParamFeedback(uint32_t node_id, uint8_t axis, uint8_t param_id, uint32_t value);
 

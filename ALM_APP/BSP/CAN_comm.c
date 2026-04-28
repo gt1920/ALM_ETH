@@ -1,4 +1,5 @@
 #include "CAN_comm.h"
+#include "module_upgrade.h"
 #include "comm_protocol.h"
 #include "eth_send_queue.h"
 
@@ -293,6 +294,17 @@ void HAL_FDCAN_RxFifo0Callback(FDCAN_HandleTypeDef *hfdcan, uint32_t it)
         }
 
         ETH_Report_ParamFeedback(node_id, axis, pid, value);
+        return;
+    }
+
+    /* ---------- Module upgrade RESP 0x305 ---------- */
+    if (rxHeader.Identifier == 0x305U &&
+        rxHeader.DataLength >= FDCAN_DLC_BYTES_12)
+    {
+        uint32_t node_id    = u32_le(&CAN_rxData[0]);
+        uint8_t  status     = CAN_rxData[4];
+        uint32_t last_off   = u32_le(&CAN_rxData[8]);
+        MUR_OnCanResp(node_id, status, last_off);
         return;
     }
 }

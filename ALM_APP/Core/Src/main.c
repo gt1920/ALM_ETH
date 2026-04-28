@@ -34,6 +34,7 @@
 #include "lwip_app.h"
 #include "tcp_server.h"
 #include "upgrade_handler.h"
+#include "module_upgrade.h"
 #include "CAN_comm.h"
 #include "systick_task.h"
 #include "udp_discovery.h"
@@ -235,6 +236,8 @@ int main(void)
   UDP_Discovery_Init();
   g_dbg_step = 20U;  /* UDP discovery done */
 
+  MUR_Init();
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -251,6 +254,9 @@ int main(void)
 
 		/* Deferred reboot after OTA upgrade END — fires after LWIP flush */
 		UPG_PollReboot();
+
+		/* Drive module-upgrade CAN-FD relay after a Motor .mot is staged. */
+		MUR_PollRelay();
 
 		/* UDP discovery: broadcast announcement every 3s */
 		UDP_Discovery_Poll();
