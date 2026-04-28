@@ -6,7 +6,7 @@ REM  Invokes Copy_Bin.exe which:
 REM    1. Copies ..\Output\<ProjectName>.bin to ..\HEX\ (with timestamp)
 REM    2. Copies to ..\HEX\app\app.bin
 REM    3. Runs ..\HEX\app\Run.bat  (merges BooLoader.hex + app1.hex)
-REM    4. Encrypts .bin to .alm (AES-256, Key/IV from aes.c)
+REM    4. Encrypts .bin to .cic (AES-256, Key/IV from aes.c)
 REM ============================================================
 setlocal
 

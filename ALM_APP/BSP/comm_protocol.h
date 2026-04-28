@@ -39,7 +39,7 @@ extern "C" {
 #define UPG_STATUS_SIZE_ERROR   0x02   /* file_size out of range       */
 #define UPG_STATUS_WRITE_ERROR  0x03   /* W25Q erase/write failure     */
 #define UPG_STATUS_VERIFY_ERROR 0x04   /* rx_bytes != expected         */
-#define UPG_STATUS_BAD_FW       0x05   /* .alm header decrypt/CRC fail */
+#define UPG_STATUS_BAD_FW       0x05   /* .cic header decrypt/CRC fail */
 #define UPG_STATUS_WRONG_SN     0x06   /* fw_sn locked to other MCU    */
 
 void Process_ETH_Command(const uint8_t *buf, uint16_t len);

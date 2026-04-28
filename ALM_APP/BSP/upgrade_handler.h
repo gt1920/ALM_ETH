@@ -1,7 +1,7 @@
 /**
  * upgrade_handler.h - OTA firmware upgrade over TCP
  *
- * PC sends an .alm file in three phases:
+ * PC sends an .cic file in three phases:
  *   1. SUBCMD_UPG_START  (0x01) — file size; device erases W25Q sectors then ACKs
  *   2. SUBCMD_UPG_DATA   (0x02) — 128-byte chunks with offset; device writes W25Q, ACKs each
  *   3. SUBCMD_UPG_END    (0x03) — total size; device verifies, ACKs, then reboots

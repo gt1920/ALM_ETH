@@ -1,8 +1,8 @@
 /**
  * upgrade_handler.c - OTA firmware upgrade over TCP (CMD_UPGRADE = 0x30)
  *
- * START payload: file_size(4 LE) + alm_hdr[0..15](16 B)
- *   Device decrypts the .alm header block, checks magic / board_id / fw_sn / CRC32
+ * START payload: file_size(4 LE) + cic_hdr[0..15](16 B)
+ *   Device decrypts the .cic header block, checks magic / board_id / fw_sn / CRC32
  *   before erasing W25Q. Rejects immediately if any check fails.
  *
  * DATA payload:  offset(4 LE) + data(≤128 B)
@@ -17,7 +17,7 @@
 #include "main.h"
 #include <string.h>
 
-/* .alm is stored at W25Q address 0 — bootloader reads it from there */
+/* .cic is stored at W25Q address 0 — bootloader reads it from there */
 #define UPG_W25Q_ADDR       0x00000000UL
 
 /* This firmware's board identity ("ETH\0" packed LE) */
@@ -95,9 +95,9 @@ void UPG_HandleCommand(const uint8_t *buf, uint16_t len)
 
     switch (subcmd)
     {
-        /* ---- START: validate .alm header, erase W25Q, ACK ----
-         * Payload: file_size(4 LE) + alm_hdr[0..15](16 B)
-         * The 16-byte block is the encrypted FW_ID header from the .alm file.
+        /* ---- START: validate .cic header, erase W25Q, ACK ----
+         * Payload: file_size(4 LE) + cic_hdr[0..15](16 B)
+         * The 16-byte block is the encrypted FW_ID header from the .cic file.
          * We decrypt it and verify magic / board_id / fw_sn / CRC32
          * before touching the flash.
          * ---- */
@@ -110,7 +110,7 @@ void UPG_HandleCommand(const uint8_t *buf, uint16_t len)
                 return;
             }
 
-            /* Need: subcmd(1) + file_size(4) + alm_hdr(16) = 21 bytes after frame hdr */
+            /* Need: subcmd(1) + file_size(4) + cic_hdr(16) = 21 bytes after frame hdr */
             if (len < 27U)
             {
                 send_resp(seq, UPG_SIZE_ERROR);
@@ -124,10 +124,10 @@ void UPG_HandleCommand(const uint8_t *buf, uint16_t len)
                 return;
             }
 
-            /* --- Decrypt .alm header block (independent CBC, fresh IV copy) --- */
+            /* --- Decrypt .cic header block (independent CBC, fresh IV copy) --- */
             uint8_t block[16];
             uint8_t iv_copy[16];
-            memcpy(block,   &buf[11], 16U);   /* encrypted header from .alm[0..15] */
+            memcpy(block,   &buf[11], 16U);   /* encrypted header from .cic[0..15] */
             memcpy(iv_copy, IV,       16U);   /* fresh copy of global IV */
             Aes_IV_key256bit_Decode(iv_copy, block, Key);
             /* plaintext: magic(4) | board_id(4) | fw_sn(4) | crc32(4) */

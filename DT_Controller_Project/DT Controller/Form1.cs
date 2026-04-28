@@ -367,7 +367,7 @@ namespace DT_Controller
 
             using (var dlg = new System.Windows.Forms.OpenFileDialog())
             {
-                dlg.Filter = "ALM firmware (*.alm)|*.alm|All files (*.*)|*.*";
+                dlg.Filter = "ALM firmware (*.cic)|*.cic|All files (*.*)|*.*";
                 dlg.Title  = "Select firmware file";
                 if (dlg.ShowDialog(this) != DialogResult.OK)
                     return;
@@ -3341,7 +3341,7 @@ namespace DT_Controller
         private const int  UPG_CHUNK_SIZE   = 128;
 
         /// <summary>
-        /// Send .alm firmware to ETH device via a dedicated TCP connection.
+        /// Send .cic firmware to ETH device via a dedicated TCP connection.
         /// Protocol: START -> [DATA x N] -> END, request/response per packet.
         /// START may block up to ~15s while device erases W25Q sectors.
         /// </summary>
@@ -3361,9 +3361,9 @@ namespace DT_Controller
 
                 // ---- 1. UPGRADE_START ----
                 if (almData.Length < 16)
-                    throw new Exception("File too small to be a valid .alm firmware.");
+                    throw new Exception("File too small to be a valid .cic firmware.");
 
-                // START payload: file_size(4) + alm header[0..15] for device-side validation
+                // START payload: file_size(4) + cic header[0..15] for device-side validation
                 var startPayload = new byte[4 + 16];
                 WriteLE32(startPayload, 0, (uint)almData.Length);
                 Array.Copy(almData, 0, startPayload, 4, 16);

@@ -101,9 +101,9 @@ namespace Copy_Bin
                 Console.WriteLine($"在 {appDir} 目录中找不到 Full_Package.hex 文件。");
             }
 
-            // 加密 .bin 文件为 .alm 格式。文件名里嵌入 fw_sn 方便区分绑定目标
+            // 加密 .bin 文件为 .cic 格式。文件名里嵌入 fw_sn 方便区分绑定目标
             string snTag = ExtractFwSnTag(targetFile);
-            string gtFile = Path.Combine(targetDir, args[0] + "_" + snTag + "_" + DateTime.Now.ToString("yyMMdd") + "_" + DateTime.Now.ToString("HHmm") + ".alm");
+            string gtFile = Path.Combine(targetDir, args[0] + "_" + snTag + "_" + DateTime.Now.ToString("yyMMdd") + "_" + DateTime.Now.ToString("HHmm") + ".cic");
             EncryptFile(targetFile, gtFile);
             Console.WriteLine($"{targetFile} 已加密为 {gtFile}。");
 
@@ -214,7 +214,7 @@ namespace Copy_Bin
             }
             if (!fwIdFound)
             {
-                Console.WriteLine("警告: bin中未找到FW_ID magic(0x47544657)，.alm文件不含FW_ID头");
+                Console.WriteLine("警告: bin中未找到FW_ID magic(0x47544657)，.cic文件不含FW_ID头");
             }
 
             byte[] userStrLen = BitConverter.GetBytes(m_Userstr.Length);
