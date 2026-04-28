@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "Copy_Bin": {
+      "commandName": "Project",
+      "commandLineArgs": "B85"
+    }
+  }
+}
