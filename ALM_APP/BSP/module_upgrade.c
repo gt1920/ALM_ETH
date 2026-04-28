@@ -166,17 +166,13 @@ void MUR_HandleCommand(const uint8_t *buf, uint16_t len)
             return;
         }
 
-        /* Stash hdr at W25Q[base..base+15]. */
-        if (BSP_W25Q_Write(MUR_W25Q_BASE, hdr, 16U) != W25Q_OK)
-        {
-            send_tcp_resp(seq, UPG_STATUS_WRITE_ERROR);
-            return;
-        }
-
+        /* Cache hdr in RAM for the CAN-FD START frame; the same 16 B will be
+           re-sent by the PC at offset 0 in the DATA stream and land in
+           W25Q[base..base+15] then. No need to write it twice. */
         memcpy(g.hdr16, hdr, 16U);
         g.file_size      = fsz;
         g.target_node_id = node;
-        g.rx_next        = 16U;          /* hdr already written; PC starts at 16 */
+        g.rx_next        = 0U;           /* PC streams the full .mot from 0  */
         g.tx_offset      = 0U;
         g.state          = MUR_S_STAGING;
         send_tcp_resp(seq, UPG_STATUS_OK);
