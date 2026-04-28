@@ -97,6 +97,11 @@ int main(void)
 
   /* USER CODE BEGIN 1 */
 	TSB = 0;
+
+  /* App lives at 0x08002000 (after 8 KB Bootloader). Point the vector
+     table here BEFORE HAL_Init() — HAL enables SysTick interrupt during
+     init, and the handler must dispatch through the app's table. */
+  SCB->VTOR = 0x08002000UL;
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/

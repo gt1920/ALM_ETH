@@ -7,7 +7,7 @@
 
   <Targets>
     <Target>
-      <TargetName>ALM</TargetName>
+      <TargetName>ALM_Motor_Bootloader</TargetName>
       <ToolsetNumber>0x4</ToolsetNumber>
       <ToolsetName>ARM-ADS</ToolsetName>
       <pCCUsed>5060960::V5.06 update 7 (build 960)::.\ARMCC</pCCUsed>
@@ -49,7 +49,7 @@
             <InvalidFlash>1</InvalidFlash>
           </TargetStatus>
           <OutputDirectory>..\Output\</OutputDirectory>
-          <OutputName>ALM_Motor</OutputName>
+          <OutputName>ALM_Motor_Bootloader</OutputName>
           <CreateExecutable>1</CreateExecutable>
           <CreateLib>0</CreateLib>
           <CreateHexFile>1</CreateHexFile>
@@ -251,8 +251,8 @@
               </IRAM>
               <IROM>
                 <Type>1</Type>
-                <StartAddress>0x8002000</StartAddress>
-                <Size>0xE000</Size>
+                <StartAddress>0x8000000</StartAddress>
+                <Size>0x2000</Size>
               </IROM>
               <XRAM>
                 <Type>0</Type>
@@ -276,8 +276,8 @@
               </OCR_RVCT3>
               <OCR_RVCT4>
                 <Type>1</Type>
-                <StartAddress>0x8002000</StartAddress>
-                <Size>0xE000</Size>
+                <StartAddress>0x8000000</StartAddress>
+                <Size>0x2000</Size>
               </OCR_RVCT4>
               <OCR_RVCT5>
                 <Type>1</Type>
@@ -400,26 +400,6 @@
               <FilePath>../Core/Src/main.c</FilePath>
             </File>
             <File>
-              <FileName>gpio.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>../Core/Src/gpio.c</FilePath>
-            </File>
-            <File>
-              <FileName>fdcan.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>../Core/Src/fdcan.c</FilePath>
-            </File>
-            <File>
-              <FileName>spi.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>../Core/Src/spi.c</FilePath>
-            </File>
-            <File>
-              <FileName>tim.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>../Core/Src/tim.c</FilePath>
-            </File>
-            <File>
               <FileName>stm32g0xx_it.c</FileName>
               <FileType>1</FileType>
               <FilePath>../Core/Src/stm32g0xx_it.c</FilePath>
@@ -435,140 +415,20 @@
           <GroupName>BSP</GroupName>
           <Files>
             <File>
-              <FileName>Motor.c</FileName>
+              <FileName>aes.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\BSP\Motor.c</FilePath>
+              <FilePath>..\BSP\aes.c</FilePath>
             </File>
             <File>
-              <FileName>Systick_Task.c</FileName>
+              <FileName>iap.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\BSP\Systick_Task.c</FilePath>
-            </File>
-            <File>
-              <FileName>CAN_Comm.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\BSP\CAN_Comm.c</FilePath>
-            </File>
-            <File>
-              <FileName>sha256.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\BSP\sha256.c</FilePath>
-            </File>
-            <File>
-              <FileName>Motor_Flash.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\BSP\Motor_Flash.c</FilePath>
-            </File>
-            <File>
-              <FileName>LED.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\BSP\LED.c</FilePath>
-            </File>
-            <File>
-              <FileName>CAN_Motor.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\BSP\CAN_Motor.c</FilePath>
-            </File>
-            <File>
-              <FileName>bsp_flash.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\BSP\bsp_flash.c</FilePath>
-            </File>
-            <File>
-              <FileName>stage_status.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\BSP\stage_status.c</FilePath>
-            </File>
-            <File>
-              <FileName>stage_status_stub.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\BSP\stage_status_stub.c</FilePath>
-            </File>
-          </Files>
-        </Group>
-        <Group>
-          <GroupName>Application/Adjuster</GroupName>
-          <Files>
-            <File>
-              <FileName>adjuster_flash.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\BSP\adjuster_flash.c</FilePath>
-            </File>
-            <File>
-              <FileName>adjuster_motor_task.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Core\Inc\adjuster_motor_task.c</FilePath>
-            </File>
-            <File>
-              <FileName>adjuster_CAN_Poll.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Core\Inc\adjuster_CAN_Poll.c</FilePath>
-            </File>
-            <File>
-              <FileName>adjuster_can_report.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Core\Inc\adjuster_can_report.c</FilePath>
-            </File>
-            <File>
-              <FileName>adjuster_app.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>../Core/Src/adjuster_app.c</FilePath>
-            </File>
-            <File>
-              <FileName>adjuster_can.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>../Core/Src/adjuster_can.c</FilePath>
-            </File>
-            <File>
-              <FileName>adjuster_params.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>../Core/Src/adjuster_params.c</FilePath>
-            </File>
-            <File>
-              <FileName>adjuster_motion.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>../Core/Src/adjuster_motion.c</FilePath>
-            </File>
-            <File>
-              <FileName>adjuster_identify.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>../Core/Src/adjuster_identify.c</FilePath>
-            </File>
-            <File>
-              <FileName>adjuster_autorun.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>../Core/Src/adjuster_autorun.c</FilePath>
-            </File>
-            <File>
-              <FileName>adjuster_check.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\BSP\adjuster_check.c</FilePath>
-            </File>
-            <File>
-              <FileName>adjuster_update_task.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\BSP\adjuster_update_task.c</FilePath>
-            </File>
-            <File>
-              <FileName>adjuster_process_task.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\BSP\adjuster_process_task.c</FilePath>
-            </File>
-            <File>
-              <FileName>adjuster_idle_task.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\BSP\adjuster_idle_task.c</FilePath>
+              <FilePath>..\BSP\iap.c</FilePath>
             </File>
           </Files>
         </Group>
         <Group>
           <GroupName>Drivers/STM32G0xx_HAL_Driver</GroupName>
           <Files>
-            <File>
-              <FileName>stm32g0xx_hal_fdcan.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>../Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_fdcan.c</FilePath>
-            </File>
             <File>
               <FileName>stm32g0xx_hal_rcc.c</FileName>
               <FileType>1</FileType>
@@ -578,11 +438,6 @@
               <FileName>stm32g0xx_hal_rcc_ex.c</FileName>
               <FileType>1</FileType>
               <FilePath>../Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_rcc_ex.c</FilePath>
-            </File>
-            <File>
-              <FileName>stm32g0xx_ll_rcc.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>../Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_ll_rcc.c</FilePath>
             </File>
             <File>
               <FileName>stm32g0xx_hal_flash.c</FileName>
@@ -628,31 +483,6 @@
               <FileName>stm32g0xx_hal.c</FileName>
               <FileType>1</FileType>
               <FilePath>../Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal.c</FilePath>
-            </File>
-            <File>
-              <FileName>stm32g0xx_hal_exti.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>../Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_exti.c</FilePath>
-            </File>
-            <File>
-              <FileName>stm32g0xx_hal_spi.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>../Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_spi.c</FilePath>
-            </File>
-            <File>
-              <FileName>stm32g0xx_hal_spi_ex.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>../Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_spi_ex.c</FilePath>
-            </File>
-            <File>
-              <FileName>stm32g0xx_hal_tim.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>../Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_tim.c</FilePath>
-            </File>
-            <File>
-              <FileName>stm32g0xx_hal_tim_ex.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>../Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_tim_ex.c</FilePath>
             </File>
           </Files>
         </Group>
