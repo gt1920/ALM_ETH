@@ -141,8 +141,8 @@ void MUR_HandleCommand(const uint8_t *buf, uint16_t len)
     {
     case SUBCMD_MUPG_START:
     {
-        /* Need: subcmd(1) + file_size(4) + target_node_id(4) + hdr(16) = 25 */
-        if (len < 32U) { send_tcp_resp(seq, UPG_STATUS_SIZE_ERROR); return; }
+        /* Need: hdr(6) + subcmd(1) + file_size(4) + target_node_id(4) + cic_hdr(16) = 31 */
+        if (len < 31U) { send_tcp_resp(seq, UPG_STATUS_SIZE_ERROR); return; }
         if (g.state != MUR_S_IDLE && g.state != MUR_S_DONE && g.state != MUR_S_FAILED)
         {
             send_tcp_resp(seq, MUPG_STATUS_BUSY);
