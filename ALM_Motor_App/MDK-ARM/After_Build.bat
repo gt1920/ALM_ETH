@@ -38,10 +38,16 @@ if errorlevel 1 (
 )
 echo [After_Build] OK : %BIN_SRC% -^> %BIN_DST%
 
-set "COPY_BIN=..\Copy_Bin\Copy_Bin.exe"
+REM Use the canonical (fresh) Copy_Bin from Copy_Bin_Motor_Project's Release
+REM build, NOT the stale ..\Copy_Bin\ snapshot that lives next to the App
+REM source. The stale local copy was the source of a brick-OTA bug after the
+REM .mot CRC-block format change: it was producing pre-CRC .mot files that
+REM the new BL rightly refused to flash.
+set "COPY_BIN=..\..\Copy_Bin_Motor_Project\Copy_Bin\bin\Release\net8.0-windows7.0\Copy_Bin.exe"
 
 if not exist "%COPY_BIN%" (
     echo [After_Build] ERROR: %COPY_BIN% not found
+    echo [After_Build]        ^(rebuild Copy_Bin_Motor_Project first: dotnet build -c Release^)
     exit /b 1
 )
 
