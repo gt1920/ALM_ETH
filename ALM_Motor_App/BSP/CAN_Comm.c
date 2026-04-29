@@ -81,8 +81,9 @@ uint8_t CANFD_Send(uint16_t std_id, uint8_t *data, uint8_t len)
     // Error state
     txHeader.ErrorStateIndicator  = FDCAN_ESI_ACTIVE;
 
-    // DLC
-    if (len <= 8)      txHeader.DataLength = len << 16;
+    // DLC -- HAL macros are raw 4-bit values; HAL_FDCAN_AddMessageToTxFifoQ shifts
+    // DataLength <<16 internally. (len << 16) double-shifts and zeroes the DLC field.
+    if (len <= 8)      txHeader.DataLength = len;
     else if (len <= 12) txHeader.DataLength = FDCAN_DLC_BYTES_12;
     else if (len <= 16) txHeader.DataLength = FDCAN_DLC_BYTES_16;
     else if (len <= 20) txHeader.DataLength = FDCAN_DLC_BYTES_20;

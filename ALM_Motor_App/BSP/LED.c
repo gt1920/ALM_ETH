@@ -1,15 +1,11 @@
 
 #include "LED.h"
 
+/* Diagnostic mode: LED is ON whenever the App is running.
+   The argument is ignored so existing call sites continue to compile. */
 void LED_Ctrl(uint8_t Comm)
 {
-	if(Comm)
-	{
-		LED_ON;
-	}
-	else
-	{
-		LED_OFF;
-	}
+	(void)Comm;
+	LED_ON;
 }
 

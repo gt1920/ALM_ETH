@@ -345,9 +345,13 @@ void CAN_Send_ParamSet(uint32_t node_id, uint8_t axis, uint8_t param_id, uint16_
     CAN_Send_FD_Frame(CAN_ID_PARAM_SET, tx_buf, 12);
 }
 
+/* HAL FDCAN_DLC_BYTES_* macros are raw 4-bit values (0..15); HAL_FDCAN_AddMessageToTxFifoQ
+   itself shifts DataLength left by 16 when packing the TX register. Returning (len << 16)
+   for the 0..8 branch double-shifts and zeroes the DLC field on the wire — which silently
+   broke the 8-byte OTA END frame (DLC=0 → receiver dropped it as "len < 4"). */
 static uint32_t CAN_Encode_DLC(uint8_t len)
 {
-    if (len <= 8)   return (uint32_t)len << 16;
+    if (len <= 8)   return (uint32_t)len;
     if (len <= 12)  return FDCAN_DLC_BYTES_12;
     if (len <= 16)  return FDCAN_DLC_BYTES_16;
     if (len <= 20)  return FDCAN_DLC_BYTES_20;

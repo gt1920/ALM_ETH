@@ -124,6 +124,9 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
+  /* Diagnostic: LED ON immediately when App starts running (Bootloader leaves
+     PB8 at reset default → LED OFF). Use to confirm whether Module rebooted. */
+  LED_ON;
   MX_FDCAN1_Init();
   MX_SPI3_Init();
   MX_TIM2_Init();

@@ -462,8 +462,9 @@ void CAN_Send_ParamSet(uint32_t node_id, uint8_t axis, uint8_t param_id, uint16_
  */
 static uint32_t CAN_Encode_DLC(uint8_t len)
 {
-    /* CAN FD DLC ӳ�� */
-    if (len <= 8)   return (uint32_t)len << 16;
+    /* HAL FDCAN_DLC_BYTES_* macros are raw 4-bit values; HAL_FDCAN_AddMessageToTxFifoQ
+       shifts DataLength <<16 internally. (len << 16) double-shifts and zeroes the DLC. */
+    if (len <= 8)   return (uint32_t)len;
     if (len <= 12)  return FDCAN_DLC_BYTES_12;
     if (len <= 16)  return FDCAN_DLC_BYTES_16;
     if (len <= 20)  return FDCAN_DLC_BYTES_20;
