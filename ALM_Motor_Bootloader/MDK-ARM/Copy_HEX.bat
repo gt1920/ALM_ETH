@@ -43,5 +43,19 @@ if errorlevel 1 (
 )
 echo [Copy_HEX.bat] OK : %SRC%  ^-^>  %DST2%
 
+REM ---- Report BL ROM utilization against MOT_BL_SIZE (0x2800 = 10240 B) ----
+set "MAP=..\Output\ALM_Motor_Bootloader.map"
+set "BL_LIMIT=10240"
+if exist "%MAP%" (
+    for /f "tokens=11" %%A in ('findstr /C:"Total ROM Size" "%MAP%"') do set "ROM_BYTES=%%A"
+    if defined ROM_BYTES (
+        set /a "PCT_X10=ROM_BYTES * 1000 / BL_LIMIT"
+        set /a "PCT_INT=PCT_X10 / 10"
+        set /a "PCT_DEC=PCT_X10 - PCT_INT * 10"
+        set /a "FREE_BYTES=BL_LIMIT - ROM_BYTES"
+        echo [Copy_HEX.bat] BL ROM: %ROM_BYTES% / %BL_LIMIT% B  ^(%PCT_INT%.%PCT_DEC%%%, free %FREE_BYTES% B^)
+    )
+)
+
 endlocal
 exit /b 0
