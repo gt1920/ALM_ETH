@@ -37,7 +37,6 @@ struct UpgCtx {
     UpgState_t state;
     uint32_t   file_size;       /* total .mot bytes (header + payload) */
     uint32_t   next_offset;     /* bytes already written to STAGING    */
-    uint32_t   reboot_deadline; /* HAL_GetTick() at which to reset; 0 = none */
     uint32_t   rx_start_count;  /* CANID_UPG_START frames seen          */
     uint32_t   rx_data_count;   /* CANID_UPG_DATA frames seen           */
     uint32_t   rx_end_count;    /* CANID_UPG_END frames seen            */
@@ -226,10 +225,10 @@ void Upgrade_OnCanFrame(uint32_t id, const uint8_t *data, uint8_t len)
     case CANID_UPG_END:
     {
         g_upg.rx_end_count++;
-        /* Idempotent: if device retransmits END after we already accepted one
-           (e.g., our prior RESP was lost), re-send OK so the device's state
-           machine completes instead of going to FAILED. The reboot_deadline
-           is already armed from the first END — don't bump it. */
+        /* Idempotent: if the device retransmits END (its RESP was lost and
+           we've already crossed the reboot path with a prior END), there's
+           nothing left to do but ack — but in practice we never reach here
+           after the first valid END because that one resets the MCU below. */
         if (g_upg.state == UPG_S_DONE)
         {
             send_resp(UPG_OK, g_upg.next_offset);
@@ -245,10 +244,18 @@ void Upgrade_OnCanFrame(uint32_t id, const uint8_t *data, uint8_t len)
             return;
         }
 
-        g_upg.state           = UPG_S_DONE;
-        g_upg.reboot_deadline = HAL_GetTick() + 100U;   /* 100 ms grace */
+        g_upg.state = UPG_S_DONE;
         send_resp(UPG_OK, g_upg.next_offset);
-        break;
+
+        /* Inline NVIC_SystemReset (was deferred via main-loop polling — that
+           path turned out to be flaky; some boots wrote staging successfully
+           but never auto-rebooted, requiring a manual power-cycle to land in
+           the BL). 50 ms is plenty for the RESP frame to leave the TX FIFO
+           on a 1 Mbit/2 Mbit FDCAN bus. */
+        HAL_Delay(50U);
+        __disable_irq();
+        NVIC_SystemReset();
+        while (1) { __NOP(); }
     }
 
     default:
@@ -258,13 +265,8 @@ void Upgrade_OnCanFrame(uint32_t id, const uint8_t *data, uint8_t len)
 
 void Upgrade_PollReboot(void)
 {
-    if (g_upg.reboot_deadline != 0U &&
-        (int32_t)(HAL_GetTick() - g_upg.reboot_deadline) >= 0)
-    {
-        __disable_irq();
-        NVIC_SystemReset();
-        while (1) { __NOP(); }
-    }
+    /* No-op since the END handler now resets inline. Kept as a stub so older
+       callers (main loop) link without an edit. */
 }
 
 void Upgrade_LedBlinkPoll(void)

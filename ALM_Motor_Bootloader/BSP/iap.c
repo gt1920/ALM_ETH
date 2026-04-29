@@ -308,6 +308,12 @@ static void bl_jump_to_app(uint32_t app_base)
         /* Unreachable: recovery either system-resets or spins forever. */
     }
 
+    /* Hold in BL for a fixed window before jumping to APP. Gives an operator
+       time to attach SWD / J-Link before APP code starts running, regardless
+       of whether this boot performed an upgrade. SysTick is already up
+       (HAL_Init called from main), so HAL_Delay polls it correctly. */
+    HAL_Delay(5000U);
+
     __disable_irq();
 
     SysTick->CTRL = 0;
