@@ -312,7 +312,7 @@ static void bl_jump_to_app(uint32_t app_base)
        time to attach SWD / J-Link before APP code starts running, regardless
        of whether this boot performed an upgrade. SysTick is already up
        (HAL_Init called from main), so HAL_Delay polls it correctly. */
-    HAL_Delay(5000U);
+    HAL_Delay(2000U);
 
     __disable_irq();
 

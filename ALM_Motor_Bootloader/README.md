@@ -60,7 +60,7 @@ HAL_Init() → clocks → BL_Run()
         ├─ PASS 2: re-read APP, compute CRC32
         │     mismatch ──────────────────────────── NVIC_SystemReset
         ├─ Erase STAGING (clears .mot magic)
-        ├─ HAL_Delay(5000)  ─────────────── 5 s hold-window (operator can attach SWD)
+        ├─ HAL_Delay(2000)  ─────────────── 2 s hold-window (operator can attach SWD)
         └─ jump 0x08003000
 ```
 
