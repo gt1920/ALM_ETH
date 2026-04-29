@@ -1,140 +1,164 @@
-# ALM ETH — No Router
+# ALM ETH — No Router (Project Collection Root)
 
-STM32H563 Ethernet laser driver controller.  
-Branch: **Build_141** | Date: 2026-04-27
+STM32H563 Ethernet laser-driver controller + STM32G0B1 motor sub-module + PC GUI + encryption tools. Branch **Build_145** | Date 2026-04-29.
 
----
-
-## Project Structure
-
-| Folder | Description |
-|--------|-------------|
-| `ALM_CIC_APP/` | Main application firmware (STM32H563, Keil MDK) |
-| `ALM_CIC_Bootloader/` | IAP bootloader — decrypts and flashes `.cic` upgrades from W25Q |
-| `DT_Controller_Project/` | PC control software (WinForms, .NET 4.8) |
-| `Copy_Bin_CIC_Project/` | Post-build tool — encrypts `.bin` to `.cic` upgrade package |
-| `ALM_Motor_App/` | Motor sub-module firmware (App) |
-| `ALM_Motor_Bootloader/` | Motor sub-module IAP bootloader |
-| `Copy_Bin_Motor_Project/` | Post-build tool — encrypts Motor `.bin` to `.mot` |
-| `G0B1_SPI_Bootloader/` | G0B1 SPI bootloader reference |
+This README is the **global index**. Each subproject has its own `README.md` covering the details — open those for source layout, addresses, AES keys, and protocol specifics.
 
 ---
 
-## Flash Layout (STM32H563, 1 MB internal)
+## Subproject Index
+
+| Folder | Role | Target | Index |
+|---|---|---|---|
+| [ALM_CIC_APP/](ALM_CIC_APP/) | Main controller firmware (TCP/UDP, OTA orchestrator) | STM32H563, Keil | [README](ALM_CIC_APP/README.md) |
+| [ALM_CIC_Bootloader/](ALM_CIC_Bootloader/) | IAP bootloader — applies `.cic` from W25Q16 | STM32H563, Keil | [README](ALM_CIC_Bootloader/README.md) |
+| [ALM_Motor_App/](ALM_Motor_App/) | Motor adjuster firmware (CAN-FD only) | STM32G0B1, Keil | [README](ALM_Motor_App/README.md) |
+| [ALM_Motor_Bootloader/](ALM_Motor_Bootloader/) | Motor IAP bootloader — applies `.mot` from W25Qxx | STM32G0B1, Keil | [README](ALM_Motor_Bootloader/README.md) |
+| [ALM_USB_Project/](ALM_USB_Project/) | USB-HID ↔ CAN bridge variant (alternate host link) | STM32G0B1, Keil | [README](ALM_USB_Project/README.md) |
+| [Copy_Bin_CIC_Project/](Copy_Bin_CIC_Project/) | `.bin` → `.cic` AES-256 encryption tool | .NET 8.0 | [README](Copy_Bin_CIC_Project/README.md) |
+| [Copy_Bin_Motor_Project/](Copy_Bin_Motor_Project/) | `.bin` → `.mot` AES-256 encryption tool (Motor key) | .NET 8.0 | [README](Copy_Bin_Motor_Project/README.md) |
+| [DT_Controller_Project/](DT_Controller_Project/) | PC GUI (TCP + HID) | WinForms, .NET 4.8 | [README](DT_Controller_Project/README.md) |
+| [G0B1_SPI_Bootloader/](G0B1_SPI_Bootloader/) | Reference G0B1 bootloader (not in active chain) | STM32G0B1, Keil | [README](G0B1_SPI_Bootloader/README.md) |
+
+Additional assets:
+- [DT Controller.exe.lnk](DT%20Controller.exe.lnk) — shortcut to the active PC GUI build
+- Companion repo (DT Controller source/build): `x:/GT_IAP_Done/DT_Controller/DT_Controller_V1.0/DT_Controller_260402_1354/DT Controller`
+
+---
+
+## System Architecture
+
+```
+                                   ┌──────────────────────────┐
+                                   │  PC — DT Controller      │
+                                   │  (WinForms .NET 4.8)     │
+                                   └────────┬─────────────────┘
+                                            │
+                          ┌─────────────────┴────────────────┐
+                          │                                  │
+                    TCP 40000                          USB-HID (0x0483:0xA7D1)
+                  UDP 40001 (DTDR)                            │
+                          │                                  │
+              ┌───────────▼──────────┐               ┌───────▼──────────┐
+              │   ALM_CIC_APP        │               │ ALM_USB_Project  │
+              │   STM32H563 (ETH)    │               │ STM32G0B1 (HID)  │
+              │   @ 0x08008000       │               │  reference / alt │
+              └───────────┬──────────┘               └────────┬─────────┘
+                          │                                  │
+                ALM_CIC_Bootloader                            │
+                  @ 0x08000000                                │
+                          │                                  │
+                          └──────────────┬───────────────────┘
+                                         │
+                                  CAN-FD (motion + MUPG OTA relay)
+                                         │
+                          ┌──────────────▼─────────────┐
+                          │      ALM_Motor_App         │
+                          │      STM32G0B1             │
+                          │      @ 0x08002000          │
+                          └──────────────┬─────────────┘
+                                         │
+                              ALM_Motor_Bootloader
+                                @ 0x08000000 (8 KB)
+```
+
+---
+
+## Flash Layout — STM32H563 (CIC)
 
 | Region | Address | Size | Content |
-|--------|---------|------|---------|
+|---|---|---|---|
 | Bootloader | `0x08000000` | 32 KB | `ALM_CIC_Bootloader` |
-| Application | `0x08008000` | ~992 KB | `ALM_CIC_APP` |
+| Application | `0x08008000` | 984 KB | `ALM_CIC_APP` |
+| Device config | `0x080FE000` | 8 KB | Persisted device name (last sector bank 2) |
 
-W25Q16 external flash (`0x00000000`): holds the `.cic` upgrade package written by the app; cleared by bootloader after flashing.
+W25Q16 (2 MB SPI flash) at `0x000000` = staged `.cic` upgrade (cleared by bootloader after apply).
+
+## Flash Layout — STM32G0B1 (Motor)
+
+| Region | Address | Size | Content |
+|---|---|---|---|
+| Bootloader | `0x08000000` | 8 KB | `ALM_Motor_Bootloader` |
+| Application | `0x08002000` | 120 KB | `ALM_Motor_App` |
+
+Motor uses an external W25Qxx for staged `.mot` upgrades over CAN-FD MUPG.
 
 ---
 
-## Boot & Upgrade Flow
+## Encryption Domains — Two Distinct AES-256-CBC Keys
 
+| Pipeline | Key/IV | Tool | Bootloader |
+|---|---|---|---|
+| `.cic` (CIC App) | "Lp7kZ4cN9b…" / "u3F9hM2zE6vK1oQ5" | [Copy_Bin_CIC](Copy_Bin_CIC_Project/) | [ALM_CIC_Bootloader](ALM_CIC_Bootloader/) |
+| `.mot` (Motor App) | random bytes (D1 16 0B F7… / CD 11 C5 E4…) | [Copy_Bin_Motor](Copy_Bin_Motor_Project/) | [ALM_Motor_Bootloader](ALM_Motor_Bootloader/) |
+
+Both share the same envelope (16 B FW_ID hdr + 16 B payload meta + chain-CBC firmware). Magic `0x47544657` ("GTFW"), userstr `"LEDFW012"`, wildcard SN `0xA5C3F09E`.
+
+---
+
+## OTA Pipelines
+
+### CIC self-OTA (`.cic`)
 ```
-Power on
-  └─ Bootloader (0x08000000)
-       ├─ W25Q[0x00]: no valid .cic  →  jump to App (0x08008000)
-       └─ W25Q[0x00]: valid .cic found
-            ├─ Decrypt header (AES-256-CBC)
-            ├─ Check magic / board_id / fw_sn / CRC32
-            ├─ Erase + program internal flash
-            ├─ Erase W25Q sector 0 (clear upgrade flag)
-            └─ Jump to App
-
-PC Upgrade (DT Controller → right-click ETH device → Upgrade)
-  1. PC opens .cic file
-  2. TCP connect to device port 40000
-  3. CMD_UPGRADE START  — sends file_size + cic[0..15] for device-side validation
+PC → TCP CMD_UPGRADE START (file_size + cic[0..15] for device-side validation)
        Device: AES-decrypt header, check magic/board/sn/CRC → reject or erase W25Q
-  4. CMD_UPGRADE DATA   — 128-byte chunks, per-packet ACK
-  5. CMD_UPGRADE END    — verify total byte count → ACK → reboot into bootloader
-  6. Bootloader applies update automatically
+   → DATA (128 B chunks, per-packet ACK)
+   → END (byte-count check) → ACK → UPG_PollReboot() → NVIC_SystemReset()
+   → Bootloader applies update on next boot
+```
+
+### Motor module OTA (`.mot`) — relayed
+```
+PC → TCP CMD_MODULE_UPGRADE → CIC App relay (module_upgrade.c)
+   → CAN-FD MUPG START / DATA / END → Motor App stages to W25Qxx
+   → Motor reboots → Motor Bootloader decrypts + flashes app region
 ```
 
 ---
 
-## .cic File Format
+## Versioning
 
-Generated by `Copy_Bin_CIC_Project` from the compiled `.bin`.
-
-```
-[0..15]   Encrypted FW_ID header (AES-256-CBC, independent IV)
-            plaintext: magic(4) | board_id(4) | fw_sn(4) | crc32(4)
-[16..31]  Encrypted metadata block (chain CBC)
-            plaintext: userstr_len(4) | "LEDFW012"(8) | filesize(4)
-[32..end] Encrypted firmware blocks (chain continues)
-```
-
-- **Algorithm**: AES-256-CBC
-- **Board ID**: `0x00485445` ("ETH\0")
-- **fw_sn**: `0xA5C3F09E` = wildcard (any MCU); or MCU-specific UID-derived SN
+`FW_HW_VER = FW_BUILD_NUMBER` — auto-incremented by `MDK-ARM/Inc_Build.bat` on every Keil build (file `BSP/fw_build_number.h`, do not hand-edit). Reported in `CMD_INFO` and UDP discovery.
 
 ---
 
-## TCP Protocol (port 40000)
+## Recent Work (Build_142 → Build_145)
 
-All frames: `[LEN_L][LEN_H][0xA5][CMD][DIR][SEQ_L][SEQ_H][LEN_BODY][SUBCMD][payload...]`
+Pulled from `git log`. Authoritative source: `git log` itself.
 
-| CMD | Value | Description |
-|-----|-------|-------------|
-| `CMD_INFO` | `0x01` | Version query, module list, device name |
-| `CMD_MOTION` | `0x10` | Motion command → CAN 0x120 |
-| `CMD_PARAM_SET` | `0x20` | Set motor parameter |
-| `CMD_UPGRADE` | `0x30` | OTA firmware upgrade |
-
-UDP discovery broadcast: port **40001**, magic `"DTDR"`, every 3 s.
-
----
-
-## Work Log — 2026-04-27 (Build_141)
-
-### Bug Fixes
-
-**Bootloader → App hang at init step 8 (ICACHE)**
-- Root cause: CubeMX-generated `MX_ICACHE_Init()` called `HAL_ICACHE_EnableRemapRegion()` mapping FMC address `0x60000000` to alias `0x0`. No FMC NOR flash exists on this board; the call blocked on a BUSY flag that never cleared.
-- Fix: removed `HAL_ICACHE_EnableRemapRegion()` from `icache.c`; kept only `HAL_ICACHE_Enable()`.
-
-**VTOR not pointing to app base**
-- `system_stm32h5xx.c`: `VECT_TAB_OFFSET` corrected from `0x00` to `0x8000` so `SystemInit()` sets `SCB->VTOR = 0x08008000`.
-- Added explicit `SCB->VTOR = 0x08008000` at the top of `main()` as belt-and-suspenders.
-
-**Debug checkpoint variable**
-- Added `volatile uint8_t g_dbg_step` (0–21) in `main.c`; incremented at each init step to locate hangs in the debugger.
-
-### New Feature: OTA Firmware Upgrade
-
-**Protocol (STM32 side — `ALM_CIC_APP/BSP/upgrade_handler.c`)**
-- New command `CMD_UPGRADE (0x30)` with sub-commands START / DATA / END.
-- START: receives `file_size(4) + cic[0..15](16)`, decrypts the header with AES-256-CBC, validates magic / board_id / fw_sn / CRC32 before erasing W25Q. Rejects mismatched or invalid firmware immediately.
-- DATA: writes 128-byte chunks to W25Q with per-packet ACK.
-- END: verifies total byte count, sends ACK, then triggers deferred reboot via `UPG_PollReboot()` (called from `while(1)` after `LWIP_APP_Poll()` to ensure TCP flush before reset).
-- `aes.c` / `aes.h` copied from `ALM_CIC_Bootloader` into `ALM_CIC_APP/BSP/`.
-
-**PC side (`DT_Controller_Project`)**
-- ETH device right-click → **Upgrade** menu enabled.
-- Opens `OpenFileDialog` for `.cic` files.
-- Disconnects existing TCP control connection before upgrade (single-client server constraint).
-- Sends START (with cic header for device-side validation) → DATA chunks → END.
-- `null` END response treated as success (device already rebooting).
-- All firmware rejection cases show: **"Upgrade failed: firmware invalid."**
-- Removed all Chinese byte sequences from runtime string literals for cross-locale compatibility.
-
-### Other Changes
-
-- `FW_HW_VER` bumped **1 → 2** in `comm_protocol.c` and `udp_discovery.c`.
+| Commit | Change |
+|---|---|
+| `ef8841b` | Fix OTA END frame loss: `CAN_Encode_DLC` double-shift on ≤8 B payloads |
+| `b626f8a` | OTA: retransmit END frame on timeout + Motor handles duplicate END |
+| `c4ae801` | DT Controller: full UI refresh after both `.cic` and `.mot` upgrades |
+| `ec839ad` | PC auto-refresh after Module OTA + Motor LED blink during OTA |
+| `03a0017` / `c15129a` | Expose `g_upg`; add OTA tx/rx debug counters (CIC + Motor) |
+| `f2b9f62` | DT Controller: stop `GET_MODULE_INFO` spam after Module click |
+| `d85c3a3` | Rename `ALM_APP → ALM_CIC_APP`, `ALM_Bootloader → ALM_CIC_Bootloader`, `Copy_Bin_Project → Copy_Bin_CIC_Project` |
+| `904d59b` | MUPG protocol fix: don't pre-write hdr to W25Q in START |
+| `acc749c` | Rename `ALM_Motor_Project → ALM_Motor_App`; auto-increment FW |
+| `M1`–`M6` (4e982bd..ec10225) | Motor partition + bootloader skeleton + Copy_Bin_Motor + CAN-FD upgrade receiver + relax fw_sn check + device-side relay + DT Controller right-click upgrade |
+| `581364b` | Align Motor SN with CIC UID→SN algorithm (byte-identical) |
+| `f7ac802` | Rename encrypted firmware extension `.alm → .cic` |
 
 ---
 
-## Test Status (2026-04-27)
+## Build / Flash Workflow
 
-| Test | Result |
-|------|--------|
-| Bootloader → App jump (cold boot) | ✅ Pass |
-| App full init sequence (g_dbg_step = 21) | ✅ Pass |
-| ETH link / DHCP / TCP 40000 / UDP 40001 | ✅ Pass |
-| OTA upgrade — correct firmware (wildcard SN) | ✅ Pass |
-| OTA upgrade — wrong board firmware rejected | ✅ Pass |
-| OTA upgrade — MCU-specific SN locked firmware | ⬜ Not yet tested |
+| Step | Tool / Where |
+|---|---|
+| Build CIC App | Keil → `ALM_CIC_APP/MDK-ARM/ALM_ETH.uvprojx` (auto-runs `Copy_Bin_CIC` post-build) |
+| Build CIC Bootloader | Keil → `ALM_CIC_Bootloader/MDK-ARM/ALM_CIC_Bootloader.uvprojx` |
+| Build Motor App | Keil → `ALM_Motor_App/MDK-ARM/ALM_Motor.uvprojx` (auto-runs `Copy_Bin_Motor` post-build) |
+| Build Motor Bootloader | Keil → `ALM_Motor_Bootloader/MDK-ARM/ALM_Motor_Bootloader.uvprojx` |
+| Build PC GUI | VS → `DT_Controller_Project/DT Controller/DT Controller.csproj` |
+| Initial factory flash (CIC) | Merged hex from `ALM_CIC_APP/HEX/app/` via SWD |
+| Initial factory flash (Motor) | Bootloader + App hex separately via SWD |
+| OTA update (CIC) | DT Controller → right-click ETH device → Upgrade → `.cic` |
+| OTA update (Motor) | DT Controller → right-click Module → Upgrade → `.mot` |
+
+---
+
+## Memory Aid — Directory README Quick-Look
+
+> When opening this project in a future session, start by reading the relevant subproject README rather than the source. Each one is structured as `Source Index → Memory & Build → Protocol/Format → Cross-References`.
