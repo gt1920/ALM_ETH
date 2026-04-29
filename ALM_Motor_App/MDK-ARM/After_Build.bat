@@ -10,7 +10,7 @@ REM       Full_Package.hex without a manual copy step.
 REM    2) Run ..\Copy_Bin\Copy_Bin.exe to encrypt the same .bin into
 REM       ..\HEX\<ProjectName>_<snTag>_yyMMdd_HHmm.mot for OTA.
 REM ============================================================
-setlocal
+setlocal enabledelayedexpansion
 
 if "%~1"=="" (
     echo [After_Build] ERROR: no project name argument
@@ -50,17 +50,18 @@ if errorlevel 1 (
     exit /b 1
 )
 
-REM ---- Report App ROM utilization against MOT_APP_SIZE (0xD800 = 55296 B) ----
+REM ---- Report App ROM utilization against MOT_APP_SIZE (0xD000 = 53248 B) ----
 set "MAP=..\Output\%~1.map"
-set "APP_LIMIT=55296"
+set "APP_LIMIT=53248"
+set "ROM_BYTES="
 if exist "%MAP%" (
     for /f "tokens=11" %%A in ('findstr /C:"Total ROM Size" "%MAP%"') do set "ROM_BYTES=%%A"
     if defined ROM_BYTES (
-        set /a "PCT_X10=ROM_BYTES * 1000 / APP_LIMIT"
-        set /a "PCT_INT=PCT_X10 / 10"
-        set /a "PCT_DEC=PCT_X10 - PCT_INT * 10"
-        set /a "FREE_BYTES=APP_LIMIT - ROM_BYTES"
-        echo [After_Build] App ROM: %ROM_BYTES% / %APP_LIMIT% B  ^(%PCT_INT%.%PCT_DEC%%%, free %FREE_BYTES% B^)
+        set /a "PCT_X10=!ROM_BYTES! * 1000 / %APP_LIMIT%"
+        set /a "PCT_INT=!PCT_X10! / 10"
+        set /a "PCT_DEC=!PCT_X10! - !PCT_INT! * 10"
+        set /a "FREE_BYTES=%APP_LIMIT% - !ROM_BYTES!"
+        echo [After_Build] App ROM: !ROM_BYTES! / %APP_LIMIT% B  ^(!PCT_INT!.!PCT_DEC!%%, free !FREE_BYTES! B^)
     )
 )
 

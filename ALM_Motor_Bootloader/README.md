@@ -1,6 +1,6 @@
 # ALM_Motor_Bootloader — Motor Sub-Module IAP Bootloader
 
-STM32G0B1 IAP bootloader for the Motor sub-module. Lives in the bottom 10 KB of internal flash. On boot, decrypts and verifies a staged `.mot` (written by [ALM_Motor_App](../ALM_Motor_App/) after a CAN-FD OTA), programs APP, then jumps to `0x08002800`. If APP's vector table is invalid (brick scenario), the BL itself brings up FDCAN1 and accepts a fresh OTA — see [BSP/bl_can_recovery.c](BSP/bl_can_recovery.c).
+STM32G0B1 IAP bootloader for the Motor sub-module. Lives in the bottom 12 KB of internal flash. On boot, decrypts and verifies a staged `.mot` (written by [ALM_Motor_App](../ALM_Motor_App/) after a CAN-FD OTA), programs APP, then jumps to `0x08003000`. If APP's vector table is invalid (brick scenario), the BL itself brings up FDCAN1 and accepts a fresh OTA — see [BSP/bl_can_recovery.c](BSP/bl_can_recovery.c).
 
 ---
 
@@ -20,17 +20,18 @@ STM32G0B1 IAP bootloader for the Motor sub-module. Lives in the bottom 10 KB of 
 
 | Region | Address | Size | Content |
 |---|---|---|---|
-| Bootloader | `0x08000000` | **10 KB** (0x2800) | This project (5 pages) |
-| App | `0x08002800` | 54 KB (0xD800) | [ALM_Motor_App](../ALM_Motor_App/) (27 pages) |
+| Bootloader | `0x08000000` | **12 KB** (0x3000) | This project (6 pages) |
+| App | `0x08003000` | 52 KB (0xD000) | [ALM_Motor_App](../ALM_Motor_App/) (26 pages) |
 | Staging | `0x08010000` | 62 KB (0xF800) | Encrypted `.mot` slot (31 pages) |
 | Params | `0x0801F800` | 2 KB (0x800) | App's persistent params (node_id, calibration) |
 | RAM | `0x20000000` | 144 KB | RW + ZI |
 
-The BL grew from 8 KB → 10 KB to make room for the FDCAN brick-recovery
-listener. APP shrank by the same one page (2 KB). STAGING shrank from 64 KB
-→ 62 KB so the App's persistent params page sits OUTSIDE the staging-erase
-region — that way `node_id` and calibration survive every OTA, and the BL
-recovery listener can read its own `node_id` from flash.
+The BL grew from 8 KB → 12 KB across two page moves: +2 KB for the FDCAN
+brick-recovery listener (HAL_FDCAN drags in a lot of code), +2 KB headroom
+for future BL features. APP shrank by the same two pages. STAGING shrank
+from 64 KB → 62 KB so the App's persistent params page sits OUTSIDE the
+staging-erase region — that way `node_id` and calibration survive every
+OTA, and the BL recovery listener can read its own `node_id` from flash.
 
 Scatter: [Output/ALM_Motor_Bootloader.sct](Output/ALM_Motor_Bootloader.sct)
 Project: [MDK-ARM/ALM_Motor_Bootloader.uvprojx](MDK-ARM/ALM_Motor_Bootloader.uvprojx)
@@ -59,7 +60,7 @@ HAL_Init() → clocks → BL_Run()
         ├─ PASS 2: re-read APP, compute CRC32
         │     mismatch ──────────────────────────── NVIC_SystemReset
         ├─ Erase STAGING (clears .mot magic)
-        └─ jump 0x08002800
+        └─ jump 0x08003000
 ```
 
 **Brick-safety invariants:**

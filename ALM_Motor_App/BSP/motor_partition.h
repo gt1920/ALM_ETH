@@ -7,14 +7,14 @@
  *  Bootloader and App share these constants — drift breaks OTA.
  *
  *  Layout (128 KB internal flash, 2 KB sector):
- *    0x08000000 + 10 KB  — Bootloader (.text, .data, vector table, CAN recovery)
- *    0x08002800 + 54 KB  — Application
+ *    0x08000000 + 12 KB  — Bootloader (.text, .data, vector table, CAN recovery)
+ *    0x08003000 + 52 KB  — Application
  *    0x08010000 + 62 KB  — Staging (encrypted .mot delivered via CAN FD)
  *    0x0801F800 + 2 KB   — Persistent params (node_id, calibration, etc.)
  *
- *  Bootloader expanded from 8 KB → 10 KB to hold the brick-recovery CAN-FD
- *  listener (see ALM_Motor_Bootloader/BSP/bl_can_recovery.c). APP shrank
- *  by the same one page (2 KB).
+ *  Bootloader expanded from 8 KB → 12 KB across two page moves: +2 KB for
+ *  the brick-recovery CAN-FD listener (HAL_FDCAN pulls in a lot of code),
+ *  +2 KB headroom for future BL features. APP shrank by the same two pages.
  *
  *  The PARAMS page is carved out of the back of STAGING so that the BL's
  *  staging-erase pass leaves it intact. That way the App's saved node_id
@@ -32,10 +32,10 @@
 #define MOT_FLASH_TOTAL_SIZE    0x00020000UL    /* 128 KB    */
 
 #define MOT_BL_BASE             0x08000000UL
-#define MOT_BL_SIZE             0x00002800UL    /* 10 KB (5 pages)  */
+#define MOT_BL_SIZE             0x00003000UL    /* 12 KB (6 pages)  */
 
-#define MOT_APP_BASE            0x08002800UL
-#define MOT_APP_SIZE            0x0000D800UL    /* 54 KB (27 pages) */
+#define MOT_APP_BASE            0x08003000UL
+#define MOT_APP_SIZE            0x0000D000UL    /* 52 KB (26 pages) */
 #define MOT_APP_END             (MOT_APP_BASE + MOT_APP_SIZE)
 
 #define MOT_STAGE_BASE          0x08010000UL
