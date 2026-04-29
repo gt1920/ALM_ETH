@@ -407,11 +407,6 @@ namespace DT_Controller
                     // device's SelectedIndexChanged after a delay, which already
                     // does Disconnect→Reconnect→GET_VERSION_INFO→GET_MODULE_LIST.
                     ScheduleDeviceSelectionRefresh(8000);
-
-                    MessageBox.Show(this,
-                        "Firmware sent. Device is rebooting to apply the update.\n" +
-                        "FW info will refresh in ~8 seconds.",
-                        "Upgrade", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
                 catch (Exception ex)
                 {
