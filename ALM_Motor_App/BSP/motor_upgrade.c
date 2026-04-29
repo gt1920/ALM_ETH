@@ -219,6 +219,21 @@ void Upgrade_OnCanFrame(uint32_t id, const uint8_t *data, uint8_t len)
 
         g_upg.next_offset += chunk_len;
         send_resp(UPG_OK, g_upg.next_offset);
+
+        /* All bytes staged? Reboot now — don't wait for an END frame.
+           Observed in the field: rx_end_count stayed 0 even with all DATA
+           accounted for (next_offset == file_size), so the device sat
+           wedged in RECVING forever and the user had to power-cycle to
+           land in the BL. Once the byte count is complete the staging
+           image is structurally whole; the BL can verify CRC on its own. */
+        if (g_upg.next_offset >= g_upg.file_size)
+        {
+            g_upg.state = UPG_S_DONE;
+            HAL_Delay(50U);
+            __disable_irq();
+            NVIC_SystemReset();
+            while (1) { __NOP(); }
+        }
         break;
     }
 
