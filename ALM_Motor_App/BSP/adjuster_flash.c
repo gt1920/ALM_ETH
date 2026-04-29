@@ -214,14 +214,17 @@ void Adjuster_Flash_SetDefault(Adjuster_Params_t *p)
     p->mfg_month = 12;
     p->mfg_day   = 1;
 
-    /* Motor Defaults */
-    p->x_run_current      = 20;
-    p->y_run_current      = 20;
-    p->x_hold_current_pct = 50;
-    p->y_hold_current_pct = 50;
+    /* Motor Defaults
+       run_current is the TIM CCR percent (Period=100), so raw 25 = 25% PWM
+       on VREF = 250 mA at the driver IC's 1 A full-scale.
+       hold_current is run_current × pct / 100 (Motor.c:Motor_SetHoldCurrent). */
+    p->x_run_current      = 25;       /* 250 mA */
+    p->y_run_current      = 25;       /* 250 mA */
+    p->x_hold_current_pct = 30;       /* 30 %  */
+    p->y_hold_current_pct = 30;       /* 30 %  */
 
-    p->x_step_freq_hz     = 200;
-    p->y_step_freq_hz     = 200;
+    p->x_step_freq_hz     = 5000;     /* 5000 step/s */
+    p->y_step_freq_hz     = 5000;     /* 5000 step/s */
 
     p->x_dir_invert = 0;
     p->y_dir_invert = 0;

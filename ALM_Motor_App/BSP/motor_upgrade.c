@@ -286,6 +286,7 @@ void Upgrade_PollReboot(void)
 
 void Upgrade_LedBlinkPoll(void)
 {
-    /* Diagnostic mode: LED stays ON while in App, including during OTA. */
-    LED_ON;
+    /* No-op: Stat_LED is now driven by the CAN-RX ACT-light path
+       (update_data → process → signal_led_off). Forcing LED_ON here
+       would clobber the OFF half of the blink and pin the LED solid. */
 }

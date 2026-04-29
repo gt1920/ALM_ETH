@@ -21,6 +21,55 @@ static CAN_Heartbeat_t hb;
 static uint16_t g_motion_report_seq = 0;
 
 /* =========================================================
+ * Switch-ACT-style indicator for CAN_LED (PE3)
+ *
+ *   IDLE (LED OFF) ──[event && OFF gap done]──▶ ON (30 ms) ──▶ OFF gap (30 ms)
+ *
+ * Any CAN bus TX or RX event sets `s_act_pending`. The state machine
+ * (driven from the main loop via CAN_ActLed_Tick) starts a fixed-width
+ * ON pulse, then forces an OFF gap before allowing the next pulse.
+ * The forced OFF gap is what guarantees visible flicker even when CAN
+ * is saturated (e.g. OTA UPG_DATA bursts) — without it, every new event
+ * would re-extend the ON window and the LED would look solid ON.
+ * ========================================================= */
+#define CAN_ACT_LED_ON_MS   30u
+#define CAN_ACT_LED_OFF_MS  30u
+
+static volatile uint8_t s_act_pending = 0u;   /* set in ISR (RX) and main (TX) */
+static uint8_t          s_act_state   = 0u;   /* 0 = LED OFF, 1 = LED ON */
+static uint32_t         s_act_change_ms = 0u; /* tick of last ON↔OFF transition */
+
+static inline void can_act_led_event(void)
+{
+    /* Single-byte volatile write — atomic on Cortex-M, safe from FDCAN ISR
+       and from main-thread TX path. We never clear from the ISR. */
+    s_act_pending = 1u;
+}
+
+void CAN_ActLed_Tick(uint32_t now_ms)
+{
+    if (s_act_state)
+    {
+        if ((uint32_t)(now_ms - s_act_change_ms) >= CAN_ACT_LED_ON_MS)
+        {
+            HAL_GPIO_WritePin(CAN_LED_GPIO_Port, CAN_LED_Pin, GPIO_PIN_RESET);
+            s_act_state     = 0u;
+            s_act_change_ms = now_ms;
+        }
+    }
+    else
+    {
+        if (s_act_pending && (uint32_t)(now_ms - s_act_change_ms) >= CAN_ACT_LED_OFF_MS)
+        {
+            HAL_GPIO_WritePin(CAN_LED_GPIO_Port, CAN_LED_Pin, GPIO_PIN_SET);
+            s_act_state     = 1u;
+            s_act_change_ms = now_ms;
+            s_act_pending   = 0u;
+        }
+    }
+}
+
+/* =========================================================
  * Helpers
  * ========================================================= */
 static uint32_t u32_le(const uint8_t *p)
@@ -227,6 +276,11 @@ void HAL_FDCAN_RxFifo0Callback(FDCAN_HandleTypeDef *hfdcan, uint32_t it)
                               CAN_rxData) != HAL_OK)
         return;
 
+    /* ACT-light: flag every frame the hardware actually pulled off the bus,
+       even ones we won't dispatch (e.g. extended IDs, unknown 11-bit IDs).
+       The CIC's 0x000–0x7FF range filter already gates out junk. */
+    can_act_led_event();
+
     if (rxHeader.IdType != FDCAN_STANDARD_ID)
         return;
 
@@ -390,4 +444,9 @@ void CAN_Send_FD_Frame(uint16_t std_id,
     }
 
     HAL_FDCAN_AddMessageToTxFifoQ(&hfdcan1, &txHeader, tx_buf);
+
+    /* ACT-light: every queued TX frame counts as bus activity. Single
+       central wrapper means this hook covers all CIC-originated traffic
+       (param sets, device names, OTA UPG_DATA relay, etc.). */
+    can_act_led_event();
 }

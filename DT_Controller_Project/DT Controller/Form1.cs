@@ -529,12 +529,27 @@ namespace DT_Controller
                     // index might miss. Re-trigger the device's SelectedIndexChanged
                     // — that forces a full Disconnect→Reconnect→GET_VERSION_INFO→
                     // GET_MODULE_LIST→per-module GET_MODULE_INFO refresh.
-                    ScheduleDeviceSelectionRefresh(12000);
+                    //
+                    // Drop the upgraded module from the visible list right away so
+                    // the user sees it leave the moment staging completes; the
+                    // 30 s deferred refresh re-queries GET_MODULE_LIST after the
+                    // module has had time to reboot and re-register on the bus.
+                    uint upgradedNodeId = mi.NodeId;
+                    InvokeIfRequired(() =>
+                    {
+                        try
+                        {
+                            for (int i = SubDevice.Items.Count - 1; i >= 0; i--)
+                            {
+                                if (SubDevice.Items[i] is ModuleInfo it && it.NodeId == upgradedNodeId)
+                                    SubDevice.Items.RemoveAt(i);
+                            }
+                            currentModules.RemoveAll(m => m.NodeId == upgradedNodeId);
+                        }
+                        catch { }
+                    });
 
-                    MessageBox.Show(this,
-                        "Firmware staged on device. Module will reboot to apply the update.\n" +
-                        "Module list will refresh in ~12 seconds.",
-                        "Module FW upgrade", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    ScheduleDeviceSelectionRefresh(30000);
                 }
                 catch (Exception ex)
                 {

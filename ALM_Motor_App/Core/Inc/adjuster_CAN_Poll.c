@@ -61,8 +61,9 @@ void CAN_Poll(void)
 
         uint8_t payload_len = FDCAN_DLC_ToBytes(rxHeader.DataLength);
 
-        g_can_rx_has_new_data = 1;
-
+        /* g_can_rx_has_new_data is now set inside AdjusterCAN_OnRx() AFTER
+           the node_id == FDCAN_NodeID check, so the ACT-light only flickers
+           on frames actually addressed to this module. */
         AdjusterCAN_OnRx(rxHeader.Identifier,
                          rxHeader.IdType,
                          rxData,

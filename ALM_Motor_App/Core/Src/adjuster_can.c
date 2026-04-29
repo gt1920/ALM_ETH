@@ -9,6 +9,7 @@
 #include "adjuster_motor_task.h"
 #include "motor_upgrade.h"
 #include "fw_version.h"
+#include "adjuster_CAN_Poll.h"   /* g_can_rx_has_new_data */
 
 void Motor_StartFromCommand(const CAN_MotionCmd_t *cmd);
 
@@ -96,6 +97,11 @@ void AdjusterCAN_OnRx(uint32_t id,
 
     if (!Adjuster_IsMyNode(node_id))
         return;
+
+    /* Frame is addressed to us → flag for the ACT-light path
+       (update_data → process). Set here, AFTER the node match,
+       so frames for other nodes don't blink our LED. */
+    g_can_rx_has_new_data = 1;
 
     switch (id)
     {

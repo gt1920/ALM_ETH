@@ -249,6 +249,10 @@ int main(void)
 
 		check_data(now);
 
+		/* CAN_LED (PE3) ACT-style flicker — driven by every TX or RX
+		   event flagged inside CAN_comm.c. */
+		CAN_ActLed_Tick(now);
+
 		/* LwIP: process received frames + timers (DHCP etc.) */
 		LWIP_APP_Poll();
 

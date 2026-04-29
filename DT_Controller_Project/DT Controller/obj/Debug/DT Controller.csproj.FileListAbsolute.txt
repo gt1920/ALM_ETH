@@ -231,7 +231,6 @@ x:\GT_IAP_Done\app_\app_LaserDriver\ALM\ALM_ETH\ALM_ETH_260314_1816\DT_Controlle
 x:\GT_IAP_Done\app_\app_LaserDriver\ALM\ALM_ETH\ALM_ETH_260314_1816\DT_Controller_Project\DT Controller\obj\Debug\DT Controller.exe
 x:\GT_IAP_Done\app_\app_LaserDriver\ALM\ALM_ETH\ALM_ETH_260314_1816\DT_Controller_Project\DT Controller\obj\Debug\DT Controller.pdb
 X:\GT_IAP_Done\app_\app_LaserDriver\ALM\ALM_ETH\ETH_No_Router\DT_Controller_Project\DT Controller\obj\Debug\DT Controller.csproj.AssemblyReference.cache
-X:\GT_IAP_Done\app_\app_LaserDriver\ALM\ALM_ETH\ETH_No_Router\DT_Controller_Project\DT Controller\obj\Debug\DT Controller.exe.config
 X:\GT_IAP_Done\app_\app_LaserDriver\ALM\ALM_ETH\ETH_No_Router\DT_Controller_Project\DT Controller\obj\Debug\DT_Controller.Form1.resources
 X:\GT_IAP_Done\app_\app_LaserDriver\ALM\ALM_ETH\ETH_No_Router\DT_Controller_Project\DT Controller\obj\Debug\DT_Controller.Properties.Resources.resources
 X:\GT_IAP_Done\app_\app_LaserDriver\ALM\ALM_ETH\ETH_No_Router\DT_Controller_Project\DT Controller\obj\Debug\DT Controller.csproj.GenerateResource.cache

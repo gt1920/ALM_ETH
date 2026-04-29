@@ -124,9 +124,10 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
-  /* Diagnostic: LED ON immediately when App starts running (Bootloader leaves
-     PB8 at reset default → LED OFF). Use to confirm whether Module rebooted. */
-  LED_ON;
+  /* Stat_LED starts OFF (MX_GPIO_Init drives PB8 to RESET). The CAN-RX
+     ACT-light state machine in process() takes over from here — driving
+     a boot-time LED_ON would pin the LED solid until the first RX cycle
+     turned it off, defeating the "OFF when idle" semantics. */
   MX_FDCAN1_Init();
   MX_SPI3_Init();
   MX_TIM2_Init();

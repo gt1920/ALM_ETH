@@ -126,6 +126,12 @@ void CAN_Send_ParamSet(uint32_t node_id, uint8_t axis, uint8_t param_id, uint16_
 void CAN_Send_FD_Frame(uint16_t std_id, const uint8_t *data, uint8_t len);
 void Pack_USB_NodeID_MSB_To_CAN(uint32_t node_id, uint8_t out[4]);
 
+/* Switch-ACT-style indicator for CAN_LED (PE3): call every main-loop
+   iteration. Drives a 30 ms ON / 30 ms OFF pulse state machine, fed by
+   any CAN-bus TX or RX event. Idle → LED OFF; sustained traffic →
+   visible flicker (not solid ON). Safe to call from main thread only. */
+void CAN_ActLed_Tick(uint32_t now_ms);
+
 #ifdef __cplusplus
 }
 #endif
