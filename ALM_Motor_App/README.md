@@ -39,6 +39,7 @@ The only CAN entry point is `AdjusterCAN_OnRx(id, data, len)` from the FDCAN rx 
 ## Memory & Build
 
 - **Scatter**: `Output/ALM_Motor_App.sct` — App at `0x08002800`, IROM 54 KB (0xD800). Bootloader sits in `0x08000000–0x080027FF` (10 KB).
+- **Persistent params** (`adjuster_flash.c`): single 2 KB page at `0x0801F800`. Sits just past the 62 KB STAGING region; survives every OTA because the BL's staging-erase pass stops short of this page. node_id, device_name, motor calibration, and runtime snapshot persist across upgrades.
 - **Project**: [MDK-ARM/ALM_Motor.uvprojx](MDK-ARM/ALM_Motor.uvprojx)
 - **CubeMX**: [ALM.ioc](ALM.ioc) (STM32G0B1)
 - **Build counter**: `MDK-ARM/Inc_Build.bat` auto-increments `fw_build_number.h` on each build

@@ -12,11 +12,17 @@
  * programs APP, and the device is recovered.
  *
  * Identity:
- *   - Without a healthy APP we cannot read the App's saved node_id (it lives
- *     in a flash page at 0x0801F800 that may itself have been wiped). The
- *     listener therefore accepts upgrade frames addressed to ANY node_id
- *     during recovery. Single-bricked-module recovery only — power-down or
- *     bus-isolate other healthy modules before triggering OTA in this mode.
+ *   - The App's saved params (incl. node_id) live at MOT_PARAMS_BASE
+ *     (0x0801F800), which sits OUTSIDE the staging-erase region by design
+ *     so it survives every OTA. On entry the listener reads { magic, node_id }
+ *     from that page:
+ *       - magic == MOT_PARAMS_MAGIC ("APJA"): filter incoming START / DATA /
+ *         END frames by data[0..3] == node_id, and reply with that node_id
+ *         in the RESP. Multiple bricked modules on the same bus can be
+ *         recovered without isolation.
+ *       - magic missing (virgin device, or page corrupted): fall back to
+ *         accept-any mode and reply with node_id = 0xFFFFFFFF. Single-
+ *         bricked-module recovery only in this fallback.
  *
  * This module never returns through normal control flow: either it triggers
  * NVIC_SystemReset on a complete .mot, or it spin-waits forever for one.

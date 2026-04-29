@@ -43,6 +43,11 @@ static BlUpgState_t        s_state;
 static uint32_t            s_file_size;
 static uint32_t            s_next_offset;
 
+/* Recovered identity. s_have_node_id == 0 means params page was empty / not
+   yet initialized (virgin device); we then fall back to accept-any. */
+static uint32_t            s_node_id;
+static uint8_t             s_have_node_id;
+
 static inline uint32_t rd_le32(const uint8_t *p)
 {
     return (uint32_t)p[0]
@@ -180,14 +185,20 @@ static uint8_t bl_rec_dlc_to_len(uint32_t dlc_enc)
     }
 }
 
-/* Build a 12-byte RESP. Uses node_id = 0xFFFFFFFF (broadcast) since BL has
-   no node_id of its own; host correlates by transaction state. */
+/* Build a 12-byte RESP. node_id is the one recovered from the params page,
+   or 0xFFFFFFFF if the params page hasn't been initialized yet (host treats
+   the broadcast value as "I don't know who I am — ack me by transaction
+   state alone"). */
 static void bl_rec_send_resp(uint8_t status, uint32_t last_offset)
 {
     FDCAN_TxHeaderTypeDef tx = {0};
     uint8_t f[12];
+    uint32_t resp_node = s_have_node_id ? s_node_id : 0xFFFFFFFFUL;
 
-    f[0] = 0xFFU; f[1] = 0xFFU; f[2] = 0xFFU; f[3] = 0xFFU;
+    f[0] = (uint8_t)(resp_node);
+    f[1] = (uint8_t)(resp_node >> 8);
+    f[2] = (uint8_t)(resp_node >> 16);
+    f[3] = (uint8_t)(resp_node >> 24);
     f[4] = status;
     f[5] = 0U; f[6] = 0U; f[7] = 0U;
     f[8]  = (uint8_t)(last_offset);
@@ -212,7 +223,15 @@ static void bl_rec_send_resp(uint8_t status, uint32_t last_offset)
 
 static void bl_rec_handle_frame(uint32_t id, const uint8_t *data, uint8_t len)
 {
-    /* Recovery mode does not enforce data[0..3] == FDCAN_NodeID — see header. */
+    /* When the params page has yielded a valid node_id, drop frames not
+       addressed to us. (The first 4 bytes of every START / DATA / END frame
+       carry the target node_id.) Without a known node_id we accept any —
+       see header. */
+    if (s_have_node_id && len >= 4U)
+    {
+        uint32_t target = rd_le32(&data[0]);
+        if (target != s_node_id) return;
+    }
 
     switch (id)
     {
@@ -330,6 +349,34 @@ static void bl_rec_handle_frame(uint32_t id, const uint8_t *data, uint8_t len)
     }
 }
 
+/* Read node_id from the App's persistent-params page. The page survives
+   STAGING erases (see motor_partition.h), so a previously-configured node_id
+   is available even after multiple successful OTAs. Returns 0 on virgin /
+   uninitialized pages, in which case the listener falls back to accept-any.
+
+   We don't trust the rest of the struct (CRC etc.) — that's the App's job.
+   For BL filtering, a present magic is enough: if the App ever wrote that
+   page, the node_id field reflects whatever node_id the App was running
+   under at the time. Worst case we filter on a stale id and miss recovery
+   frames; the host operator can then power-cycle the bus to clear. */
+static void bl_rec_load_identity(void)
+{
+    const uint32_t *p = (const uint32_t *)MOT_PARAMS_BASE;
+
+    if (p[0] == MOT_PARAMS_MAGIC)
+    {
+        /* Layout: magic[0], param_version+reserved0 packed into uint32_t
+           at index 1, node_id at index 2. */
+        s_node_id      = p[2];
+        s_have_node_id = 1U;
+    }
+    else
+    {
+        s_node_id      = 0xFFFFFFFFUL;
+        s_have_node_id = 0U;
+    }
+}
+
 /* ---- Entry: spin forever on the FDCAN RX FIFO ---- */
 
 void BL_CanRecovery_RunForever(void)
@@ -337,6 +384,8 @@ void BL_CanRecovery_RunForever(void)
     s_state       = BL_UPG_IDLE;
     s_file_size   = 0U;
     s_next_offset = 0U;
+
+    bl_rec_load_identity();
 
     if (bl_rec_can_init() != HAL_OK)
     {

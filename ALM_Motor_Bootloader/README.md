@@ -22,11 +22,15 @@ STM32G0B1 IAP bootloader for the Motor sub-module. Lives in the bottom 10 KB of 
 |---|---|---|---|
 | Bootloader | `0x08000000` | **10 KB** (0x2800) | This project (5 pages) |
 | App | `0x08002800` | 54 KB (0xD800) | [ALM_Motor_App](../ALM_Motor_App/) (27 pages) |
-| Staging | `0x08010000` | 64 KB (0x10000) | Encrypted `.mot` slot (32 pages) |
+| Staging | `0x08010000` | 62 KB (0xF800) | Encrypted `.mot` slot (31 pages) |
+| Params | `0x0801F800` | 2 KB (0x800) | App's persistent params (node_id, calibration) |
 | RAM | `0x20000000` | 144 KB | RW + ZI |
 
 The BL grew from 8 KB → 10 KB to make room for the FDCAN brick-recovery
-listener. APP shrank by the same one page (2 KB).
+listener. APP shrank by the same one page (2 KB). STAGING shrank from 64 KB
+→ 62 KB so the App's persistent params page sits OUTSIDE the staging-erase
+region — that way `node_id` and calibration survive every OTA, and the BL
+recovery listener can read its own `node_id` from flash.
 
 Scatter: [Output/ALM_Motor_Bootloader.sct](Output/ALM_Motor_Bootloader.sct)
 Project: [MDK-ARM/ALM_Motor_Bootloader.uvprojx](MDK-ARM/ALM_Motor_Bootloader.uvprojx)
@@ -81,14 +85,17 @@ reset. It calls `BL_CanRecovery_RunForever()` which:
 5. The next boot re-enters `BL_Run()`, which now sees a valid STAGING magic
    and runs the normal verify-and-program flow → APP is recovered.
 
-**Limitations:**
-- *Single-bricked-module recovery only.* The BL can't read the App's saved
-  `node_id` (the App's params page lives at `0x0801F800` inside STAGING and
-  may itself be wiped). Recovery accepts upgrade frames addressed to any
-  node_id; if you have multiple bricked modules on the same bus, isolate or
-  power them up one at a time.
-- Recovery RESPs use `node_id = 0xFFFFFFFF` so the host can distinguish them
-  from normal App-mode RESPs.
+**Identity:**
+The BL reads the App's persistent params at `MOT_PARAMS_BASE` (0x0801F800)
+on entry into recovery. That page sits outside the staging-erase region and
+survives every OTA, so a previously-configured `node_id` is available.
+
+- Magic `"APJA"` present → recovery filters incoming frames by `data[0..3]
+  == node_id` and replies with that node_id. Multiple bricked modules on the
+  same bus can be recovered without isolation.
+- Magic missing (virgin device, or page never written by the App) → fallback
+  to accept-any with RESP node_id = `0xFFFFFFFF`. Single-bricked-module
+  recovery only; isolate or power up other modules one at a time.
 
 Bootloader is **shipped as plain `.hex`** — no Copy_Bin step. Flash via SWD once at manufacture.
 
