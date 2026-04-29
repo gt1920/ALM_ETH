@@ -76,7 +76,6 @@
             this.checkBoxXY = new System.Windows.Forms.CheckBox();
             this.checkBoxX = new System.Windows.Forms.CheckBox();
             this.checkBoxY = new System.Windows.Forms.CheckBox();
-            this.button_stop = new System.Windows.Forms.Button();
             this.label_pos = new System.Windows.Forms.Label();
             this.button_clearLog = new System.Windows.Forms.Button();
             this.SuspendLayout();
@@ -237,7 +236,7 @@
             // 
             this.remain.AutoSize = true;
             this.remain.ForeColor = System.Drawing.SystemColors.GrayText;
-            this.remain.Location = new System.Drawing.Point(500, 186);
+            this.remain.Location = new System.Drawing.Point(560, 186);
             this.remain.Name = "remain";
             this.remain.Size = new System.Drawing.Size(89, 22);
             this.remain.TabIndex = 20;
@@ -527,51 +526,43 @@
             this.checkBoxB.TabIndex = 52;
             this.checkBoxB.Text = "B";
             this.checkBoxB.UseVisualStyleBackColor = true;
-            // 
-            // checkBoxXY
-            // 
+            //
+            // checkBoxXY  (placed in the middle of the arrow ring, where the
+            //              old button_stop used to live; bbox center at x=380
+            //              aligns with the up/down arrow column center).
+            //
             this.checkBoxXY.AutoSize = true;
-            this.checkBoxXY.Location = new System.Drawing.Point(530, 81);
+            this.checkBoxXY.Location = new System.Drawing.Point(348, 167);
             this.checkBoxXY.Name = "checkBoxXY";
             this.checkBoxXY.Size = new System.Drawing.Size(65, 26);
             this.checkBoxXY.TabIndex = 53;
             this.checkBoxXY.Text = "X/Y";
             this.checkBoxXY.UseVisualStyleBackColor = true;
-            // 
-            // checkBoxX
-            // 
+            //
+            // checkBoxX  (to the right of button_right, vertically centered)
+            //
             this.checkBoxX.AutoSize = true;
-            this.checkBoxX.Location = new System.Drawing.Point(580, 81);
+            this.checkBoxX.Location = new System.Drawing.Point(488, 167);
             this.checkBoxX.Name = "checkBoxX";
             this.checkBoxX.Size = new System.Drawing.Size(48, 26);
             this.checkBoxX.TabIndex = 54;
             this.checkBoxX.Text = "X";
             this.checkBoxX.UseVisualStyleBackColor = true;
-            // 
-            // checkBoxY
-            // 
+            //
+            // checkBoxY  (above button_up, horizontally aligned to its center)
+            //
             this.checkBoxY.AutoSize = true;
-            this.checkBoxY.Location = new System.Drawing.Point(630, 81);
+            this.checkBoxY.Location = new System.Drawing.Point(356, 48);
             this.checkBoxY.Name = "checkBoxY";
             this.checkBoxY.Size = new System.Drawing.Size(48, 26);
             this.checkBoxY.TabIndex = 55;
             this.checkBoxY.Text = "Y";
             this.checkBoxY.UseVisualStyleBackColor = true;
-            // 
-            // button_stop
-            // 
-            this.button_stop.FlatAppearance.BorderSize = 0;
-            this.button_stop.Image = ((System.Drawing.Image)(resources.GetObject("button_stop.Image")));
-            this.button_stop.Location = new System.Drawing.Point(340, 140);
-            this.button_stop.Name = "button_stop";
-            this.button_stop.Size = new System.Drawing.Size(80, 80);
-            this.button_stop.TabIndex = 56;
-            this.button_stop.UseVisualStyleBackColor = true;
-            // 
+            //
             // label_pos
             // 
             this.label_pos.AutoSize = true;
-            this.label_pos.Location = new System.Drawing.Point(500, 160);
+            this.label_pos.Location = new System.Drawing.Point(560, 160);
             this.label_pos.Name = "label_pos";
             this.label_pos.Size = new System.Drawing.Size(175, 22);
             this.label_pos.TabIndex = 57;
@@ -594,7 +585,6 @@
             this.ClientSize = new System.Drawing.Size(1006, 721);
             this.Controls.Add(this.button_clearLog);
             this.Controls.Add(this.label_pos);
-            this.Controls.Add(this.button_stop);
             this.Controls.Add(this.checkBoxY);
             this.Controls.Add(this.checkBoxX);
             this.Controls.Add(this.checkBoxXY);
@@ -702,7 +692,6 @@
         private System.Windows.Forms.CheckBox checkBoxXY;
         private System.Windows.Forms.CheckBox checkBoxX;
         private System.Windows.Forms.CheckBox checkBoxY;
-        private System.Windows.Forms.Button button_stop;
         private System.Windows.Forms.Label label_pos;
         private System.Windows.Forms.Button button_clearLog;
     }

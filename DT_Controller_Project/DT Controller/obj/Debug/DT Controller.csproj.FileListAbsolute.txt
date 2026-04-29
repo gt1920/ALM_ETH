@@ -245,3 +245,4 @@ X:\GT_IAP_Done\app_\app_LaserDriver\ALM\ALM_ETH\ETH_No_Router\DT_Controller_Proj
 X:\GT_IAP_Done\app_\app_LaserDriver\ALM\ALM_ETH\ETH_No_Router\DT_Controller_Project\DT Controller\bin\Debug\HidLibrary.pdb
 X:\GT_IAP_Done\app_\app_LaserDriver\ALM\ALM_ETH\ETH_No_Router\DT_Controller_Project\DT Controller\bin\Debug\System.CodeDom.xml
 X:\GT_IAP_Done\app_\app_LaserDriver\ALM\ALM_ETH\ETH_No_Router\DT_Controller_Project\DT Controller\obj\Debug\DT Contr.932558DF.Up2Date
+X:\GT_IAP_Done\app_\app_LaserDriver\ALM\ALM_ETH\ETH_No_Router\DT_Controller_Project\DT Controller\obj\Debug\DT Controller.exe.config

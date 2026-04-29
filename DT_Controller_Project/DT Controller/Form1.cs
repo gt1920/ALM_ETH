@@ -173,13 +173,11 @@ namespace DT_Controller
             ConfigureTransparentImageButton(button_down);
             ConfigureTransparentImageButton(button_left);
             ConfigureTransparentImageButton(button_right);
-            ConfigureTransparentImageButton(button_stop);
 
             ConfigurePressedImageButton(button_up, "ico_direction_up_grey.png");
             ConfigurePressedImageButton(button_down, "ico_direction_down_grey.png");
             ConfigurePressedImageButton(button_left, "ico_direction_left_grey.png");
             ConfigurePressedImageButton(button_right, "ico_direction_right_grey.png");
-            ConfigurePressedImageButton(button_stop, "stop_76x76_grey.png");
 
             // Enable key preview to handle step hotkeys
             this.KeyPreview = true;
@@ -257,6 +255,27 @@ namespace DT_Controller
 
             // ��������ӳ�䣨������ڣ�
             LoadNameMappingsSafe();
+
+            // Default startup mode: User. Admin-only controls (right-column
+            // motor params + bottom TX-TCP log + Clear Log) start hidden.
+            // Ctrl+F8 + password "dsdsds" reveals them.
+            ApplyAdminMode();
+
+            // Append the assembly version to the title bar so users can tell
+            // which build they're running. Bump it via Properties\AssemblyInfo.cs
+            // (AssemblyVersion). The existing transient-title pattern
+            // (origTitle = this.Text → "Upgrading... %" → restore origTitle)
+            // preserves this suffix automatically.
+            try
+            {
+                var ver = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
+                if (ver != null)
+                    this.Text = $"{this.Text}  v{ver.Major}.{ver.Minor}.{ver.Build}";
+            }
+            catch
+            {
+                // ignore — not worth blocking startup over
+            }
         }
 
         // ListBox �Ҽ���ѡ�в���ʾ�����Ĳ˵�
@@ -3197,9 +3216,6 @@ namespace DT_Controller
                 case Keys.Right:
                     button = button_right;
                     break;
-                case Keys.Space:
-                    button = button_stop;
-                    break;
             }
 
             return button != null;
@@ -3214,7 +3230,6 @@ namespace DT_Controller
                 SetButtonPressedState(button_down, false, true);
                 SetButtonPressedState(button_left, false, true);
                 SetButtonPressedState(button_right, false, true);
-                SetButtonPressedState(button_stop, false, true);
             }
             catch
             {
@@ -3270,6 +3285,16 @@ namespace DT_Controller
 
         protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
         {
+            // Ctrl+F8 toggles admin mode (password required to enter, free to
+            // exit). Caught here so the keystroke can't be swallowed by the
+            // focused control.
+            if (keyData == (Keys.Control | Keys.F8) &&
+                msg.Msg != WM_KEYUP && msg.Msg != WM_SYSKEYUP)
+            {
+                ToggleAdminMode();
+                return true;
+            }
+
             var keyCode = keyData & Keys.KeyCode;
 
             if (msg.Msg == WM_KEYUP || msg.Msg == WM_SYSKEYUP)
@@ -3309,11 +3334,15 @@ namespace DT_Controller
 
         private List<RadioButton> GetStepRadiosOrdered()
         {
+            // Only enumerate radios that are currently visible. In user mode the
+            // x1000 / x2000 radios are hidden by ApplyAdminMode(), so the +/-
+            // keyboard shortcut naturally caps at x100 instead of silently
+            // selecting an unreachable step multiplier.
             var list = new List<RadioButton>();
             for (int i = 1; i <= 10000; i++)
             {
                 var rb = this.Controls.Find($"radio_x{i}", true).FirstOrDefault() as RadioButton;
-                if (rb != null)
+                if (rb != null && rb.Visible)
                     list.Add(rb);
             }
             return list;
@@ -3704,6 +3733,115 @@ namespace DT_Controller
                         $"Device rejected END (status=0x{resp[0]:X2}).");
                 // After END_OK the device has staged .mot and starts CAN-FD
                 // relay asynchronously. The TCP connection is no longer needed.
+            }
+        }
+
+        // ============================================================
+        // Admin Mode (Ctrl+F8 + password)
+        //
+        //   User mode (default): right-column motor params + bottom TX-TCP
+        //                        log + Clear Log button are hidden.
+        //   Admin mode:          Ctrl+F8 → password "dsdsds" → unlock.
+        //                        Press Ctrl+F8 again while admin to lock
+        //                        back without re-prompting.
+        // ============================================================
+        private bool _adminMode = false;
+        private const string AdminPassword = "dsdsds";
+
+        private Control[] GetAdminOnlyControls()
+        {
+            return new Control[]
+            {
+                radio_x1000, radio_x2000,
+                label_xCurrent,    textBox_xCurrent,    button_xCurrentMinus,    button_xCurrentPlus,
+                label_yCurrent,    textBox_yCurrent,    button_yCurrentMinus,    button_yCurrentPlus,
+                label_holdCurrent, textBox_holdCurrent, button_holdCurrentMinus, button_holdCurrentPlus,
+                label_stepSpeed,   textBox_stepSpeed,   button_stepSpeedMinus,   button_stepSpeedPlus,
+                richTextBox1,      button_clearLog,
+            };
+        }
+
+        private void ApplyAdminMode()
+        {
+            foreach (var c in GetAdminOnlyControls())
+            {
+                if (c != null) c.Visible = _adminMode;
+            }
+        }
+
+        // Ctrl+F8 dispatch lives in the existing ProcessCmdKey override
+        // earlier in the file (next to the direction-key handler).
+
+        private void ToggleAdminMode()
+        {
+            if (_adminMode)
+            {
+                _adminMode = false;
+                ApplyAdminMode();
+                return;
+            }
+
+            string entered = PromptForPassword();
+            if (entered == AdminPassword)
+            {
+                _adminMode = true;
+                ApplyAdminMode();
+            }
+            else if (!string.IsNullOrEmpty(entered))
+            {
+                MessageBox.Show(this, "Wrong password.", "Admin",
+                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+            // empty input (Cancel / closed) → silent no-op
+        }
+
+        // Inline modal: masked TextBox + OK/Cancel. Cheaper than a separate
+        // designer file and keeps the password UI co-located with its only
+        // caller.
+        private string PromptForPassword()
+        {
+            using (var dlg = new Form())
+            {
+                dlg.Text            = "Admin";
+                dlg.FormBorderStyle = FormBorderStyle.FixedDialog;
+                dlg.StartPosition   = FormStartPosition.CenterParent;
+                dlg.MinimizeBox     = false;
+                dlg.MaximizeBox     = false;
+                dlg.ShowInTaskbar   = false;
+                dlg.ClientSize      = new Size(280, 110);
+
+                var lbl = new Label
+                {
+                    Text     = "Password:",
+                    Location = new Point(12, 14),
+                    AutoSize = true
+                };
+                var txt = new TextBox
+                {
+                    Location              = new Point(12, 38),
+                    Size                  = new Size(256, 25),
+                    UseSystemPasswordChar = true
+                };
+                var ok = new Button
+                {
+                    Text         = "OK",
+                    DialogResult = DialogResult.OK,
+                    Location     = new Point(112, 72),
+                    Size         = new Size(74, 28)
+                };
+                var cancel = new Button
+                {
+                    Text         = "Cancel",
+                    DialogResult = DialogResult.Cancel,
+                    Location     = new Point(194, 72),
+                    Size         = new Size(74, 28)
+                };
+
+                dlg.Controls.AddRange(new Control[] { lbl, txt, ok, cancel });
+                dlg.AcceptButton = ok;
+                dlg.CancelButton = cancel;
+
+                return dlg.ShowDialog(this) == DialogResult.OK ? txt.Text : string.Empty;
             }
         }
 
