@@ -22,6 +22,7 @@
 #include "iap.h"
 #include "aes.h"
 #include "motor_partition.h"
+#include "bl_can_recovery.h"
 #include <string.h>
 
 /* Plaintext magic at the head of the CRC metadata block (chain CBC, third
@@ -293,17 +294,19 @@ static void bl_jump_to_app(uint32_t app_base)
     uint32_t app_msp   = *(volatile uint32_t *)(app_base);
     uint32_t app_reset = *(volatile uint32_t *)(app_base + 4U);
 
-    /* MSP must be in SRAM (0x20000000..0x20023FFF on G0B1). If not, APP is
-       absent or corrupted — reset the MCU rather than locking up in while(1).
-       That way, if a valid .mot lands in STAGING later, the next BL_Run can
-       still install it. */
-    if ((app_msp & 0xFFF00000UL) != 0x20000000UL)
-        NVIC_SystemReset();
-
-    /* Reset handler must be inside the app flash region. */
-    if ((app_reset & ~1UL) <  MOT_APP_BASE ||
+    /* MSP must be in SRAM (0x20000000..0x20023FFF on G0B1) and the Reset
+       handler must point inside APP. If either is bad, APP is absent or
+       corrupted and we have no valid image to jump to. Enter the brick-
+       recovery CAN-FD listener and wait for the host to re-stage a .mot.
+       BL_CanRecovery_RunForever never returns through normal control flow —
+       it triggers NVIC_SystemReset on a complete .mot. */
+    if ((app_msp & 0xFFF00000UL) != 0x20000000UL ||
+        (app_reset & ~1UL) <  MOT_APP_BASE ||
         (app_reset & ~1UL) >= MOT_APP_END)
-        NVIC_SystemReset();
+    {
+        BL_CanRecovery_RunForever();
+        /* Unreachable: recovery either system-resets or spins forever. */
+    }
 
     __disable_irq();
 

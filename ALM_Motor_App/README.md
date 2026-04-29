@@ -1,6 +1,6 @@
 # ALM_Motor_App — Motor Sub-Module Firmware
 
-STM32G0B1 motor adjuster firmware (Keil MDK-ARM). Runs above [ALM_Motor_Bootloader](../ALM_Motor_Bootloader/) at `0x08002000`. Talks **only** CAN-FD — no TCP, no USB. The CIC App ([../ALM_CIC_APP](../ALM_CIC_APP/)) is its sole host.
+STM32G0B1 motor adjuster firmware (Keil MDK-ARM). Runs above [ALM_Motor_Bootloader](../ALM_Motor_Bootloader/) at `0x08002800` (App region was 56 KB, now 54 KB after BL grew by one page for brick-recovery support). Talks **only** CAN-FD — no TCP, no USB. The CIC App ([../ALM_CIC_APP](../ALM_CIC_APP/)) is its sole host.
 
 ---
 
@@ -38,7 +38,7 @@ The only CAN entry point is `AdjusterCAN_OnRx(id, data, len)` from the FDCAN rx 
 
 ## Memory & Build
 
-- **Scatter**: `Output/ALM_Motor_App.sct` — App at `0x08002000`, IROM 120 KB. Bootloader sits in `0x08000000–0x08001FFF` (8 KB).
+- **Scatter**: `Output/ALM_Motor_App.sct` — App at `0x08002800`, IROM 54 KB (0xD800). Bootloader sits in `0x08000000–0x080027FF` (10 KB).
 - **Project**: [MDK-ARM/ALM_Motor.uvprojx](MDK-ARM/ALM_Motor.uvprojx)
 - **CubeMX**: [ALM.ioc](ALM.ioc) (STM32G0B1)
 - **Build counter**: `MDK-ARM/Inc_Build.bat` auto-increments `fw_build_number.h` on each build
