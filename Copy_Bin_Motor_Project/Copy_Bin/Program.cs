@@ -66,10 +66,39 @@ namespace Copy_Bin
 
             string snTag  = ExtractFwSnTag(sourceFile);
             string stamp  = DateTime.Now.ToString("yyMMdd_HHmm");
-            string motOut = Path.Combine(targetDir, $"{args[0]}_{snTag}_{stamp}.mot");
+            string verTag = ReadFwBuildVersionTag();   // e.g. "_v34", or "" if header missing
+            string motOut = Path.Combine(targetDir, $"{args[0]}_{snTag}_{stamp}{verTag}.mot");
 
             EncryptFile(sourceFile, motOut);
             Console.WriteLine($"[Copy_Bin] {sourceFile} encrypted to {motOut}");
+        }
+
+        // Reads ..\BSP\fw_build_number.h relative to the cwd that Keil sets
+        // when invoking After_Build.bat (= ALM_Motor_App\MDK-ARM). Parses the
+        // FW_BUILD_NUMBER macro and returns "_v<N>" for use as a filename
+        // suffix. Returns "" if the header is missing or unparseable, so a
+        // filename always succeeds.
+        static string ReadFwBuildVersionTag()
+        {
+            string headerPath = Path.Combine(@"..\BSP", "fw_build_number.h");
+            if (!File.Exists(headerPath)) return "";
+            try
+            {
+                foreach (string line in File.ReadAllLines(headerPath))
+                {
+                    string trimmed = line.Trim();
+                    const string prefix = "#define FW_BUILD_NUMBER";
+                    if (!trimmed.StartsWith(prefix)) continue;
+                    string rest = trimmed.Substring(prefix.Length).Trim();
+                    // Take the first whitespace-delimited token, strip any
+                    // trailing comment / suffix.
+                    int sp = rest.IndexOfAny(new[] { ' ', '\t', '/' });
+                    string num = (sp < 0) ? rest : rest.Substring(0, sp);
+                    if (int.TryParse(num, out int v)) return $"_v{v}";
+                }
+            }
+            catch { /* fall through to "" */ }
+            return "";
         }
 
         // Scan .bin for FW_ID magic; return tag for filename:

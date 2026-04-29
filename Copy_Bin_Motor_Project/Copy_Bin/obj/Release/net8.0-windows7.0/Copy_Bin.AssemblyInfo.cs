@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("SUPER-CAN Light")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Release")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+6d8a236f6ace6f461359c51ed778e092286924d0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+2550513ebab92a652346a09880c4eb10ab828d03")]
 [assembly: System.Reflection.AssemblyProductAttribute("IDE Output")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Copy_Bin")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

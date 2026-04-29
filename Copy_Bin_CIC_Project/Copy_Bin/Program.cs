@@ -57,34 +57,40 @@ namespace Copy_Bin
             File.Copy(targetFile, appFile, true);
             //Console.WriteLine($"{targetFileName} 文件已经成功复制到 {appDir} 目录，并且重命名为 app.bin。");
 
-            // 将当前的工作目录设置为 HEX\app与Bootloader合并0x3800_115200 目录
+            // 注意：相对路径 ..\HEX 等是相对启动时的 cwd（MDK-ARM\）解析的；
+            // 切到 appDir 跑 Run.bat 之后必须切回 _原 cwd_，不能用 Assembly
+            // 位置当替代（旧版本本地 Copy_Bin 恰好在工程内才碰巧能用，现在
+            // canonical 路径在 Copy_Bin_CIC_Project\bin\Release\... 不工作）。
+            string originalCwd = Directory.GetCurrentDirectory();
             Directory.SetCurrentDirectory(appDir);
 
-            //Console.WriteLine("Current working directory: " + appDir);
-            // 执行 run.bat 文
-            //string appBatchFile = Path.Combine(appDir, "Run.bat");
             string appBatchFile = "Run.bat";
 
-            //Console.WriteLine("appBatchFile: " + appBatchFile);
-
-            //Process.Start(new ProcessStartInfo(appBatchFile));
-
-            ProcessStartInfo startInfo = new ProcessStartInfo(appBatchFile)
+            // Run.bat 现在已经被 After_Build.bat 直接接管（合并 BL+App ->
+            // Full_Package.hex 写到 HEX\）；这里这次调用是冗余的。.NET 8 下
+            // Process.Start 用相对文件名定位 .bat 还会抛 Win32Exception("找不到
+            // 指定的文件")，所以用 UseShellExecute + WorkingDirectory 兜底，
+            // 同时 try/catch：即使彻底失败，也不阻塞后面 .cic 加密产出。
+            try
             {
-                //WorkingDirectory = appDir,
-                WindowStyle = ProcessWindowStyle.Normal,
-                CreateNoWindow = false
-            };
+                ProcessStartInfo startInfo = new ProcessStartInfo(appBatchFile)
+                {
+                    WorkingDirectory = appDir,
+                    UseShellExecute  = true,
+                    WindowStyle      = ProcessWindowStyle.Normal,
+                    CreateNoWindow   = false
+                };
 
-            Process process = new Process();
-            process.StartInfo = startInfo;
-            process.Start();
+                using Process process = Process.Start(startInfo);
+                process?.WaitForExit();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[Copy_Bin] WARNING: Run.bat 执行失败 (不影响 .cic 输出): {ex.Message}");
+            }
 
-            // 等待 run.bat 执行完毕
-            process.WaitForExit();
-
-            // 将当前的工作目录恢复到原来的目录
-            Directory.SetCurrentDirectory(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location));
+            // 切回最初的 cwd
+            Directory.SetCurrentDirectory(originalCwd);
 
             // 检查 app 目录下是否有 Full_Package.hex 文件，如果有就将其复制到 HEX 目录下
             string fullPackageFile = Path.Combine(appDir, "Full_Package.hex");
@@ -102,8 +108,10 @@ namespace Copy_Bin
             }
 
             // 加密 .bin 文件为 .cic 格式。文件名里嵌入 fw_sn 方便区分绑定目标
+            // 末尾追加 _v<N>，N 来自 ..\BSP\fw_build_number.h（缺失时省略后缀）。
             string snTag = ExtractFwSnTag(targetFile);
-            string gtFile = Path.Combine(targetDir, args[0] + "_" + snTag + "_" + DateTime.Now.ToString("yyMMdd") + "_" + DateTime.Now.ToString("HHmm") + ".cic");
+            string verTag = ReadFwBuildVersionTag();
+            string gtFile = Path.Combine(targetDir, args[0] + "_" + snTag + "_" + DateTime.Now.ToString("yyMMdd") + "_" + DateTime.Now.ToString("HHmm") + verTag + ".cic");
             EncryptFile(targetFile, gtFile);
             Console.WriteLine($"{targetFile} 已加密为 {gtFile}。");
 
@@ -114,6 +122,32 @@ namespace Copy_Bin
                 Console.WriteLine($"{targetFile} 已被删除。");
             }
 
+        }
+
+        // 读 ..\BSP\fw_build_number.h，解析 #define FW_BUILD_NUMBER 后的整数，
+        // 返回 "_v<N>" 作为文件名后缀。文件缺失或解析失败返回 ""，文件名照常生成。
+        // 注意：Keil 调起 After_Build.bat 时 cwd 是 MDK-ARM\；这里再后又会被
+        // 切到 Copy_Bin\（见上面的 SetCurrentDirectory）。两种情况下 ..\BSP
+        // 都正好指向 ALM_CIC_APP\BSP\，所以同一相对路径都能用。
+        static string ReadFwBuildVersionTag()
+        {
+            string headerPath = Path.Combine(@"..\BSP", "fw_build_number.h");
+            if (!File.Exists(headerPath)) return "";
+            try
+            {
+                foreach (string line in File.ReadAllLines(headerPath))
+                {
+                    string trimmed = line.Trim();
+                    const string prefix = "#define FW_BUILD_NUMBER";
+                    if (!trimmed.StartsWith(prefix)) continue;
+                    string rest = trimmed.Substring(prefix.Length).Trim();
+                    int sp = rest.IndexOfAny(new[] { ' ', '\t', '/' });
+                    string num = (sp < 0) ? rest : rest.Substring(0, sp);
+                    if (int.TryParse(num, out int v)) return $"_v{v}";
+                }
+            }
+            catch { /* fall through to "" */ }
+            return "";
         }
 
         // 扫描 bin 取 fw_sn, 返回用于拼接文件名的 SN 标签:

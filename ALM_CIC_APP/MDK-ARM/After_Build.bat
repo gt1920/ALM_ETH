@@ -72,7 +72,11 @@ echo [After_Build] OK : Full_Package -^> !FULL_HEX!
 :merge_done
 
 REM ---- Run Copy_Bin to produce the timestamped .bin and encrypted .cic ----
-set "COPY_BIN=..\Copy_Bin\Copy_Bin.exe"
+REM Use canonical (fresh) Copy_Bin from Copy_Bin_CIC_Project's Release build.
+REM The stale local snapshot under ..\Copy_Bin\ predates filename / format
+REM changes (same class of bug that broke Motor OTA earlier). Build the
+REM C# tool once with "dotnet build -c Release" to refresh it.
+set "COPY_BIN=..\..\Copy_Bin_CIC_Project\Copy_Bin\bin\Release\net8.0-windows7.0\Copy_Bin.exe"
 
 if not exist "%COPY_BIN%" (
     echo [After_Build] ERROR: %COPY_BIN% not found
