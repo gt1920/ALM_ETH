@@ -46,13 +46,31 @@ The only CAN entry point is `AdjusterCAN_OnRx(id, data, len)` from the FDCAN rx 
 
 ## Build Outputs & Post-Build
 
-After Keil build, `MDK-ARM/After_Build.bat` invokes [Copy_Bin.exe](../Copy_Bin_Motor_Project/):
-- Reads `Output/ALM_Motor_App.bin`
-- Encrypts to `HEX/ALM_Motor_App_<SN-tag>_<yyMMdd>_<HHmm>.mot`
-  - SN-tag = `"Unlock"` if `fw_sn == 0xA5C3F09E`, otherwise hex SN
-- **No bootloader merge** — Motor bootloader is flashed separately via SWD
+After Keil build, [MDK-ARM/After_Build.bat](MDK-ARM/After_Build.bat) does three things:
 
-Examples seen: `ALM_Motor_App_Unlock_260429_1046.mot`, `v19.mot` (manual snapshot).
+1. Copy `Output/ALM_Motor_App.bin` → `HEX/app/app.bin` so the manual
+   `Run.bat` flow can find it.
+2. Invoke [Copy_Bin.exe](../Copy_Bin_Motor_Project/) which reads the same
+   `.bin` and encrypts it into `HEX/ALM_Motor_App_<SN-tag>_<yyMMdd>_<HHmm>.mot`
+   for OTA. SN-tag = `"Unlock"` if `fw_sn == 0xA5C3F09E`, otherwise hex SN.
+3. Merge `HEX/app/Bootloader/BooLoader.hex` (auto-copied here by the BL's
+   own [MDK-ARM/Copy_HEX.bat](../ALM_Motor_Bootloader/MDK-ARM/Copy_HEX.bat))
+   with the new App `.bin` into a timestamped SWD package:
+   `HEX/ALM_Motor_App_Full_Package_<yyMMdd>_<HHmm>.hex`
+   App load address `0x08003000` is hard-coded in After_Build.bat — must
+   stay in sync with `MOT_APP_BASE` in [BSP/motor_partition.h](BSP/motor_partition.h).
+
+If `BooLoader.hex` is missing (BL hasn't been built yet), step 3 prints a
+warning and skips; the App build still succeeds. The manual fallback
+[HEX/app/Run.bat](HEX/app/Run.bat) does the same merge but produces an
+unstamped `Full_Package.hex` next to itself.
+
+Both `After_Build.bat` and BL's `Copy_HEX.bat` print firmware ROM
+utilization vs the partition limit so size pressure is visible at every
+build.
+
+Examples seen: `ALM_Motor_App_Unlock_260429_1544.mot`,
+`ALM_Motor_App_Full_Package_260429_1544.hex`.
 
 ---
 

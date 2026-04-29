@@ -98,10 +98,28 @@ survives every OTA, so a previously-configured `node_id` is available.
   to accept-any with RESP node_id = `0xFFFFFFFF`. Single-bricked-module
   recovery only; isolate or power up other modules one at a time.
 
-Bootloader is **shipped as plain `.hex`** — no Copy_Bin step. Flash via SWD once at manufacture.
+Bootloader is **shipped as plain `.hex`** — no Copy_Bin step. Flash via SWD once at manufacture, normally as part of the merged image produced by the App's After_Build.bat (see below).
 
 > **Format change**: this BL refuses pre-CRC `.mot` files. Rebuild firmware
 > with the matching `Copy_Bin_Motor_Project` (CRC block writer) before OTA.
+
+## Post-Build Hook
+
+[MDK-ARM/Copy_HEX.bat](MDK-ARM/Copy_HEX.bat) is wired into the Keil project's
+*After Build* step. Each BL build drops the freshly-linked hex into two
+places:
+
+1. `HEX/ALM_Motor_Bootloader.hex` — local archive of every BL revision.
+2. `../ALM_Motor_App/HEX/app/Bootloader/BooLoader.hex` — input to the App's
+   own [After_Build.bat](../ALM_Motor_App/MDK-ARM/After_Build.bat), which
+   merges BL + App into a timestamped
+   `ALM_Motor_App_Full_Package_yyMMdd_HHmm.hex` for SWD flashing.
+
+Copy_HEX.bat also prints BL ROM utilization vs `MOT_BL_SIZE` (12 KB):
+
+```
+[Copy_HEX.bat] BL ROM: 9372 / 12288 B  (76.2%, free 2916 B)
+```
 
 ---
 

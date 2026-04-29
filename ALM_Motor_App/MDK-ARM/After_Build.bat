@@ -3,12 +3,15 @@ REM ============================================================
 REM  After_Build.bat <ProjectName>
 REM  Called by Keil "After Build" UserProg from MDK-ARM directory.
 REM
-REM  Two side effects:
+REM  Three side effects:
 REM    1) Copy ..\Output\<ProjectName>.bin -> ..\HEX\app\app.bin
 REM       so ..\HEX\app\Run.bat can merge it with BooLoader.hex into
 REM       Full_Package.hex without a manual copy step.
 REM    2) Run ..\Copy_Bin\Copy_Bin.exe to encrypt the same .bin into
 REM       ..\HEX\<ProjectName>_<snTag>_yyMMdd_HHmm.mot for OTA.
+REM    3) Merge BooLoader.hex + .bin into a timestamped SWD package:
+REM         ..\HEX\<ProjectName>_Full_Package_yyMMdd_HHmm.hex
+REM       (skipped with a warning if BooLoader.hex is missing).
 REM ============================================================
 setlocal enabledelayedexpansion
 
@@ -64,6 +67,51 @@ if exist "%MAP%" (
         echo [After_Build] App ROM: !ROM_BYTES! / %APP_LIMIT% B  ^(!PCT_INT!.!PCT_DEC!%%, free !FREE_BYTES! B^)
     )
 )
+
+REM ---- Merge BL hex + App bin into a timestamped Full_Package.hex ----
+REM  Output  : ..\HEX\<ProjectName>_Full_Package_yyMMdd_HHmm.hex
+REM  Inputs  : ..\HEX\app\Bootloader\BooLoader.hex (auto-copied by BL build)
+REM            ..\Output\%~1.bin                   (this build's App image)
+REM  App load address: 0x08003000 (must match motor_partition.h MOT_APP_BASE).
+set "BL_HEX=..\HEX\app\Bootloader\BooLoader.hex"
+set "SREC=..\HEX\app\srecord\srec_cat.exe"
+set "APP_OFFSET=0x8003000"
+set "TMP_HEX=..\HEX\app\app1.hex"
+
+if not exist "%BL_HEX%" (
+    echo [After_Build] WARNING: %BL_HEX% missing - skipping Full_Package merge
+    echo [After_Build]          ^(build ALM_Motor_Bootloader first to populate it^)
+    goto :merge_done
+)
+if not exist "%SREC%" (
+    echo [After_Build] WARNING: %SREC% missing - skipping Full_Package merge
+    goto :merge_done
+)
+
+REM Generate yyMMdd_HHmm timestamp via PowerShell (locale-independent).
+for /f "tokens=*" %%T in ('powershell -NoProfile -Command "Get-Date -Format yyMMdd_HHmm"') do set "TS=%%T"
+if not defined TS (
+    echo [After_Build] WARNING: timestamp generation failed - skipping Full_Package merge
+    goto :merge_done
+)
+
+set "FULL_HEX=..\HEX\%~1_Full_Package_!TS!.hex"
+
+"%SREC%" "%BIN_SRC%" -Binary -offset %APP_OFFSET% -o "%TMP_HEX%" -Intel
+if errorlevel 1 (
+    echo [After_Build] WARNING: srec_cat .bin -^> .hex failed - skipping Full_Package merge
+    goto :merge_done
+)
+"%SREC%" "%BL_HEX%" -Intel "%TMP_HEX%" -Intel -o "!FULL_HEX!" -Intel
+if errorlevel 1 (
+    echo [After_Build] WARNING: srec_cat merge failed - Full_Package not produced
+    if exist "%TMP_HEX%" del "%TMP_HEX%"
+    goto :merge_done
+)
+if exist "%TMP_HEX%" del "%TMP_HEX%"
+echo [After_Build] OK : Full_Package -^> !FULL_HEX!
+
+:merge_done
 
 echo [After_Build] Done.
 endlocal
