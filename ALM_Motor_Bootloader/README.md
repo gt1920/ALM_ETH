@@ -29,39 +29,61 @@ Project: [MDK-ARM/ALM_Motor_Bootloader.uvprojx](MDK-ARM/ALM_Motor_Bootloader.uvp
 
 ---
 
-## Boot Flow
+## Boot Flow (brick-safe)
 
 ```
-HAL_Init() → clocks → GPIO → SPI → W25Qxx_Init()
+HAL_Init() → clocks → BL_Run()
    │
    └─ BL_Run()
-        ├─ Read W25Qxx[0..15] = encrypted FW_ID header
-        ├─ Decrypt (independent CBC, Motor IV copy)
-        ├─ magic != 0x47544657 ("GTFW") ─────────── jump 0x08002000
-        ├─ board_id != Motor BL_BOARD_ID? ───────── erase W25Q sector 0 + jump
-        ├─ fw_sn != 0xA5C3F09E && != g_device_sn? ─ erase + jump (relaxed in commit fdb8913)
-        ├─ CRC32(hdr[0..11]) != hdr[12..15]? ────── erase + jump
-        ├─ Decrypt payload meta → filesize
-        ├─ Erase app sectors, decrypt + program QUADWORDs
-        ├─ Erase W25Qxx sector 0 (clear .mot magic)
+        ├─ Decrypt staging[0..15] = FW_ID header (independent CBC)
+        ├─ magic != "GTFW"     ─────────────────── jump APP (staging intact)
+        ├─ board != "MOT" / hdr CRC bad ─────────── jump APP (staging intact)
+        ├─ Decrypt staging[16..31]: filesize
+        ├─ filesize == 0 || > APP region ────────── jump APP (staging intact)
+        ├─ Decrypt staging[32..47]: crc_magic, fw_crc32
+        ├─ crc_magic != "MOTC" (pre-CRC .mot) ───── jump APP (staging intact)
+        ├─ PASS 1: decrypt staging[48..end], compute plaintext CRC32
+        │     mismatch ──────────────────────────── jump APP (staging intact)
+        ├─ Erase APP region
+        │     erase fail ────────────────────────── NVIC_SystemReset
+        ├─ Decrypt + program APP (DOUBLEWORD)
+        │     program fail ──────────────────────── NVIC_SystemReset
+        ├─ PASS 2: re-read APP, compute CRC32
+        │     mismatch ──────────────────────────── NVIC_SystemReset
+        ├─ Erase STAGING (clears .mot magic)
         └─ jump 0x08002000
 ```
 
+**Brick-safety invariants:**
+- Failure paths NEVER erase STAGING. Only a fully-verified flash clears it.
+- A bad payload, a transient flash fault, or a power loss mid-program can all
+  be retried on the next boot from the same .mot.
+- `bl_jump_to_app` resets the MCU on bad MSP/reset vector (no `while(1)`),
+  so a partially-written APP loops back through BL instead of dead-locking.
+
 Bootloader is **shipped as plain `.hex`** — no Copy_Bin step. Flash via SWD once at manufacture.
+
+> **Format change**: this BL refuses pre-CRC `.mot` files. Rebuild firmware
+> with the matching `Copy_Bin_Motor_Project` (CRC block writer) before OTA.
 
 ---
 
 ## `.mot` Format
 
-Same envelope as `.cic`, encrypted with Motor key/IV instead of CIC key/IV. See [Copy_Bin_Motor_Project/README.md](../Copy_Bin_Motor_Project/README.md) for byte-level layout and key/IV values.
+Encrypted with Motor key/IV. See [Copy_Bin_Motor_Project/README.md](../Copy_Bin_Motor_Project/README.md) for byte-level layout and key/IV values.
 
 ```
 [0..15]   AES-CBC encrypted FW_ID header (independent IV)
             magic(4) | board_id(4) | fw_sn(4) | crc32(4)
-[16..31]  AES-CBC encrypted payload meta (chain CBC)
+[16..31]  AES-CBC encrypted metadata block-0 (chain CBC starts)
             userstr_len(4) | "LEDFW012"(8) | filesize(4)
-[32..end] AES-CBC encrypted firmware blocks (chain continues)
+[32..47]  AES-CBC encrypted CRC block (chain continues)
+            crc_magic(4,"MOTC") | fw_crc32(4) | reserved(8)
+[48..end] AES-CBC encrypted firmware blocks (chain continues)
 ```
+
+`fw_crc32` covers the plaintext APP `.bin` (`filesize` bytes, no padding).
+BL verifies it before erasing APP, and re-verifies after programming.
 
 ---
 

@@ -29,14 +29,25 @@ Authoritative bytes live in `Copy_Bin/Program.cs` and the matching firmware `aes
 
 ## `.mot` Layout
 
-Same envelope as `.cic`:
 ```
 [0..15]   AES-CBC encrypted FW_ID header (independent CBC)
             magic(4) | board_id(4) | fw_sn(4) | crc32(4)
-[16..31]  AES-CBC encrypted payload meta (chain CBC)
+[16..31]  AES-CBC encrypted metadata block-0 (chain CBC starts)
             userstr_len(4) | "LEDFW012"(8) | filesize(4)
-[32..end] AES-CBC encrypted firmware blocks (chain continues)
+[32..47]  AES-CBC encrypted CRC block (chain continues)
+            crc_magic(4,"MOTC"=0x4D4F5443) | fw_crc32(4) | reserved(8)
+[48..end] AES-CBC encrypted firmware blocks (chain continues)
 ```
+
+`fw_crc32` is the CRC32 (poly 0xEDB88320, init 0xFFFFFFFF, final XOR
+0xFFFFFFFF) of the **plaintext** APP `.bin`, exactly `filesize` bytes.
+The Motor bootloader verifies it twice: before erasing APP, and after
+programming completes. This makes the OTA path brick-safe.
+
+> **Format change**: this CRC block is required by the new
+> ALM_Motor_Bootloader. Older `.mot` files (no CRC block) will be rejected
+> by new BLs. Older BLs cannot consume new `.mot` files. Flash the new BL
+> via SWD before pushing the first new-format `.mot`.
 
 ---
 

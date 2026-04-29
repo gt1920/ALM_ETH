@@ -154,8 +154,10 @@ void Upgrade_OnCanFrame(uint32_t id, const uint8_t *data, uint8_t len)
         uint32_t file_size = rd_le32(&data[4]);
         const uint8_t *enc_hdr = &data[8];     /* 16 B encrypted FW_ID header */
 
-        /* file_size sanity: at least 16 hdr + 16 metadata + ≥1 block. */
-        if (file_size < 48U || file_size > MOT_STAGE_SIZE)
+        /* file_size sanity: 16 hdr + 16 metadata + 16 CRC block + ≥1 payload block.
+           App side does not interpret the CRC block — it just stages bytes —
+           but the lower bound moves with the .mot format change. */
+        if (file_size < 64U || file_size > MOT_STAGE_SIZE)
         {
             send_resp(UPG_SIZE_ERROR, 0);
             return;

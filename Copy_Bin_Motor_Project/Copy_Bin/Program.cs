@@ -43,6 +43,7 @@ namespace Copy_Bin
         const uint FW_SN_WILDCARD    = 0xA5C3F09Eu;
         const int  FW_ID_HEADER_SIZE = 16;            // magic(4)+board(4)+sn(4)+crc32(4)
         const string USERSTR         = "LEDFW012";    // 8B fixed metadata tag
+        const uint MOT_CRC_MAGIC     = 0x4D4F5443u;   // "MOTC" — flags brick-safe .mot with payload CRC
 
         static void Main(string[] args)
         {
@@ -111,7 +112,10 @@ namespace Copy_Bin
         // .mot layout (decoded by ALM_Motor_Bootloader/BSP/iap.c):
         //   [ 0..15]  16B encrypted FW_ID header        — independent CBC, fresh IV copy
         //   [16..31]  16B encrypted metadata block-0    — chain CBC starts here, fresh IV copy
-        //   [32..end] encrypted firmware payload        — chain continues
+        //                plaintext: userstr_len(4) | "LEDFW012"(8) | filesize(4)
+        //   [32..47]  16B encrypted CRC block           — chain CBC continues
+        //                plaintext: MOT_CRC_MAGIC(4) | fw_crc32(4) | reserved(8)
+        //   [48..end] encrypted firmware payload        — chain continues
         static void EncryptFile(string inputFile, string outputFile)
         {
             byte[] fileContent = File.ReadAllBytes(inputFile);
@@ -153,11 +157,16 @@ namespace Copy_Bin
                 Console.WriteLine("WARNING: FW_ID magic (0x47544657) not found in .bin — .mot will not contain a valid FW_ID header");
             }
 
-            // ---- pack metadata + payload ----
+            // ---- pack metadata + CRC block + payload ----
             byte[] userStrLen = BitConverter.GetBytes(USERSTR.Length);
             byte[] fileSize   = BitConverter.GetBytes(fileContent.Length);
+            uint   fwCrcVal   = Crc32(fileContent, fileContent.Length);
+            byte[] crcMagic   = BitConverter.GetBytes(MOT_CRC_MAGIC);
+            byte[] fwCrcBytes = BitConverter.GetBytes(fwCrcVal);
 
-            int headerSize  = 4 + USERSTR.Length + 4;
+            const int META_BLOCK_SIZE = 16;     // userstr_len + USERSTR + filesize
+            const int CRC_BLOCK_SIZE  = 16;     // crc_magic + fw_crc32 + 8B reserved
+            int headerSize  = META_BLOCK_SIZE + CRC_BLOCK_SIZE;
             int contentSize = fileContent.Length;
             int paddingSize = (16 - (contentSize % 16)) % 16;
             if (paddingSize == 0) paddingSize = 16;     // always at least one padding block
@@ -165,10 +174,18 @@ namespace Copy_Bin
 
             byte[] dataToEncrypt = new byte[totalSize];
             int offset = 0;
+            // metadata block-0
             Buffer.BlockCopy(userStrLen, 0, dataToEncrypt, offset, 4); offset += 4;
             Buffer.BlockCopy(Encoding.ASCII.GetBytes(USERSTR), 0, dataToEncrypt, offset, USERSTR.Length); offset += USERSTR.Length;
             Buffer.BlockCopy(fileSize, 0, dataToEncrypt, offset, 4); offset += 4;
+            // CRC block (8B reserved tail left as zero)
+            Buffer.BlockCopy(crcMagic,   0, dataToEncrypt, offset, 4); offset += 4;
+            Buffer.BlockCopy(fwCrcBytes, 0, dataToEncrypt, offset, 4); offset += 4;
+            offset += 8;        // reserved
+            // firmware payload
             Buffer.BlockCopy(fileContent, 0, dataToEncrypt, offset, contentSize); offset += contentSize;
+
+            Console.WriteLine($"FW payload CRC32: 0x{fwCrcVal:X8}, size={contentSize} bytes");
 
             // padding bytes derived from time (cosmetic; bootloader truncates by fileSize anyway)
             byte[] timeBytes = BitConverter.GetBytes(DateTime.Now.Ticks);

@@ -64,7 +64,11 @@ PC (DT Controller)
               └─ Stage to W25Qxx → reboot → ALM_Motor_Bootloader applies
 ```
 
-`.mot` format: same envelope as `.cic` (FW_ID hdr + payload meta + AES-CBC chain), encrypted with **Motor** key/IV.
+`.mot` format: FW_ID hdr (16B) + metadata block-0 (16B) + CRC block (16B) +
+AES-CBC payload, encrypted with **Motor** key/IV. The CRC block carries a
+`fw_crc32` over the plaintext payload that the bootloader verifies before
+erasing APP and again after programming — see
+[ALM_Motor_Bootloader/README.md](../ALM_Motor_Bootloader/README.md).
 
 ---
 

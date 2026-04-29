@@ -7,16 +7,23 @@
  *                plaintext: magic(4,LE) | board_id(4,LE) | fw_sn(4,LE) | crc32(4,LE)
  *   [ 16.. 31] Encrypted payload block-0 — chain CBC, iv = copy of global IV
  *                plaintext: userstr_len(4) | "LEDFW012"(8) | filesize(4,LE)
- *   [ 32..end] Encrypted firmware blocks — chain continues
+ *   [ 32.. 47] Encrypted CRC block — chain CBC continues
+ *                plaintext: crc_magic(4,LE,"MOTC") | fw_crc32(4,LE) | reserved(8)
+ *   [ 48..end] Encrypted firmware blocks — chain continues
  *
- * Boot flow:
- *   1. Decrypt internal flash[STAGE..STAGE+15] → check magic, board_id, fw_sn, CRC
- *      magic != FW_ID_MAGIC      → no upgrade, jump app
- *      board != "MOT" / crc fail → erase staging, jump app
- *   2. Decrypt block-0 → extract filesize
- *   3. Erase + program app region from MOT_APP_BASE
- *   4. Erase staging region (clears magic so we don't re-flash next boot)
- *   5. Jump to app
+ * Boot flow (brick-safe):
+ *   1. Decrypt staging[0..15] → verify magic == "GTFW", board_id == "MOT", CRC.
+ *      Any failure → jump app, leave STAGING untouched.
+ *   2. Decrypt block-0 → extract filesize.
+ *   3. Decrypt CRC block → verify crc_magic == "MOTC", read fw_crc32.
+ *      Pre-CRC .mot (older Copy_Bin) → refuse to flash (jump app).
+ *   4. PASS 1: walk encrypted payload, decrypt, compute CRC32 of plaintext;
+ *      compare against fw_crc32. Mismatch → jump app, STAGING intact.
+ *   5. Erase APP region; program APP from re-decrypted staging.
+ *      Any flash error → NVIC_SystemReset (re-enters BL with STAGING intact).
+ *   6. PASS 2: re-read APP region, recompute CRC32, compare. Mismatch →
+ *      NVIC_SystemReset (retry on next boot).
+ *   7. Erase STAGING (clears magic so we don't re-flash) → jump APP.
  */
 #ifndef __IAP_H__
 #define __IAP_H__
